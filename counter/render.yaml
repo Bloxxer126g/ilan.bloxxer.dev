@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: visitor-counter
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    plan: free
+    disk:
+      name: counter-disk
+      mountPath: /data
+      sizeGB: 1
