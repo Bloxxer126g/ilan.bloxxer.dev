@@ -65,6 +65,32 @@ nav{
 .logo span{color:var(--red);}
 .nav-sub{margin-left:16px;font-size:10px;letter-spacing:2px;color:var(--text-dim);}
 
+/* visitor counter */
+#visitor-widget{
+  position:fixed;top:72px;right:28px;
+  text-align:right;
+  z-index:200;
+  pointer-events:none;
+}
+#visitor-widget .vc-label{
+  font-size:9px;letter-spacing:3px;color:var(--text-dim);
+  margin-bottom:4px;
+}
+#visitor-widget .vc-label::before{content:'// ';}
+#visitor-count{
+  font-family:'Orbitron',monospace;
+  font-size:42px;
+  font-weight:900;
+  letter-spacing:2px;
+  color:var(--green);
+  text-shadow:0 0 24px rgba(0,255,136,.4);
+  line-height:1;
+}
+#visitor-count.vc-loading{
+  color:var(--text-dim);
+  font-size:28px;
+}
+
 /* main */
 main{
   display:flex;
@@ -174,6 +200,11 @@ footer{
 <div id="cursor-outer"></div>
 <div id="cursor-inner"></div>
 
+<div id="visitor-widget">
+  <div class="vc-label">VISITORS</div>
+  <span id="visitor-count" class="vc-loading">...</span>
+</div>
+
 <nav>
   <span class="logo">ILAN<span>.BLOXXER.DEV</span>
 </nav>
@@ -219,6 +250,19 @@ footer{
     el.addEventListener('mouseleave',function(){document.body.classList.remove('ch');});
   });
 })();
+</script>
+
+<script>
+fetch("https://website-counter-bjxn.onrender.com/api/visit")
+  .then(r => r.json())
+  .then(d => {
+    var el = document.getElementById('visitor-count');
+    el.classList.remove('vc-loading');
+    el.innerText = d.visits;
+  })
+  .catch(function() {
+    document.getElementById('visitor-count').innerText = '—';
+  });
 </script>
 </body>
 </html>
