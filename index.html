@@ -263,16 +263,19 @@ footer{
 </script>
 
 <script>
-fetch("https://website-counter-bjxn.onrender.com/api/visit")
-  .then(r => r.json())
-  .then(d => {
-    var el = document.getElementById('visitor-count');
-    el.classList.remove('vc-loading');
-    el.innerText = d.visits;
-  })
-  .catch(function() {
-    document.getElementById('visitor-count').innerText = '—';
-  });
+(function retry(attempts) {
+  fetch("https://website-counter-bjxn.onrender.com/api/visit")
+    .then(r => r.json())
+    .then(d => {
+      var el = document.getElementById('visitor-count');
+      el.classList.remove('vc-loading');
+      el.innerText = d.visits;
+    })
+    .catch(function() {
+      if (attempts > 0) setTimeout(function() { retry(attempts - 1); }, 3000);
+      else document.getElementById('visitor-count').innerText = '—';
+    });
+})(5);
 </script>
 </body>
 </html>
