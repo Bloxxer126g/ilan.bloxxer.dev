@@ -469,7 +469,7 @@ body.cursor-text #cursor-inner { opacity: 0; }
       reason: document.getElementById('reason').value
     });
     toast('Order ' + id + ' placed! RAM incoming...');
-    setTimeout(() => { window.location.href = '/rent-a-ram/dashboard.html'; }, 1800);
+    setTimeout(() => { window.location.href = '/rent-a-ram/dashboard.html?accepted=true'; }, 1800);
   }
 </script>
 
