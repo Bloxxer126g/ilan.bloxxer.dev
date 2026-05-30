@@ -1,0 +1,125 @@
+:root {
+    --background-color: hsl(215, 100%, 98%);
+    --font-family: 'Satoshi', sans-serif;
+    --hint-colour: hsl(0, 0%, 69%);
+    --item-background: hsl(0, 0%, 100%);
+    --hover-colour: hsl(0, 0%, 96%);
+    --select-colour: hsl(0, 0%, 92%);
+}
+
+.Text {
+    font-family: var(--font-family);
+}
+
+.Hint {
+    color: var(--hint-colour);
+}
+
+.InputBox {
+    scale: 1.5;
+    border: none;
+    border-radius: 0.4rem;
+    background-color: var(--item-background);
+    transition: 0.3s;
+}
+
+.InputBox:hover {
+    background-color: var(--hover-colour);
+}
+
+.InputBox:focus {
+    outline: none;
+    background-color: var(--select-colour);
+}
+
+.Button {
+    scale: 1.3;
+    border-radius: 0.4rem;
+    border: none;
+    background-color: var(--item-background);
+    transition: 0.3s;
+}
+
+.Button:hover {
+    background-color: var(--hover-colour);
+}
+
+.Button:active {
+    background-color: var(--select-colour);
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+#TitleImage {
+    width: 8em;
+    position: fixed;
+}
+
+#CenterContent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    position: fixed;
+
+    left: 50vw;
+    top: 40vw;
+    transform: translate(-50vw, -40vw);
+
+    background-color: hsla(0, 0%, 0%, 0);
+
+    width: 100%;
+    height: 100%;
+}
+
+#ProjectsContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 60%;
+    height: 70%;
+}
+
+.Project {
+    aspect-ratio: 1/1;
+    width: 8em;
+    background-color: var(--item-background);
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    border-radius: 1rem;
+}
+
+.Project:hover {
+    background-color: var(--hover-colour);
+    scale: 1.1;
+    margin: 1.5em;
+    border-radius: 3rem;    
+}
+
+.wip {
+    color: rgba(255, 0, 0, 0.435);
+    font-size: 0.5em;
+    transition: 0.3s;
+}
+
+.wip::before {
+    content: "[WIP]";
+}
+
+.wip:hover {
+    font-size: 0.7em;
+    color: red;
+}
+
+.wip:hover::before {
+    content: "Work In Progress";
+}
