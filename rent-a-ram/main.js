@@ -24,14 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Shared nav HTML ──
 const NAV_HTML = `
 <nav>
-  <a href="/rent-a-ram/index.html" class="logo">RENT<span>-A-</span>RAM</a>
+  <a href="/rent-a-ram/index.html?accepted=true" class="logo">RENT<span>-A-</span>RAM</a>
   <div class="nav-links">
-    <a href="/rent-a-ram/index.html">HOME</a>
-    <a href="/rent-a-ram/pricing.html">PRICING</a>
-    <a href="/rent-a-ram/order.html">ORDER</a>
-    <a href="/rent-a-ram/dashboard.html">DASHBOARD</a>
-    <a href="/rent-a-ram/faq.html">FAQ</a>
-    <a href="/rent-a-ram/contact.html">CONTACT</a>
+    <a href="/rent-a-ram/index.htm?accepted=truel">HOME</a>
+    <a href="/rent-a-ram/pricing.htm?accepted=truel">PRICING</a>
+    <a href="/rent-a-ram/order.html?accepted=true">ORDER</a>
+    <a href="/rent-a-ram/dashboard.html?accepted=true">DASHBOARD</a>
+    <a href="/rent-a-ram/faq.html?accepted=true">FAQ</a>
+    <a href="/rent-a-ram/contact.html?accepted=true">CONTACT</a>
   </div>
 </nav>`;
 
