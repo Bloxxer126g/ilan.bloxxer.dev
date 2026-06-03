@@ -254,13 +254,11 @@ footer{
 
 <script>
 (function() {
-  fetch("https://raw.githubusercontent.com/II-Dragon14/website-counter/main/counter.json")
-    .then(r => r.json())
-    .then(d => {
-      var el = document.getElementById('visitor-count');
-      el.classList.remove('vc-loading');
-      el.innerText = d.count;
-    })
+  fetch("https://YOUR-RENDER-SERVICE.onrender.com/api/visit")
+  .then(r => r.json())
+  .then(d => {
+    document.getElementById("visitor-count").innerText = d.visits;
+  })
     .catch(function() {
       document.getElementById('visitor-count').innerText = '—';
     });
