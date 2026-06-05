@@ -27,7 +27,7 @@
 </nav>
 
 <main>
-  <div class="FlashbangContainer"></div>
+  <div id="FlashbangContainer"></div>
   <div class="title-block">
     <div class="eyebrow">PERSONAL PROJECTS</div>
     <h1>Ilan<span class="blink">.</span></h1>
@@ -81,6 +81,12 @@
       document.getElementById('visitor-count').innerText = '—';
     });
 })();
+</script>
+
+<script>
+  setTimeout(function() {
+    document.getElementById("FlashbangContainer").remove();
+  }, 3500)
 </script>
 </body>
 </html>
