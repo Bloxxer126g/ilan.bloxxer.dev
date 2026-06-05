@@ -1,0 +1,15 @@
+@keyframes Flash {
+  from {background-color: hsl(115, 100%, 29%);}
+  to {background-color: hsla(115, 100%, 29%, 0);}
+}
+
+.FlashbangContainer {
+    width: 100%;
+    height: 100%;
+    top: 0%;
+    left: 0%;
+    position: fixed;
+    display: block;
+    z-index: 999999;
+    animation: Flash 3s ease-in-out;
+}
