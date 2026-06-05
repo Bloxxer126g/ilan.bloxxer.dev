@@ -3,189 +3,13 @@
 <head>
 <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B11HJYVGYN"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-B11HJYVGYN');
-  </script>
+  <script src="gtag.js"></script>
 <script src="/global/redirect.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Ilan.Bloxxer.Dev: Ilan is the best!">
 <title>Ilan.Bloxxer.Dev</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;cursor:none!important}
-
-:root{
-  --green:#00ff88;--red:#ff4466;--yellow:#ffcc00;
-  --bg:#0a0a0f;--bg2:#0f0f1a;
-  --border:#00ff8818;--border2:#00ff8840;
-  --text-dim:#00ff8855;--text-mid:#00ff8899;
-}
-
-body{
-  font-family:'Share Tech Mono',monospace;
-  background:var(--bg);
-  color:var(--green);
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-
-/* scanlines */
-body::before{
-  content:'';pointer-events:none;position:fixed;inset:0;
-  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,255,136,.012) 3px,rgba(0,255,136,.012) 4px);
-  z-index:9000;
-}
-
-/* cursor */
-#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:32px;height:32px;border:1px solid rgba(0,255,136,.5);border-radius:50%;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s,background .2s;}
-#cursor-inner{position:fixed;pointer-events:none;z-index:99999;width:5px;height:5px;background:var(--green);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s;}
-body.ch #cursor-outer{width:52px;height:52px;border-color:rgba(0,255,136,.8);background:rgba(0,255,136,.06);}
-body.ch #cursor-inner{width:6px;height:6px;background:#00ffaa;}
-
-/* nav strip */
-nav{
-  position:fixed;top:0;left:0;right:0;
-  height:52px;
-  background:var(--bg);
-  border-bottom:1px solid var(--border2);
-  display:flex;align-items:center;padding:0 40px;
-  z-index:100;
-}
-.logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:3px;}
-.logo span{color:var(--red);}
-.nav-sub{margin-left:16px;font-size:10px;letter-spacing:2px;color:var(--text-dim);}
-
-/* visitor counter */
-#visitor-widget{
-  position:fixed;top:72px;right:28px;
-  text-align:right;
-  z-index:200;
-  pointer-events:none;
-}
-#visitor-widget .vc-label{
-  font-size:9px;letter-spacing:3px;color:var(--text-dim);
-  margin-bottom:4px;
-}
-#visitor-widget .vc-label::before{content:'// ';}
-#visitor-count{font-family:'Orbitron',monospace;font-size:30px;font-weight:900;letter-spacing:3px;}
-#visitor-count.vc-loading{
-  color:var(--green);
-  font-size:28px;
-}
-
-/* main */
-main{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  min-height:100vh;
-  width:100%;
-  padding:80px 24px 40px;
-}
-
-/* title block */
-.title-block{text-align:center;margin-bottom:56px;}
-.eyebrow{font-size:10px;letter-spacing:4px;color:var(--text-dim);margin-bottom:14px;}
-.eyebrow::before{content:'// ';}
-h1{font-family:'Orbitron',monospace;font-size:52px;font-weight:900;line-height:1;letter-spacing:2px;}
-h1 span{color:var(--red);}
-.sub{font-size:12px;color:var(--text-mid);margin-top:14px;letter-spacing:1px;}
-
-/* projects grid */
-.projects{
-  display:flex;
-  flex-wrap:wrap;
-  gap:16px;
-  justify-content:center;
-  max-width:700px;
-}
-
-/* project card */
-.project{
-  width:160px;
-  aspect-ratio:1/1;
-  background:var(--bg2);
-  border:1px solid var(--border2);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:20px;
-  transition:border-color .2s,background .2s,transform .2s;
-  text-decoration:none;
-  color:var(--green);
-  position:relative;
-  overflow:hidden;
-}
-.project::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(circle at 50% 0%,rgba(0,255,136,.07) 0%,transparent 70%);
-  opacity:0;transition:opacity .25s;
-}
-.project:hover{
-  border-color:var(--green);
-  background:#0f0f1a;
-  transform:translateY(-4px);
-}
-.project:hover::before{opacity:1;}
-
-.project-icon{
-  font-size:26px;
-  line-height:1;
-}
-.project-name{
-  font-family:'Orbitron',monospace;
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:2px;
-  text-align:center;
-  line-height:1.3;
-}
-.project-desc{
-  font-size:9px;
-  color:var(--text-mid);
-  text-align:center;
-  letter-spacing:.5px;
-  line-height:1.5;
-}
-.project-badge{
-  position:absolute;top:10px;right:10px;
-  font-size:8px;letter-spacing:1px;
-  padding:2px 6px;
-  border:1px solid;
-}
-.badge-new{color:var(--green);border-color:var(--border2);background:rgba(0,255,136,.1);}
-.badge-wip{color:var(--yellow);border-color:rgba(255,204,0,.3);background:rgba(255,204,0,.07);}
-
-/* footer */
-footer{
-  position:fixed;bottom:0;left:0;right:0;
-  height:36px;
-  border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;color:var(--text-dim);letter-spacing:2px;
-}
-.blink{animation:blink 1.2s step-end infinite;}
-@keyframes blink{50%{opacity:0;}}
-
-@media(max-width:480px){
-  h1{font-size:32px;}
-  .project{width:140px;}
-  nav{padding:0 16px;}
-}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -198,13 +22,13 @@ footer{
 </div>
 
 <nav>
-  <span class="logo">ILAN<span>.BLOXXER.DEV</span>
+  <span class="logo" onclick="location.href='https://ilan.bloxxer.dev'">ILAN<span>.BLOXXER.DEV</span>
 </nav>
 
 <main>
   <div class="title-block">
     <div class="eyebrow">PERSONAL PROJECTS</div>
-    <h1>Ilan<span>.</span></h1>
+    <h1>Ilan<span class="blink">.</span></h1>
     <div class="sub">Select a project below to launch it.</div>
   </div>
 
