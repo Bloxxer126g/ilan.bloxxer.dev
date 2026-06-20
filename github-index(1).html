@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B11HJYVGYN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-B11HJYVGYN');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GitHub projects by II-Dragon14">
+  <title>GitHub Projects — Ilan.Bloxxer.Dev</title>
+  <script src="https://ilan.bloxxer.dev/global/redirect.js"></script>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #00ff88;
+  --red: #ff4466;
+  --yellow: #ffcc00;
+  --bg: #0a0a0f;
+  --bg2: #0f0f1a;
+  --bg3: #14141f;
+  --border: #00ff8818;
+  --border2: #00ff8840;
+  --text-dim: #00ff8855;
+  --text-mid: #00ff8899;
+}
+
+body {
+  font-family: 'Share Tech Mono', monospace;
+  background: var(--bg);
+  color: var(--green);
+  min-height: 100vh;
+  cursor: none !important;
+}
+
+a { color: inherit; text-decoration: none; }
+*, *::before, *::after { cursor: none !important; }
+
+body::before {
+  content: '';
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 3px,
+    rgba(0,255,136,0.012) 3px, rgba(0,255,136,0.012) 4px
+  );
+  z-index: 9000;
+}
+
+/* CURSOR */
+#cursor-outer {
+  position: fixed; pointer-events: none; z-index: 99999;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(0,255,136,0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
+}
+#cursor-inner {
+  position: fixed; pointer-events: none; z-index: 99999;
+  width: 5px; height: 5px;
+  background: var(--green);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.15s, height 0.15s, background 0.15s;
+}
+body.cursor-hover #cursor-outer { width: 44px; height: 44px; border-color: rgba(0,255,136,0.8); background: rgba(0,255,136,0.06); }
+body.cursor-hover #cursor-inner { width: 6px; height: 6px; background: #00ffaa; }
+body.cursor-text #cursor-outer { width: 3px; height: 28px; border-radius: 2px; border-color: rgba(0,255,136,0.7); }
+body.cursor-text #cursor-inner { opacity: 0; }
+
+/* NAV */
+nav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900; letter-spacing: 3px; cursor: none; }
+.logo span { color: var(--red); }
+.nav-links { display: flex; }
+.nav-links a {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-mid);
+  padding: 0 18px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid var(--border);
+  transition: color 0.15s, background 0.15s;
+}
+.nav-links a:hover { color: var(--green); background: rgba(0,255,136,0.05); }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 40px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 2.2;
+  margin-top: 80px;
+}
+.blink { animation: blink 1.2s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* HERO */
+.hero { text-align: center; padding: 70px 40px 50px; border-bottom: 1px solid var(--border); }
+.badge {
+  display: inline-block;
+  background: rgba(255,68,102,0.12);
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-size: 10px;
+  letter-spacing: 3px;
+  padding: 4px 14px;
+  margin-bottom: 22px;
+}
+.hero h1 { font-family: 'Orbitron', monospace; font-size: 46px; font-weight: 900; line-height: 1.1; margin-bottom: 14px; }
+.hero h1 span { color: var(--red); }
+.hero p { font-size: 13px; color: var(--text-mid); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+.hero p a { color: var(--green); text-decoration: underline; }
+
+/* BUTTONS */
+.btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 12px 28px;
+  border: 1px solid var(--green);
+  background: transparent;
+  color: var(--green);
+  cursor: none;
+  transition: background 0.15s, transform 0.1s;
+  display: inline-block;
+}
+.btn:hover { background: rgba(0,255,136,0.1); }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--green); color: var(--bg); font-family: 'Orbitron', monospace; font-weight: 700; }
+.btn-primary:hover { background: #00ffaa; color: var(--bg); }
+.btn-block { display: block; width: 100%; text-align: center; }
+
+/* CARDS */
+.card { background: var(--bg2); border: 1px solid var(--border2); padding: 24px; transition: border-color 0.2s, transform 0.2s; }
+.card-title { font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 2px; margin-bottom: 10px; }
+
+/* SECTION TITLES */
+.section-title { font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 3px; text-align: center; margin-bottom: 32px; }
+.section-title::before { content: '// '; color: var(--text-dim); }
+
+/* LAYOUT */
+.page-wide { max-width: 860px; margin: 0 auto; padding: 48px 24px; }
+.grid-2 { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+.grid-2 > .repo-card { flex: 0 1 280px; }
+@media (max-width: 600px) {
+  nav { padding: 0 16px; }
+  .nav-links a { padding: 0 10px; font-size: 9px; }
+  .hero h1 { font-size: 28px; }
+}
+
+.dim { color: var(--text-dim); }
+.mid { color: var(--text-mid); }
+
+/* REPO CARD */
+.repo-card { text-align: center; }
+.repo-card:hover { border-color: var(--green); transform: translateY(-3px); }
+.repo-icon { font-size: 34px; margin-bottom: 12px; }
+.repo-tagline { font-size: 12px; color: var(--text-mid); line-height: 1.7; margin: 0 0 18px; min-height: 38px; }
+
+/* MODAL */
+.repo-modal-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(0,0,0,0.75);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+.repo-modal-overlay.open { display: flex; }
+.repo-modal-box {
+  max-width: 440px; width: 100%;
+  position: relative;
+  text-align: center;
+}
+.repo-modal-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none;
+  color: var(--text-mid); font-size: 20px;
+  line-height: 1; cursor: none;
+  transition: color 0.15s, background 0.15s;
+}
+.repo-modal-close:hover { color: var(--red); background: rgba(255,68,102,0.08); }
+.repo-modal-icon { font-size: 38px; margin-bottom: 14px; }
+.repo-modal-title { font-family: 'Orbitron', monospace; font-size: 14px; letter-spacing: 2px; margin-bottom: 14px; }
+.repo-modal-desc { font-size: 12px; color: var(--text-mid); line-height: 1.8; margin-bottom: 22px; text-align: left; }
+  </style>
+</head>
+<body>
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+
+<nav>
+  <span class="logo" onclick="location.href='https://ilan.bloxxer.dev?accepted=true'">ILAN<span>.BLOXXER.DEV</span></span>
+  <div class="nav-links">
+    <a href="https://ilan.bloxxer.dev/index.html?accepted=true">HOME</a>
+    <a href="https://github.com/II-Dragon14" target="_blank" rel="noopener">GITHUB ↗</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="badge">PUBLIC REPOSITORIES</div>
+  <h1>My Code<br><span>Lives Here.</span></h1>
+  <p>A small but growing pile of scripts and side-projects from
+    <a href="https://github.com/II-Dragon14" target="_blank" rel="noopener">github.com/II-Dragon14</a>.
+    Pick a project below to read more and jump to the source.</p>
+</div>
+
+<div class="page-wide">
+  <div class="section-title">REPOSITORIES</div>
+
+  <div class="grid-2" id="repo-grid">
+    <!-- cards injected by JS from REPOS below -->
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="repo-modal-overlay" id="repo-modal">
+  <div class="repo-modal-box card">
+    <button class="repo-modal-close" onclick="closeRepo()" aria-label="Close">&times;</button>
+    <div class="repo-modal-icon" id="rm-icon"></div>
+    <div class="repo-modal-title" id="rm-title"></div>
+    <p class="repo-modal-desc" id="rm-desc"></p>
+    <a class="btn btn-primary btn-block" id="rm-link" target="_blank" rel="noopener">VIEW REPO ON GITHUB →</a>
+  </div>
+</div>
+
+<footer>
+  data pulled from github.com/II-Dragon14 &mdash; check each repo's license before reuse<br>
+  ILAN.BLOXXER.DEV &nbsp;|&nbsp; GITHUB: II-Dragon14 &nbsp;|&nbsp; <span class="blink">_</span>
+</footer>
+
+<script>
+'use strict';
+
+// ─── Repo data ───────────────────────────────────────────────────────────────
+const REPOS = [
+  {
+    id: 'guest',
+    icon: '🪟',
+    name: 'WINDOWS GUEST USER MAKER',
+    tagline: 'One-click disposable guest accounts for Windows.',
+    desc: "A PowerShell script that spins up a clean, password-free Windows guest account in seconds and disables the first-run setup screen, so it's ready to hand over immediately. Run it again later and it wipes the old guest profile to prep a fresh one for the next person. Ships as a .ps1 (run it as admin yourself) or a self-elevating .exe.",
+    url: 'https://github.com/II-Dragon14/Windows-Guest-User-Maker'
+  }
+];
+
+// ─── Render cards ─────────────────────────────────────────────────────────────
+const grid = document.getElementById('repo-grid');
+REPOS.forEach(r => {
+  const div = document.createElement('div');
+  div.className = 'card repo-card';
+  div.innerHTML = `
+    <div class="repo-icon">${r.icon}</div>
+    <div class="card-title">${r.name}</div>
+    <p class="repo-tagline">${r.tagline}</p>
+    <button class="btn btn-block" data-id="${r.id}">VIEW DETAILS</button>
+  `;
+  grid.appendChild(div);
+});
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+const modal = document.getElementById('repo-modal');
+
+function openRepo(id) {
+  const r = REPOS.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('rm-icon').textContent = r.icon;
+  document.getElementById('rm-title').textContent = r.name;
+  document.getElementById('rm-desc').textContent = r.desc;
+  document.getElementById('rm-link').href = r.url;
+  modal.classList.add('open');
+}
+function closeRepo() { modal.classList.remove('open'); }
+
+grid.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-id]');
+  if (btn) openRepo(btn.dataset.id);
+});
+modal.addEventListener('click', e => { if (e.target === modal) closeRepo(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRepo(); });
+
+// ─── Custom cursor ────────────────────────────────────────────────────────────
+(function () {
+  const o = document.getElementById('cursor-outer');
+  const i = document.getElementById('cursor-inner');
+  let mx = 0, my = 0, ox = 0, oy = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    i.style.left = mx + 'px'; i.style.top = my + 'px';
+  });
+  (function animate() {
+    ox += (mx - ox) * 0.12; oy += (my - oy) * 0.12;
+    o.style.left = Math.round(ox * 10) / 10 + 'px';
+    o.style.top = Math.round(oy * 10) / 10 + 'px';
+    requestAnimationFrame(animate);
+  })();
+  function addHover(el) {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  }
+  document.querySelectorAll('a, button, .card').forEach(addHover);
+})();
+</script>
+
+</body>
+</html>
