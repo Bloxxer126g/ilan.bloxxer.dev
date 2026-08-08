@@ -37,6 +37,10 @@
     animation-duration: 1000ms;
 }
 
+.AppearingProject:nth-child(4) {
+    animation-duration: 1200ms;
+}
+
 .AppearingProject {
     animation-name: ProjectAppear;
 }

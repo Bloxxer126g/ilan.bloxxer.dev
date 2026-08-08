@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Cipher — encode and decode messages with 20+ classical ciphers.">
@@ -238,3 +239,727 @@ function playfair(t,key,enc){
   var pairs=[];for(var i=0;i<clean.length;){var a=clean[i],b=clean[i+1];if(!b){pairs.push(a+'X');i++;}else if(a===b){pairs.push(a+'X');i++;}else{pairs.push(a+b);i+=2;}}
   return pairs.map(function(p){return playfairPair(sq,p[0],p[1],enc);}).join('');
 }
+=======
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher Translator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00ff88;
+            --red: #ff4466;
+            --yellow: #ffcc00;
+            --bg: #0a0a0f;
+            --bg2: #0f0f1a;
+            --border: #00ff8818;
+            --border2: #00ff8840;
+            --text-dim: #00ff8855;
+            --text-mid: #00ff8899;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg);
+            color: var(--green);
+            margin: 0;
+            min-height: 100vh;
+            cursor: none !important;
+        }
+        *, *::before, *::after { cursor: none !important; }
+        a { color: inherit; }
+
+        /* scanlines */
+        body::before {
+            content: '';
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px, transparent 3px,
+                rgba(0,255,136,0.012) 3px, rgba(0,255,136,0.012) 4px
+            );
+            z-index: 9000;
+        }
+
+        /* custom cursor */
+        #cursor-outer {
+            position: fixed; pointer-events: none; z-index: 99999;
+            width: 32px; height: 32px;
+            border: 1px solid rgba(0,255,136,0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
+        }
+        #cursor-inner {
+            position: fixed; pointer-events: none; z-index: 99999;
+            width: 5px; height: 5px;
+            background: var(--green);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.15s, height 0.15s, background 0.15s;
+        }
+        body.cursor-hover #cursor-outer { width: 44px; height: 44px; border-color: rgba(0,255,136,0.8); background: rgba(0,255,136,0.06); }
+        body.cursor-hover #cursor-inner { width: 6px; height: 6px; background: #00ffaa; }
+        body.cursor-text #cursor-outer { width: 3px; height: 28px; border-radius: 2px; border-color: rgba(0,255,136,0.7); }
+        body.cursor-text #cursor-inner { opacity: 0; }
+
+        .hidden { display: none !important; }
+
+        #app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* panel = old "bg-gray-800 rounded-xl shadow-2xl" card */
+        .panel {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            padding: 32px;
+        }
+        #cipher-menu { max-width: 640px; }
+        #translator-page { max-width: 780px; }
+
+        .panel-h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .panel-h1::before { content: '// '; color: var(--text-dim); }
+
+        .translator-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .translator-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--green);
+        }
+
+        /* Cipher selector buttons (menu) */
+        #cipher-buttons-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        @media (max-width: 560px) {
+            #cipher-buttons-container { grid-template-columns: 1fr; }
+        }
+        .cipher-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 1px;
+            padding: 16px 18px;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            color: var(--green);
+            cursor: none;
+            transition: border-color 0.15s, background 0.15s, transform 0.15s;
+        }
+        .cipher-btn::before { content: '▸ '; color: var(--text-dim); }
+        .cipher-btn:hover { border-color: var(--green); background: rgba(0,255,136,0.05); transform: translateY(-2px); }
+
+        /* Generic buttons */
+        .btn {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            padding: 10px 22px;
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            cursor: none;
+            transition: background 0.15s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover { background: rgba(0,255,136,0.1); }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--green); color: var(--bg); font-family: 'Orbitron', monospace; font-weight: 700; border-color: var(--green); }
+        .btn-primary:hover { background: #00ffaa; color: var(--bg); }
+        .btn-ghost { border-color: var(--border2); color: var(--text-mid); }
+        .btn-ghost:hover { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.05); }
+        .btn svg { width: 16px; height: 16px; }
+
+        label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-mid);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type=text], input[type=number], textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            color: var(--green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color 0.15s;
+            resize: none;
+        }
+        input:focus, textarea:focus { border-color: var(--green); }
+        input::placeholder, textarea::placeholder { color: var(--text-dim); }
+
+        #key-input-container { margin-bottom: 18px; }
+        #key-error { color: var(--red); font-size: 11px; margin-top: 6px; letter-spacing: 0.5px; }
+
+        .io-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 560px) {
+            .io-grid { grid-template-columns: 1fr; }
+        }
+
+        #message-area {
+            color: var(--yellow);
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            min-height: 18px;
+            margin-bottom: 16px;
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 9998;
+        }
+        .modal-content {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            padding: 28px;
+            max-width: 420px;
+            width: 100%;
+        }
+        .modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: var(--green);
+            margin-bottom: 14px;
+        }
+        .modal-body {
+            font-size: 12px;
+            color: var(--text-mid);
+            line-height: 1.8;
+            margin-bottom: 22px;
+        }
+        .modal-actions { text-align: right; }
+    </style>
+</head>
+<body>
+    <div id="cursor-outer"></div>
+    <div id="cursor-inner"></div>
+
+    <div id="app-container">
+
+        <div id="cipher-menu" class="panel">
+            <h1 class="panel-h1">SELECT A CIPHER</h1>
+            <div id="cipher-buttons-container"></div>
+        </div>
+
+        <div id="translator-page" class="panel hidden">
+            <div class="translator-head">
+                <h2 id="translator-title" class="translator-title">Translator</h2>
+                <button id="back-to-menu-btn" class="btn btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    MENU
+                </button>
+            </div>
+
+            <div id="key-input-container" class="hidden">
+                <label id="key-label" for="cipher-key">Cipher Key:</label>
+                <input type="text" id="cipher-key" placeholder="Enter key here">
+                <p id="key-error" class="hidden"></p>
+            </div>
+
+            <div class="io-grid">
+                <div>
+                    <label for="input-text">Input Text:</label>
+                    <textarea id="input-text" rows="6" placeholder="Enter text to process..."></textarea>
+                </div>
+                <div>
+                    <label for="output-text">Output Text:</label>
+                    <textarea id="output-text" rows="6" placeholder="Result will appear here..." readonly></textarea>
+                </div>
+            </div>
+
+            <div id="message-area"></div>
+
+            <div class="controls-row">
+                <button id="encode-btn" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                    </svg>
+                    ENCODE
+                </button>
+                <button id="decode-btn" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zm0 2.5a2.5 2.5 0 012.5 2.5V7H7.5V7a2.5 2.5 0 012.5-2.5z" />
+                    </svg>
+                    DECODE
+                </button>
+                <button id="swap-btn" class="btn btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm0 14a1 1 0 01-.707-.293l-3-3a1 1 0 011.414-1.414L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3A1 1 0 0110 17z" clip-rule="evenodd" />
+                    </svg>
+                    SWAP I/O
+                </button>
+                <button id="clear-btn" class="btn btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    CLEAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modal-title" class="modal-title">Notification</h3>
+            <p id="modal-body" class="modal-body">This is a modal message.</p>
+            <div class="modal-actions">
+                <button id="modal-close-btn" class="btn btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const cipherMenuPage = document.getElementById('cipher-menu');
+        const translatorPage = document.getElementById('translator-page');
+        const cipherButtonsContainer = document.getElementById('cipher-buttons-container');
+        const translatorTitle = document.getElementById('translator-title');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        
+        const keyInputContainer = document.getElementById('key-input-container');
+        const keyLabel = document.getElementById('key-label');
+        const cipherKeyInput = document.getElementById('cipher-key');
+        const keyError = document.getElementById('key-error');
+
+        const inputText = document.getElementById('input-text');
+        const outputText = document.getElementById('output-text');
+        const messageArea = document.getElementById('message-area');
+
+        const encodeBtn = document.getElementById('encode-btn');
+        const decodeBtn = document.getElementById('decode-btn');
+        const swapBtn = document.getElementById('swap-btn');
+        const clearBtn = document.getElementById('clear-btn');
+
+        const messageModal = document.getElementById('message-modal');
+        const modalTitleElem = document.getElementById('modal-title'); // Renamed to avoid conflict
+        const modalBodyElem = document.getElementById('modal-body');   // Renamed to avoid conflict
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        let currentCipher = null;
+
+        // --- Utility Functions ---
+        function showModal(title, message) {
+            modalTitleElem.textContent = title;
+            modalBodyElem.textContent = message;
+            messageModal.classList.remove('hidden');
+        }
+
+        modalCloseBtn.addEventListener('click', () => {
+            messageModal.classList.add('hidden');
+        });
+
+        // --- Cipher Definitions ---
+        const ciphers = {
+            caesar: {
+                name: "Caesar Cipher",
+                needsKey: true,
+                keyPrompt: "Shift value (e.g., 3 for A->D):",
+                keyType: "number",
+                process: (text, keyStr, encode) => {
+                    const shift = parseInt(keyStr);
+                    if (isNaN(shift)) {
+                        keyError.textContent = "Shift must be a number.";
+                        keyError.classList.remove('hidden');
+                        return null;
+                    }
+                    keyError.classList.add('hidden');
+                    return text.split('').map(char => {
+                        if (char.match(/[a-z]/i)) {
+                            const code = char.charCodeAt(0);
+                            let shiftedCode;
+                            if (code >= 65 && code <= 90) { // Uppercase
+                                shiftedCode = encode ? (code - 65 + shift) % 26 : (code - 65 - shift + 26*1000) % 26; 
+                                return String.fromCharCode(shiftedCode + 65);
+                            } else if (code >= 97 && code <= 122) { // Lowercase
+                                shiftedCode = encode ? (code - 97 + shift) % 26 : (code - 97 - shift + 26*1000) % 26;
+                                return String.fromCharCode(shiftedCode + 97);
+                            }
+                        }
+                        return char; 
+                    }).join('');
+                }
+            },
+            atbash: {
+                name: "Atbash Cipher",
+                needsKey: false,
+                process: (text) => { 
+                    return text.split('').map(char => {
+                        if (char.match(/[a-z]/i)) {
+                            const code = char.charCodeAt(0);
+                            if (code >= 65 && code <= 90) { 
+                                return String.fromCharCode(90 - (code - 65));
+                            } else if (code >= 97 && code <= 122) { 
+                                return String.fromCharCode(122 - (code - 97));
+                            }
+                        }
+                        return char;
+                    }).join('');
+                }
+            },
+            a1z26: {
+                name: "A1Z26 Cipher",
+                needsKey: false,
+                encode: (text) => {
+                    return text.toUpperCase().split('').map(char => {
+                        const code = char.charCodeAt(0);
+                        if (code >= 65 && code <= 90) { 
+                            return code - 64;
+                        }
+                        return ''; 
+                    }).filter(val => val !== '').join(' ');
+                },
+                decode: (text) => {
+                    return text.split(' ').map(numStr => {
+                        const num = parseInt(numStr);
+                        if (!isNaN(num) && num >= 1 && num <= 26) {
+                            return String.fromCharCode(num + 64);
+                        }
+                        return ''; 
+                    }).filter(val => val !== '').join('');
+                }
+            },
+            rot13: {
+                name: "ROT13 Cipher",
+                needsKey: false,
+                process: (text) => { 
+                    return ciphers.caesar.process(text, '13', true);
+                }
+            },
+            vigenere: {
+                name: "Vigenère Cipher",
+                needsKey: true,
+                keyPrompt: "Keyword (alphabetic, e.g., LEMON):",
+                keyType: "text",
+                process: (text, key, encode) => {
+                    if (!key || !/^[a-zA-Z]+$/.test(key)) {
+                        keyError.textContent = "Keyword must be alphabetic and not empty.";
+                        keyError.classList.remove('hidden');
+                        return null;
+                    }
+                    keyError.classList.add('hidden');
+                    const keyUpper = key.toUpperCase();
+                    let keyIndex = 0;
+                    return text.split('').map(char => {
+                        if (char.match(/[a-z]/i)) {
+                            const charCode = char.charCodeAt(0);
+                            const keyChar = keyUpper[keyIndex % keyUpper.length];
+                            const shift = keyChar.charCodeAt(0) - 65;
+                            keyIndex++;
+                            
+                            let base, processedCharCode;
+                            if (charCode >= 65 && charCode <= 90) base = 65; 
+                            else if (charCode >= 97 && charCode <= 122) base = 97; 
+                            else return char; 
+
+                            if (encode) {
+                                processedCharCode = (charCode - base + shift) % 26;
+                            } else {
+                                processedCharCode = (charCode - base - shift + 26) % 26;
+                            }
+                            return String.fromCharCode(base + processedCharCode);
+                        }
+                        return char;
+                    }).join('');
+                }
+            },
+            base64: {
+                name: "Base64",
+                needsKey: false,
+                encode: (text) => {
+                    try {
+                        return btoa(unescape(encodeURIComponent(text))); 
+                    } catch (e) {
+                        messageArea.textContent = "Error encoding to Base64: " + e.message;
+                        return null;
+                    }
+                },
+                decode: (text) => {
+                    try {
+                        return decodeURIComponent(escape(atob(text))); 
+                    } catch (e) {
+                        messageArea.textContent = "Invalid Base64 string or error decoding: " + e.message;
+                        return null;
+                    }
+                }
+            },
+            morse: {
+                name: "Morse Code",
+                needsKey: false,
+                map: {
+                    'A': '.-',    'B': '-...',  'C': '-.-.',  'D': '-..',   'E': '.',
+                    'F': '..-.',  'G': '--.',   'H': '....',  'I': '..',    'J': '.---',
+                    'K': '-.-',   'L': '.-..',  'M': '--',    'N': '-.',    'O': '---',
+                    'P': '.--.',  'Q': '--.-',  'R': '.-.',   'S': '...',   'T': '-',
+                    'U': '..-',   'V': '...-',  'W': '.--',   'X': '-..-',  'Y': '-.--',
+                    'Z': '--..',  '0': '-----', '1': '.----', '2': '..---', '3': '...--',
+                    '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+                    '9': '----.', '.': '.-.-.-',',': '--..--', '?': '..--..', '\'': '.----.',
+                    '!': '-.-.--', '/': '-..-.', '(': '-.--.', ')': '-.--.-', '&': '.-...',
+                    ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.', '-': '-....-',
+                    '_': '..--.-', '"': '.-..-.', '$': '...-..-', '@': '.--.-.', ' ': '/'
+                },
+                reverseMap: null, 
+                init: function() {
+                    this.reverseMap = {};
+                    for (const key in this.map) {
+                        this.reverseMap[this.map[key]] = key;
+                    }
+                },
+                encode: function(text) {
+                    if (!this.reverseMap) this.init();
+                    return text.toUpperCase().split('').map(char => this.map[char] || '').filter(Boolean).join(' ');
+                },
+                decode: function(morse) {
+                    if (!this.reverseMap) this.init();
+                    return morse.split(' ').map(code => this.reverseMap[code] || '').filter(Boolean).join('');
+                }
+            },
+            binary: {
+                name: "ASCII / Binary",
+                needsKey: false,
+                encode: (text) => {
+                    return text.split('').map(char => {
+                        return char.charCodeAt(0).toString(2).padStart(8, '0');
+                    }).join(' ');
+                },
+                decode: (binaryStr) => {
+                    return binaryStr.split(' ').map(bin => {
+                        if (/^[01]{8}$/.test(bin)) { 
+                           return String.fromCharCode(parseInt(bin, 2));
+                        }
+                        return ''; 
+                    }).filter(Boolean).join('');
+                }
+            }
+        };
+        
+        if (ciphers.morse.init) ciphers.morse.init();
+
+        function showCipherMenu() {
+            cipherMenuPage.classList.remove('hidden');
+            translatorPage.classList.add('hidden');
+            currentCipher = null;
+            clearTranslatorFields();
+            messageArea.textContent = '';
+        }
+
+        function showTranslator(cipherKey) {
+            currentCipher = ciphers[cipherKey];
+            if (!currentCipher) {
+                console.error("Cipher not found:", cipherKey);
+                showModal("Error", `Cipher "${cipherKey}" definition is missing.`);
+                return;
+            }
+
+            translatorTitle.textContent = `${currentCipher.name} Translator`;
+            cipherMenuPage.classList.add('hidden');
+            translatorPage.classList.remove('hidden');
+            
+            keyError.classList.add('hidden');
+            keyError.textContent = '';
+
+            if (currentCipher.needsKey) {
+                keyInputContainer.classList.remove('hidden');
+                keyLabel.textContent = currentCipher.keyPrompt || "Cipher Key:";
+                cipherKeyInput.type = currentCipher.keyType || "text";
+                cipherKeyInput.value = ''; 
+                cipherKeyInput.placeholder = currentCipher.keyType === 'number' ? "e.g., 3" : "e.g., LEMON";
+            } else {
+                keyInputContainer.classList.add('hidden');
+            }
+            clearTranslatorFields();
+            messageArea.textContent = '';
+        }
+        
+        function clearTranslatorFields() {
+            inputText.value = '';
+            outputText.value = '';
+            if (currentCipher && currentCipher.needsKey) {
+                cipherKeyInput.value = '';
+            }
+            messageArea.textContent = '';
+            keyError.classList.add('hidden');
+        }
+
+        backToMenuBtn.addEventListener('click', showCipherMenu);
+
+        encodeBtn.addEventListener('click', () => {
+            if (!currentCipher) return;
+            messageArea.textContent = ''; 
+            const text = inputText.value;
+            const key = currentCipher.needsKey ? cipherKeyInput.value : null;
+
+            let result;
+            if (currentCipher.process) { 
+                result = currentCipher.process(text, key, true);
+            } else if (currentCipher.encode) { 
+                result = currentCipher.encode(text, key);
+            } else {
+                showModal("Error", "Encoding function not implemented for this cipher.");
+                return;
+            }
+            
+            if (result !== null) { 
+                outputText.value = result;
+            } else if (!keyError.classList.contains('hidden')) {
+                // Key error already shown
+            } else if (!messageArea.textContent) {
+                 messageArea.textContent = 'Encoding failed. Check input or key.';
+            }
+        });
+
+        decodeBtn.addEventListener('click', () => {
+            if (!currentCipher) return;
+            messageArea.textContent = '';
+            const text = inputText.value;
+            const key = currentCipher.needsKey ? cipherKeyInput.value : null;
+
+            let result;
+            if (currentCipher.process) {
+                result = currentCipher.process(text, key, false);
+            } else if (currentCipher.decode) {
+                result = currentCipher.decode(text, key);
+            } else {
+                showModal("Error", "Decoding function not implemented for this cipher.");
+                return;
+            }
+
+            if (result !== null) {
+                outputText.value = result;
+            } else if (!keyError.classList.contains('hidden')) {
+                // Key error already shown
+            } else if (!messageArea.textContent) {
+                 messageArea.textContent = 'Decoding failed. Check input or key.';
+            }
+        });
+        
+        swapBtn.addEventListener('click', () => {
+            const temp = inputText.value;
+            inputText.value = outputText.value;
+            outputText.value = temp;
+            messageArea.textContent = '';
+        });
+
+        clearBtn.addEventListener('click', () => {
+            clearTranslatorFields();
+            if (currentCipher && currentCipher.needsKey) {
+                 cipherKeyInput.value = ''; 
+            }
+        });
+        
+        cipherKeyInput.addEventListener('input', () => {
+            keyError.classList.add('hidden'); 
+            messageArea.textContent = '';
+        });
+        inputText.addEventListener('input', () => {
+             messageArea.textContent = '';
+        });
+
+        function initializeApp() {
+            for (const key in ciphers) {
+                const button = document.createElement('button');
+                button.textContent = ciphers[key].name;
+                button.classList.add('cipher-btn');
+                button.dataset.cipherKey = key;
+                button.addEventListener('click', () => showTranslator(key));
+                cipherButtonsContainer.appendChild(button);
+            }
+            showCipherMenu(); 
+        }
+
+        initializeApp();
+
+        // --- Custom cursor ---
+        (function () {
+            const o = document.getElementById('cursor-outer');
+            const i = document.getElementById('cursor-inner');
+            let mx = 0, my = 0, ox = 0, oy = 0;
+            document.addEventListener('mousemove', e => {
+                mx = e.clientX; my = e.clientY;
+                i.style.left = mx + 'px'; i.style.top = my + 'px';
+            });
+            (function animate() {
+                ox += (mx - ox) * 0.12; oy += (my - oy) * 0.12;
+                o.style.left = Math.round(ox * 10) / 10 + 'px';
+                o.style.top = Math.round(oy * 10) / 10 + 'px';
+                requestAnimationFrame(animate);
+            })();
+            function addHover(el) {
+                el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+            }
+            function addTextCursor(el) {
+                el.addEventListener('mouseenter', () => document.body.classList.add('cursor-text'));
+                el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-text'));
+            }
+            document.querySelectorAll('button, a').forEach(addHover);
+            document.querySelectorAll('input, textarea').forEach(addTextCursor);
+            // cipher menu buttons are created after initializeApp() runs, so re-bind once more
+            document.querySelectorAll('.cipher-btn').forEach(addHover);
+        })();
+    </script>
+</body>
+</html>
+>>>>>>> 6801b33c756179dd55ced5217edc2c8864b87322
