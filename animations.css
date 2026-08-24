@@ -35,6 +35,22 @@
     animation-duration: 1000ms;
 }
 
+.AppearingProject:nth-child(4) {
+    animation-duration: 1200ms;
+}
+
+.AppearingProject:nth-child(5) {
+    animation-duration: 1400ms;
+}
+
+.AppearingProject:nth-child(6) {
+    animation-duration: 1600ms;
+}
+
+.AppearingProject:nth-child(7) {
+    animation-duration: 1800ms;
+}
+
 .AppearingProject {
     animation-name: ProjectAppear;
 }
