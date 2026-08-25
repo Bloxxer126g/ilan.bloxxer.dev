@@ -1,4 +1,4 @@
-// RentARAM shared utilities
+// Rent-a-RAM shared utilities
 // ── Toast ──
 function toast(msg, duration = 3000) {
   let el = document.getElementById('toast');
@@ -26,8 +26,8 @@ const NAV_HTML = `
 <nav>
   <a href="/rent-a-ram/index.html?accepted=true" class="logo">RENT<span>-A-</span>RAM</a>
   <div class="nav-links">
-    <a href="/rent-a-ram/index.htm?accepted=truel">HOME</a>
-    <a href="/rent-a-ram/pricing.htm?accepted=truel">PRICING</a>
+    <a href="/rent-a-ram/index.html?accepted=true">HOME</a>
+    <a href="/rent-a-ram/pricing.html?accepted=true">PRICING</a>
     <a href="/rent-a-ram/order.html?accepted=true">ORDER</a>
     <a href="/rent-a-ram/dashboard.html?accepted=true">DASHBOARD</a>
     <a href="/rent-a-ram/faq.html?accepted=true">FAQ</a>
@@ -39,8 +39,8 @@ const FOOTER_HTML = `
 <footer>
   * uptime guarantee subject to vibes<br>
   ** RAM is wiped after rental. Mostly.<br>
-  *** RentARAM Ltd is not liable for memory leaks, data loss, or existential crises.<br>
-  © 2026 RentARAM Ltd &nbsp;|&nbsp; No refunds. Ever. &nbsp;|&nbsp; <span class="blink">_</span>
+  *** Rent-a-RAM Ltd is not liable for memory leaks, data loss, or existential crises.<br>
+  © 2026 Rent-a-RAM Ltd &nbsp;|&nbsp; No refunds. Ever. &nbsp;|&nbsp; <span class="blink">_</span>
 </footer>`;
 
 // Inject nav + footer if placeholders exist
