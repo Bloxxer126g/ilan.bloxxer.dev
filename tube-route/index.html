@@ -107,6 +107,46 @@ select option{background:var(--bg2);}
 .btn-plan:active{transform:scale(.99);}
 .btn-plan:disabled{background:var(--border2);color:var(--text-dim);cursor:not-allowed!important;}
 
+/* CALENDAR PICKER */
+.date-display{cursor:pointer;}
+.calendar-pop{
+  position:absolute;top:100%;left:0;z-index:300;
+  background:var(--bg3);border:1px solid var(--border2);
+  width:280px;padding:14px;display:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.calendar-pop.open{display:block;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-nav{
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);border:1px solid var(--border2);color:var(--green);
+  font-size:13px;transition:border-color .15s,background .15s;user-select:none;
+}
+.cal-nav:hover{border-color:var(--green);background:rgba(0,255,136,.06);}
+.cal-title{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;color:var(--green);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{
+  font-size:9px;letter-spacing:1px;color:var(--text-dim);
+  text-align:center;padding:4px 0 8px;
+}
+.cal-day{
+  aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text-mid);background:var(--bg);
+  border:1px solid transparent;transition:border-color .15s,background .15s,color .15s;
+}
+.cal-day:not(.cal-day-empty):hover{border-color:var(--green);color:var(--green);}
+.cal-day-dim{color:var(--text-dim);opacity:.5;}
+.cal-day-empty{background:transparent;cursor:default!important;}
+.cal-day-today{border-color:var(--yellow);color:var(--yellow);}
+.cal-day-selected{background:rgba(0,255,136,.15);border-color:var(--green);color:var(--green);font-weight:700;}
+.cal-foot{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);text-align:center;}
+.cal-today-btn{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:var(--text-mid);background:none;border:1px solid var(--border2);
+  padding:6px 14px;transition:color .15s,border-color .15s;
+}
+.cal-today-btn:hover{color:var(--green);border-color:var(--green);}
+
 /* LOADING STATE */
 .loading-state{text-align:center;padding:48px 24px;display:none;}
 .loading-state.visible{display:block;}
@@ -204,6 +244,7 @@ footer{border-top:1px solid var(--border);padding:28px 40px;text-align:center;fo
   .journey-summary{grid-template-columns:1fr 1fr;}
   .journey-tabs{flex-wrap:wrap;}
   .jtab{flex:0 0 50%;}
+  .calendar-pop{width:250px;}
 }
 </style>
 </head>
@@ -250,13 +291,26 @@ footer{border-top:1px solid var(--border);padding:28px 40px;text-align:center;fo
     </div>
 
     <div class="form-row-2">
-      <div>
+      <div class="form-row" style="margin-bottom:0;">
         <label>DATE</label>
-        <input type="text" id="date-input" placeholder="Today">
+        <div class="input-wrap">
+          <input type="text" id="date-input" class="date-display" placeholder="DD/MM/YY" readonly autocomplete="off">
+          <div class="calendar-pop" id="cal-pop">
+            <div class="cal-head">
+              <div class="cal-nav" id="cal-prev">&#x2039;</div>
+              <div class="cal-title" id="cal-title"></div>
+              <div class="cal-nav" id="cal-next">&#x203A;</div>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+            <div class="cal-foot">
+              <button type="button" class="cal-today-btn" id="cal-today-btn">TODAY</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div>
         <label>TIME</label>
-        <input type="text" id="time-input" placeholder="Now">
+        <input type="text" id="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off">
       </div>
     </div>
 
@@ -323,7 +377,7 @@ footer{border-top:1px solid var(--border);padding:28px 40px;text-align:center;fo
   (function a(){ox+=(mx-ox)*.12;oy+=(my-oy)*.12;o.style.left=Math.round(ox*10)/10+'px';o.style.top=Math.round(oy*10)/10+'px';requestAnimationFrame(a);})();
   function addH(el){el.addEventListener('mouseenter',function(){document.body.classList.add('ch');});el.addEventListener('mouseleave',function(){document.body.classList.remove('ch');});}
   function addT(el){el.addEventListener('mouseenter',function(){document.body.classList.add('ct');});el.addEventListener('mouseleave',function(){document.body.classList.remove('ct');});}
-  document.querySelectorAll('a,button,.jtab').forEach(addH);
+  document.querySelectorAll('a,button,.jtab,.cal-nav,.cal-day:not(.cal-day-empty),.cal-today-btn,.date-display').forEach(addH);
   document.querySelectorAll('input,select').forEach(addT);
 })();
 
@@ -429,18 +483,186 @@ function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 setupAC('from-input','from-ac');
 setupAC('to-input','to-ac');
 
+// ─── Calendar picker ──────────────────────────────────────────────────────────
+// selectedDate holds the actual Date object chosen. Display is DD/MM/YY, API format is YYYYMMDD.
+var selectedDate = new Date();
+var calViewYear = selectedDate.getFullYear();
+var calViewMonth = selectedDate.getMonth(); // 0-indexed
+
+var MONTH_NAMES=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+var DOW_NAMES=['MO','TU','WE','TH','FR','SA','SU'];
+
+function pad2(n){return String(n).padStart(2,'0');}
+
+function formatDisplayDate(d){
+  // DD/MM/YY
+  return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(-2);
+}
+
+function formatApiDate(d){
+  // YYYYMMDD
+  return String(d.getFullYear())+pad2(d.getMonth()+1)+pad2(d.getDate());
+}
+
+function isSameDay(a,b){
+  return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+}
+
+function renderCalendar(){
+  var titleEl=document.getElementById('cal-title');
+  titleEl.textContent=MONTH_NAMES[calViewMonth]+' '+calViewYear;
+
+  var grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+
+  DOW_NAMES.forEach(function(dow){
+    var d=document.createElement('div');
+    d.className='cal-dow';
+    d.textContent=dow;
+    grid.appendChild(d);
+  });
+
+  var firstOfMonth=new Date(calViewYear,calViewMonth,1);
+  // JS getDay(): 0=Sun..6=Sat. We want Monday-first grid.
+  var startOffset=(firstOfMonth.getDay()+6)%7;
+
+  var daysInMonth=new Date(calViewYear,calViewMonth+1,0).getDate();
+  var daysInPrevMonth=new Date(calViewYear,calViewMonth,0).getDate();
+
+  var today=new Date();
+  var cellsUsed=0;
+
+  // Leading dimmed days from previous month
+  for(var i=0;i<startOffset;i++){
+    var dayNum=daysInPrevMonth-startOffset+1+i;
+    var pm=calViewMonth-1<0?11:calViewMonth-1;
+    var py=calViewMonth-1<0?calViewYear-1:calViewYear;
+    var cellDate=new Date(py,pm,dayNum);
+    grid.appendChild(makeDayCell(dayNum,cellDate,true));
+    cellsUsed++;
+  }
+
+  // Current month days
+  for(var day=1;day<=daysInMonth;day++){
+    var cellDate2=new Date(calViewYear,calViewMonth,day);
+    grid.appendChild(makeDayCell(day,cellDate2,false));
+    cellsUsed++;
+  }
+
+  // Trailing dimmed days from next month to fill grid to a multiple of 7
+  var remainder=cellsUsed%7;
+  if(remainder!==0){
+    var trailing=7-remainder;
+    var nm=calViewMonth+1>11?0:calViewMonth+1;
+    var ny=calViewMonth+1>11?calViewYear+1:calViewYear;
+    for(var t=1;t<=trailing;t++){
+      var cellDate3=new Date(ny,nm,t);
+      grid.appendChild(makeDayCell(t,cellDate3,true));
+    }
+  }
+}
+
+function makeDayCell(dayNum,cellDate,dim){
+  var el=document.createElement('div');
+  el.className='cal-day'+(dim?' cal-day-dim':'');
+  el.textContent=dayNum;
+
+  var today=new Date();
+  if(isSameDay(cellDate,today))el.classList.add('cal-day-today');
+  if(isSameDay(cellDate,selectedDate))el.classList.add('cal-day-selected');
+
+  el.addEventListener('click',function(){
+    selectedDate=cellDate;
+    calViewYear=cellDate.getFullYear();
+    calViewMonth=cellDate.getMonth();
+    updateDateInput();
+    renderCalendar();
+    closeCalendar();
+  });
+
+  return el;
+}
+
+function updateDateInput(){
+  document.getElementById('date-input').value=formatDisplayDate(selectedDate);
+}
+
+function openCalendar(){
+  document.getElementById('cal-pop').classList.add('open');
+  renderCalendar();
+}
+function closeCalendar(){
+  document.getElementById('cal-pop').classList.remove('open');
+}
+function toggleCalendar(){
+  var pop=document.getElementById('cal-pop');
+  if(pop.classList.contains('open'))closeCalendar();
+  else openCalendar();
+}
+
+document.getElementById('date-input').addEventListener('click',toggleCalendar);
+
+document.getElementById('cal-prev').addEventListener('click',function(){
+  calViewMonth--;
+  if(calViewMonth<0){calViewMonth=11;calViewYear--;}
+  renderCalendar();
+});
+document.getElementById('cal-next').addEventListener('click',function(){
+  calViewMonth++;
+  if(calViewMonth>11){calViewMonth=0;calViewYear++;}
+  renderCalendar();
+});
+document.getElementById('cal-today-btn').addEventListener('click',function(){
+  selectedDate=new Date();
+  calViewYear=selectedDate.getFullYear();
+  calViewMonth=selectedDate.getMonth();
+  updateDateInput();
+  renderCalendar();
+  closeCalendar();
+});
+
+document.addEventListener('click',function(e){
+  var pop=document.getElementById('cal-pop');
+  var inp=document.getElementById('date-input');
+  if(!pop.contains(e.target)&&e.target!==inp){
+    closeCalendar();
+  }
+});
+
 // ─── Date/time defaults ───────────────────────────────────────────────────────
 (function(){
+  updateDateInput();
   var now=new Date();
-  var dd=String(now.getDate()).padStart(2,'0');
-  var mm=String(now.getMonth()+1).padStart(2,'0');
-  var yyyy=now.getFullYear();
-  document.getElementById('date-input').value=yyyy+mm+dd;
-  document.getElementById('date-input').placeholder=dd+'/'+mm+'/'+yyyy;
   var hh=String(now.getHours()).padStart(2,'0');
   var min=String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('time-input').value=hh+min;
+  document.getElementById('time-input').value=hh+':'+min;
   document.getElementById('time-input').placeholder=hh+':'+min;
+})();
+
+// ─── Time input auto-formatting (HH:MM) ────────────────────────────────────────
+(function(){
+  var timeInp=document.getElementById('time-input');
+
+  timeInp.addEventListener('input',function(){
+    var digits=timeInp.value.replace(/\D/g,'').slice(0,4);
+    var formatted=digits;
+    if(digits.length>2){
+      formatted=digits.slice(0,2)+':'+digits.slice(2);
+    }
+    timeInp.value=formatted;
+  });
+
+  timeInp.addEventListener('blur',function(){
+    var digits=timeInp.value.replace(/\D/g,'');
+    if(!digits.length)return;
+    // Pad to 4 digits (HHMM)
+    digits=digits.padEnd(4,'0').slice(0,4);
+    var hh=parseInt(digits.slice(0,2),10);
+    var mm=parseInt(digits.slice(2,4),10);
+    if(isNaN(hh)||hh>23)hh=0;
+    if(isNaN(mm)||mm>59)mm=0;
+    timeInp.value=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  });
 })();
 
 // ─── Plan Journey ─────────────────────────────────────────────────────────────
@@ -453,7 +675,7 @@ function planJourney(){
   var toVal=document.getElementById('to-input').value.trim();
   if(!fromVal||!toVal){toast('⚠ Please enter both origin and destination.');return;}
 
-  var dateRaw=document.getElementById('date-input').value.replace(/\D/g,'')||getTodayStr();
+  var dateRaw=formatApiDate(selectedDate);
   var timeRaw=document.getElementById('time-input').value.replace(/\D/g,'')||getNowStr();
 
   showLoading('QUERYING TFL API...');
@@ -497,7 +719,6 @@ function planJourney(){
     });
 }
 
-function getTodayStr(){var n=new Date();return String(n.getFullYear())+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0');}
 function getNowStr(){var n=new Date();return String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0');}
 
 // ─── Render results ───────────────────────────────────────────────────────────
@@ -717,7 +938,7 @@ function resetForm(){
 
 // ─── Allow Enter key ──────────────────────────────────────────────────────────
 document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&document.activeElement&&(document.activeElement.id==='date-input'||document.activeElement.id==='time-input')){
+  if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='time-input'){
     planJourney();
   }
 });
