@@ -16,11 +16,6 @@
 <div id="cursor-outer"></div>
 <div id="cursor-inner"></div>
 
-<div id="visitor-widget">
-  <div class="vc-label">VISITORS</div>
-  <span id="visitor-count" class="vc-loading">...</span>
-</div>
-
 <nav>
   <span class="logo" onclick="location.href='https://ilan.bloxxer.dev'">ILAN<span>.BLOXXER.DEV</span>
 </nav>
@@ -79,18 +74,6 @@
 })();
 </script>
 
-<script>
-(function() {
-  fetch("https://website-counter-bjxn.onrender.com//api/visit")
-  .then(r => r.json())
-  .then(d => {
-    document.getElementById("visitor-count").innerText = d.visits;
-  })
-    .catch(function() {
-      document.getElementById('visitor-count').innerText = '—';
-    });
-})();
-</script>
 
 <script>
   setTimeout(function() {
