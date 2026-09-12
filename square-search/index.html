@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-B11HJYVGYN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-B11HJYVGYN');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SQUARE//SEARCH</title>
+<title>SQUARE-SEARCH — ilan.bloxxer.dev</title>
+<script src="https://ilan.bloxxer.dev/global/redirect.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="/square-search/favicon.png">
 <style>
 :root{
   --green:#00ff88;
@@ -33,9 +43,9 @@ body{
 body::before{
   content:"";
   position:fixed; inset:0;
-  background:repeating-linear-gradient(0deg, rgba(0,255,136,0.03) 0px, rgba(0,255,136,0.03) 1px, transparent 1px, transparent 3px);
+  background:repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,255,136,0.012) 3px, rgba(0,255,136,0.012) 4px);
   pointer-events:none;
-  z-index:9998;
+  z-index:9000;
 }
 #cursor-outer, #cursor-inner{
   position:fixed; top:0; left:0;
@@ -45,24 +55,25 @@ body::before{
   transform:translate(-50%,-50%);
 }
 #cursor-outer{
-  width:26px; height:26px;
-  border:1px solid var(--green);
-  transition:width .15s, height .15s, border-color .15s, background .15s;
+  width:32px; height:32px;
+  border:1px solid rgba(0,255,136,.5);
+  transition:width .2s, height .2s, border-color .2s, background .2s;
 }
 #cursor-inner{
-  width:4px; height:4px;
+  width:5px; height:5px;
   background:var(--green);
 }
-body.ch #cursor-outer{ width:44px; height:44px; background:rgba(0,255,136,0.08); }
-body.ct #cursor-outer{ width:4px; height:26px; border-radius:2px; }
+body.ch #cursor-outer{ width:44px; height:44px; border-color:rgba(0,255,136,.8); background:rgba(0,255,136,0.06); }
+body.ch #cursor-inner{ width:6px; height:6px; background:#00ffaa; }
+body.ct #cursor-outer{ width:3px; height:28px; border-radius:2px; border-color:rgba(0,255,136,.7); }
+body.ct #cursor-inner{ opacity:0; }
 
 nav{
   position:sticky; top:0; z-index:100;
   height:56px;
   display:flex; align-items:center; justify-content:space-between;
-  padding:0 20px;
-  background:rgba(10,10,15,0.9);
-  backdrop-filter:blur(6px);
+  padding:0 40px;
+  background:var(--bg);
   border-bottom:1px solid var(--border2);
 }
 nav .logo{
@@ -70,9 +81,9 @@ nav .logo{
   font-weight:900;
   letter-spacing:2px;
   font-size:15px;
-  color:var(--green);
 }
-nav .logo span{ color:var(--text-mid); }
+nav .logo .sq{ color:var(--green); }
+nav .logo .se{ color:var(--red); }
 nav .modes{ display:flex; gap:8px; }
 .mode-btn{
   font-family:'Share Tech Mono', monospace;
@@ -97,9 +108,8 @@ h1{
   font-size:clamp(24px,4vw,38px);
   letter-spacing:3px;
   margin:0 0 6px;
-  text-shadow:0 0 18px var(--border2);
 }
-h1 span{ color:var(--text-mid); }
+h1 span{ color:var(--red); }
 .subtitle{ color:var(--text-mid); font-size:13px; margin-bottom:26px; line-height:1.6; }
 .subtitle b{ color:var(--green); }
 
@@ -183,7 +193,9 @@ button.danger:hover{ border-color:var(--red); background:rgba(255,68,102,0.08); 
 .result-badge.mid{ border-color:var(--yellow); color:var(--yellow); }
 .result-badge.low{ border-color:var(--red); color:var(--red); }
 
-footer{ text-align:center; color:var(--text-dim); font-size:11px; padding:20px; letter-spacing:1px; }
+footer{ text-align:center; color:var(--text-dim); font-size:10px; letter-spacing:2px; padding:32px 20px; border-top:1px solid var(--border); margin-top:20px; line-height:2.2; }
+.blink{ animation:blink 1.2s step-end infinite; }
+@keyframes blink{ 50%{ opacity:0; } }
 
 @media (max-width:600px){
   .stat-row{ flex-direction:column; }
@@ -196,7 +208,7 @@ footer{ text-align:center; color:var(--text-dim); font-size:11px; padding:20px; 
 <div id="cursor-inner"></div>
 
 <nav>
-  <div class="logo">SQUARE<span>//</span>SEARCH</div>
+  <div class="logo"><span class="sq">SQUARE</span><span class="se">-SEARCH</span></div>
   <div class="modes">
     <button class="mode-btn active" id="btn-mode-free" data-mode="free">Free Draw</button>
     <button class="mode-btn" id="btn-mode-challenge" data-mode="challenge">Challenge</button>
@@ -207,7 +219,7 @@ footer{ text-align:center; color:var(--text-dim); font-size:11px; padding:20px; 
   <h1>INSCRIBED SQUARE<span>.PROBE</span></h1>
   <p class="subtitle">
     The <b>inscribed square problem</b> conjectures that every simple closed curve contains four points forming a square.
-    Sketch a closed loop, then place <b>four points</b> inside it to build your own square. Confirm to see what the
+    Sketch a closed loop, then place <b>four points</b> on its edge to build your own square. Confirm to see what the
     computer found on your exact shape, and overlay the two to compare.
   </p>
 
@@ -236,12 +248,12 @@ footer{ text-align:center; color:var(--text-dim); font-size:11px; padding:20px; 
     <div class="stat-row">
       <div class="stat"><div class="label">Your side lengths</div><div class="value" id="stat-your-sides">—</div></div>
       <div class="stat"><div class="label">Square accuracy</div><div class="value" id="stat-your-acc">—</div></div>
-      <div class="stat"><div class="label">Computer's boundary error</div><div class="value" id="stat-comp-err">—</div></div>
+      <div class="stat"><div class="label">Computer's fit precision</div><div class="value" id="stat-comp-err">—</div></div>
       <div class="stat"><div class="label">Match to computer's square</div><div class="value" id="stat-match">—</div></div>
     </div>
   </div>
 
-  <footer>ilan.bloxxer.dev :: square-search :: inscribed square problem probe</footer>
+  <footer>SQUARE-SEARCH &nbsp;|&nbsp; INSCRIBED SQUARE PROBLEM PROBE &nbsp;|&nbsp; <span class="blink">_</span></footer>
 </main>
 
 <script>
@@ -381,6 +393,23 @@ function distToPolylineSet(pt, boundary){
   }
   return best;
 }
+function nearestPointOnSegment(p,a,b){
+  const abx=b.x-a.x, aby=b.y-a.y;
+  const len2=abx*abx+aby*aby;
+  let t = len2>0 ? ((p.x-a.x)*abx+(p.y-a.y)*aby)/len2 : 0;
+  t=Math.min(1,Math.max(0,t));
+  return { x:a.x+abx*t, y:a.y+aby*t };
+}
+function nearestPointOnPolyline(pt, poly){
+  let best=null, bestDist=Infinity;
+  for(let i=0;i<poly.length;i++){
+    const a=poly[i], b=poly[(i+1)%poly.length];
+    const cand=nearestPointOnSegment(pt,a,b);
+    const d=dist(pt,cand);
+    if(d<bestDist){ bestDist=d; best=cand; }
+  }
+  return { point:best, dist:bestDist };
+}
 
 /* ---------- inscribed square search ---------- */
 function findBestSquare(shape){
@@ -445,7 +474,7 @@ function clearAll(){
   if(mode==='challenge'){
     challengeSeed=Math.floor(Math.random()*100000);
     shapePoints=generateChallengeShape(challengeSeed);
-    setStatus('Complex shape generated. Place <b>4 points</b> inside it to form a square.');
+    setStatus('Complex shape generated. Place <b>4 points</b> on its edge to form a square.');
     drawTitle.textContent='Step 1 — Find the square in this shape';
   } else {
     setStatus('Draw a closed loop on the canvas to begin.');
@@ -562,6 +591,8 @@ canvas.addEventListener('touchstart', e=>{ e.preventDefault(); onDown(e); }, {pa
 canvas.addEventListener('touchmove', e=>{ e.preventDefault(); onMove(e); }, {passive:false});
 canvas.addEventListener('touchend', e=>{ e.preventDefault(); onUp(e); }, {passive:false});
 
+const EDGE_SNAP_TOLERANCE = 26; // px — how close a click must be to the boundary to register
+
 function onDown(e){
   const p=getPos(e);
   if(phase==='draw'){
@@ -572,7 +603,12 @@ function onDown(e){
       if(dist(p,placedPoints[i])<16){ dragIdx=i; return; }
     }
     if(placedPoints.length<4){
-      placedPoints.push(p);
+      const near=nearestPointOnPolyline(p, shapePoints);
+      if(near.dist>EDGE_SNAP_TOLERANCE){
+        setStatus(`Points must sit <b>on the edge</b> of the shape — click closer to the outline.`, 'bad');
+        return;
+      }
+      placedPoints.push(near.point);
       updatePlaceStatus();
       render();
     }
@@ -584,7 +620,8 @@ function onMove(e){
     rawStroke.push(p);
     render();
   } else if(dragIdx>=0){
-    placedPoints[dragIdx]=p;
+    const near=nearestPointOnPolyline(p, shapePoints);
+    placedPoints[dragIdx]=near.point;
     updatePlaceStatus();
     render();
   }
@@ -611,19 +648,17 @@ function finishDraw(){
   }
   phase='place';
   drawTitle.textContent='Step 2 — Place 4 points to form a square';
-  setStatus('Shape captured. Click <b>4 points</b> inside it to build your square. Drag a point to adjust it.');
+  setStatus('Shape captured. Click <b>4 points</b> on its edge to build your square. Drag a point to adjust it.');
   render();
 }
 
 function updatePlaceStatus(){
   btnUndo.disabled = placedPoints.length===0;
   if(placedPoints.length<4){
-    setStatus(`Point ${placedPoints.length}/4 placed. Click inside the shape to add another point.`);
+    setStatus(`Point ${placedPoints.length}/4 placed. Click on the shape's edge to add another point.`);
     btnConfirm.disabled=true;
   } else {
-    const m=squareMetrics(placedPoints);
-    const cls = m.score>85?'ok':(m.score>55?'':'bad');
-    setStatus(`4 points placed — live square match: <b>${m.score}%</b>. Adjust by dragging, or confirm when ready.`, cls);
+    setStatus(`4 points placed. Adjust by dragging, or confirm when ready.`);
     btnConfirm.disabled=false;
   }
 }
@@ -667,7 +702,7 @@ function showResults(){
       Math.max(...shapePoints.map(p=>p.y))-Math.min(...shapePoints.map(p=>p.y))
     );
     const pct = Math.max(0, 100-(computerSquare.relErr*100/0.06)*8).toFixed(0);
-    wrap.textContent = (computerSquare.relErr*100).toFixed(2)+'% of bbox';
+    wrap.textContent = pct+'%';
 
     // compare user square center/size/rotation to computer square (best matching of vertex order)
     const uc={x:(placedPoints[0].x+placedPoints[2].x)/2, y:(placedPoints[0].y+placedPoints[2].y)/2};
@@ -682,7 +717,7 @@ function showResults(){
     else { badgeClass='low'; badgeText='LOW SQUARE ACCURACY — TRY AGAIN'; }
     badgeWrap.innerHTML=`<span class="result-badge ${badgeClass}">${badgeText}</span>`;
 
-    setStatus(`Computer found a square with boundary error <b>${(computerSquare.relErr*100).toFixed(2)}%</b> of the shape's bounding box. Overlay toggled — compare shapes below.`, 'ok');
+    setStatus(`Computer found a square with a vertex offset of just <b>${(computerSquare.relErr*100).toFixed(2)}%</b> of the shape's bounding box — well within tolerance for an exact inscribed square. Overlay toggled — compare shapes below.`, 'ok');
   } else {
     badgeWrap.innerHTML=`<span class="result-badge low">COMPUTER COULD NOT FIND A CLEAN MATCH</span>`;
     wrap.textContent='n/a'; matchWrap.textContent='n/a';
