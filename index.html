@@ -73,7 +73,30 @@
   });
 })();
 </script>
-
+<script>
+(function(){
+  var FLUENT_BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/';
+  var MAP = {
+    '🚇': 'Metro/3D/metro_3d.png',
+    '💾': 'Floppy disk/3D/floppy_disk_3d.png',
+    '🔐': 'Locked with key/3D/locked_with_key_3d.png',
+    '🐱': 'Cat face/3D/cat_face_3d.png'
+  };
+  document.querySelectorAll('.project-icon').forEach(function(el){
+    var char = el.textContent.trim();
+    var path = MAP[char];
+    if(!path) return;
+    var img = document.createElement('img');
+    img.src = FLUENT_BASE + encodeURI(path);
+    img.alt = '';
+    img.loading = 'lazy';
+    img.style.width = '40px';
+    img.style.height = '40px';
+    el.textContent = '';
+    el.appendChild(img);
+  });
+})();
+</script>
 
 <script>
   setTimeout(function() {
