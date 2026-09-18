@@ -126,18 +126,6 @@ h1 span{color:var(--red);}
 .project-icon{
   font-size:26px;
   line-height:1;
-}.project-icon {
-  font-size: 26px;
-  line-height: 1;
-  display: inline-flex;  /* Keeps the block aligned with normal text flow */
-  align-items: center;
-  justify-content: center;
-}
-
-.project-icon svg {
-  width: 1em;           /* Ties the SVG dimensions directly to your 26px font-size */
-  height: 1em;
-  vertical-align: middle;
 }
 
 .project-name{
