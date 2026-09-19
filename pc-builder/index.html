@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PC Builder | ilan.bloxxer.dev</title>
+<meta name="description" content="Pick parts, check compatibility and total the price. Part data is a snapshot, not live listings.">
+<meta name="theme-color" content="#0a0a0f">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-B11HJYVGYN"></script>
+<script src="/gtag.js"></script>
+<script src="https://ilan.bloxxer.dev/global/redirect.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00ff88; --red:#ff4466; --yellow:#ffcc00;
+  --bg:#0a0a0f; --bg2:#0f0f1a; --bg3:#14141f;
+  --border:#00ff8818; --border2:#00ff8840;
+  --text-dim:#00ff8855; --text-mid:#00ff8899;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+html.cur,html.cur *,html.cur *::before,html.cur *::after{cursor:none!important}
+body{background:var(--bg);color:var(--green);font:14px/1.6 'Share Tech Mono',monospace;min-height:100vh}
+body::before{content:'';pointer-events:none;position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,255,136,.012) 3px,rgba(0,255,136,.012) 4px);z-index:9000}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit}
+
+/* custom cursor */
+#cursor-outer,#cursor-inner{position:fixed;top:0;left:0;pointer-events:none;z-index:99999;display:none;opacity:0}
+html.cur #cursor-outer,html.cur #cursor-inner{display:block}
+body.on #cursor-outer,body.on #cursor-inner{opacity:1}
+#cursor-outer{width:32px;height:32px;border:1px solid rgba(0,255,136,.5);border-radius:50%;transition:width .2s,height .2s,border-color .2s,background .2s}
+#cursor-inner{width:5px;height:5px;background:var(--green);border-radius:50%;transition:width .15s,height .15s,background .15s}
+body.ch #cursor-outer{width:44px;height:44px;border-color:rgba(0,255,136,.8);background:rgba(0,255,136,.06)}
+body.ch #cursor-inner{width:6px;height:6px;background:#00ffaa}
+body.ct #cursor-outer{width:3px;height:28px;border-radius:2px;border-color:rgba(0,255,136,.7);opacity:1}
+body.ct #cursor-inner{opacity:0}
+
+/* nav */
+nav{position:sticky;top:0;z-index:100;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;
+  background:var(--bg);border-bottom:1px solid var(--border2)}
+.logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;letter-spacing:3px;text-decoration:none}
+.logo span{color:var(--red)}
+.nav-links{display:flex}
+.nav-links a{font-size:11px;letter-spacing:2px;color:var(--text-mid);padding:0 18px;height:56px;display:flex;align-items:center;
+  border-left:1px solid var(--border);text-decoration:none;transition:color .15s,background .15s}
+.nav-links a:hover,.nav-links a.active{color:var(--green);background:rgba(0,255,136,.05)}
+@media(max-width:600px){nav{padding:0 16px}.logo{font-size:15px}.nav-links a{padding:0 10px;font-size:9px}.hero h1{font-size:28px}}
+
+/* hero */
+.hero{text-align:center;padding:60px 24px 44px;border-bottom:1px solid var(--border)}
+.badge{display:inline-block;background:rgba(255,68,102,.12);border:1px solid var(--red);color:var(--red);font-size:10px;letter-spacing:3px;padding:4px 14px;margin-bottom:22px}
+.hero h1{font-family:'Orbitron',monospace;font-size:46px;font-weight:900;line-height:1.1;margin-bottom:14px;letter-spacing:0}
+.hero h1 span{color:var(--red)}
+.hero .intro{font-size:13px;color:var(--text-mid);max-width:560px;margin:0 auto;line-height:1.7}
+
+main{max-width:1180px;margin:0 auto;padding:40px 24px 0}
+h2{font-family:'Orbitron',monospace;font-weight:700;font-size:11px;letter-spacing:2px;margin-bottom:16px}
+h2::before{content:'// ';color:var(--text-dim)}
+
+.settings{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;margin-top:0;padding:12px 16px;
+  background:var(--bg2);border:1px solid var(--border2)}
+.settings label{display:flex;align-items:center;gap:8px;color:var(--text-mid)}
+.settings input[type=number]{width:84px}
+input[type=text],input[type=search],input[type=number],select{background:var(--bg3);border:1px solid var(--border2);padding:6px 10px;color:var(--green);border-radius:0}
+input::placeholder{color:var(--text-mid)}
+select option{background:var(--bg3)}
+input[type=checkbox]{accent-color:var(--green);width:15px;height:15px}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;margin-top:28px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+/* build table */
+.slot{display:grid;grid-template-columns:130px minmax(0,1fr);gap:6px 16px;padding:14px 16px;
+  background:var(--bg2);border:1px solid var(--border);margin-bottom:-1px}
+.slot>.lab{color:var(--text-mid);padding-top:2px}
+@media (max-width:600px){.slot{grid-template-columns:minmax(0,1fr)}}
+.part{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 16px;padding:6px 0}
+.part+.part{border-top:1px solid var(--border)}
+.part .nm{overflow-wrap:anywhere}
+.part .sp{grid-column:1;color:var(--text-mid);font-size:13px}
+.part .pr{grid-row:1;grid-column:2;text-align:right;white-space:nowrap}
+.part .act{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;margin-top:2px}
+.lnk{background:none;border:0;padding:0;color:var(--text-mid);text-decoration:underline;text-underline-offset:3px}
+.lnk:hover{color:var(--green)}
+.btn{background:transparent;border:1px solid var(--green);padding:10px 18px;color:var(--green);font-size:11px;letter-spacing:2px;text-transform:uppercase;transition:background .15s,transform .1s}
+.btn:hover{background:rgba(0,255,136,.1)}
+.btn:active{transform:scale(.98)}
+.btn.add{margin-top:4px;padding:6px 14px}
+.btn-primary{background:var(--green);color:var(--bg);font-family:'Orbitron',monospace;font-weight:700}
+.btn-primary:hover{background:#00ffaa}
+
+aside{position:sticky;top:80px}
+@media (max-width:900px){aside{position:static}}
+.panel{background:var(--bg2);border:1px solid var(--border2);padding:20px}
+.panel+.panel{margin-top:16px}
+.total{font-family:'Orbitron',monospace;font-weight:900;font-size:34px;line-height:1.1;letter-spacing:.02em}
+.sub{color:var(--text-mid);font-size:13px;margin-top:6px}
+.checks{list-style:none;display:grid;gap:8px;font-size:14px}
+.checks li{display:grid;grid-template-columns:5.2ch minmax(0,1fr);gap:8px}
+.checks .ok{color:var(--green)} .checks .warn{color:var(--yellow)} .checks .err{color:var(--red)}
+.checks span+span,.checks .txt{color:var(--green)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+#status{min-height:1.5em;margin-top:12px;color:var(--text-mid);font-size:13px}
+details{margin-top:24px;color:var(--text-mid);font-size:13px;max-width:70ch}
+summary{cursor:pointer;color:var(--green)}
+details ul{margin:8px 0 0 18px}
+footer{border-top:1px solid var(--border);padding:32px 40px;margin-top:80px;text-align:center;font-size:10px;color:var(--text-dim);line-height:2.2}
+.blink{animation:blink 1.2s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.slot:hover{border-color:var(--border2)}
+
+/* picker */
+.ov{position:fixed;inset:0;z-index:500;background:rgba(10,10,15,.94);display:none;justify-content:center;align-items:flex-start;padding:5vh 16px}
+.ov.open{display:flex}
+.sheet{width:min(860px,100%);max-height:90vh;display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border2)}
+.sheet header{padding:16px;border-bottom:1px solid var(--border2);display:grid;gap:12px}
+.sheet .row1{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sheet .row2{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.sheet .row2 input[type=search]{flex:1 1 220px;min-width:0}
+.sheet .row2 label{display:flex;align-items:center;gap:8px;color:var(--text-mid)}
+#pcount{color:var(--text-mid);font-size:13px}
+#plist{overflow:auto;flex:1}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 16px;width:100%;text-align:left;
+  background:transparent;border:0;border-bottom:1px solid var(--border);padding:10px 16px;color:var(--green)}
+.prow:hover{background:var(--bg3)}
+.prow .nm{overflow-wrap:anywhere}
+.prow .sp{grid-column:1;color:var(--text-mid);font-size:13px}
+.prow .pr{grid-row:1;grid-column:2;white-space:nowrap}
+.prow .bad{color:var(--red)}
+.empty{padding:24px 16px;color:var(--text-mid)}
+.more{display:block;margin:12px auto}
+
+@media (prefers-reduced-motion:reduce){#cursor-outer,#cursor-inner{transition:none}}
+</style>
+</head>
+<body>
+<div id="cursor-outer"></div><div id="cursor-inner"></div>
+
+<nav>
+  <a class="logo" href="https://ilan.bloxxer.dev">PC<span>-BUILDER</span></a>
+  <div class="nav-links">
+    <a href="https://ilan.bloxxer.dev/index.html">HOME</a>
+    <a class="active" href="/pc-builder/index.html">PC-BUILDER</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="badge">PC PART PICKER</div>
+  <h1>Build Your <span>Rig.</span></h1>
+  <p class="intro">Choose a part for each slot, see what clashes, and get a running total. Prices come from a scraped snapshot, so treat them as a guide and check live listings before you buy.</p>
+</div>
+
+<main>
+
+  <div class="settings">
+    <label>Currency
+      <select id="cur"><option value="GBP">GBP</option><option value="USD">USD</option></select>
+    </label>
+    <label id="rateWrap">USD to GBP rate
+      <input id="rate" type="number" min="0.1" max="2" step="0.01" value="0.75">
+    </label>
+    <label id="vatWrap"><input id="vat" type="checkbox"> Add 20% UK VAT</label>
+  </div>
+
+  <div class="layout">
+    <section aria-label="Your build"><div id="slots"></div></section>
+    <aside>
+      <div class="panel">
+        <h2>Build total</h2>
+        <div class="total" id="total">-</div>
+        <p class="sub" id="totalSub"></p>
+      </div>
+      <div class="panel">
+        <h2>Compatibility</h2>
+        <ul class="checks" id="checks"></ul>
+        <p class="sub" id="power"></p>
+      </div>
+      <div class="btns">
+        <button class="btn btn-primary" data-a="copylist">Copy parts list</button>
+        <button class="btn" data-a="copylink">Copy share link</button>
+        <button class="btn" data-a="clear">Clear build</button>
+      </div>
+      <div id="status" role="status" aria-live="polite"></div>
+    </aside>
+  </div>
+
+  <details>
+    <summary>What the checks cover</summary>
+    <ul>
+      <li>Checked: CPU and motherboard socket, memory generation, memory slots and maximum capacity, motherboard size against case size, and PSU wattage against a rough draw estimate.</li>
+      <li>Not checked: cooler socket support, graphics card length against the case, M.2 and SATA port counts, PSU cables, BIOS support for newer CPUs.</li>
+      <li>CPU sockets, memory generation for some boards and graphics card power are worked out from names and model families, because the source data does not list them. Boards sold in both DDR4 and DDR5 versions are flagged so you can confirm.</li>
+      <li>The power estimate is CPU TDP plus graphics card board power plus 100 W for everything else. Use it as a floor.</li>
+    </ul>
+  </details>
+
+  </main>
+
+<footer>
+  Part data: docyx/pc-part-dataset (MIT licence), scraped from PCPartPicker. Prices are USD snapshots.<br>
+  Independent project, not affiliated with PCPartPicker. Shop links are plain searches, not affiliate links.<br>
+  PC-BUILDER &nbsp;|&nbsp; ILAN.BLOXXER.DEV &nbsp;|&nbsp; <span class="blink">_</span>
+</footer>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="sheet">
+    <header>
+      <div class="row1">
+        <h2 id="pTitle" style="margin:0">Choose a part</h2>
+        <button class="btn" data-a="close">Close</button>
+      </div>
+      <div class="row2">
+        <input id="pq" type="search" placeholder="Search name or spec" aria-label="Search parts" autocomplete="off">
+        <select id="psort" aria-label="Sort parts">
+          <option value="asc">Price, low to high</option>
+          <option value="desc">Price, high to low</option>
+          <option value="name">Name</option>
+        </select>
+        <label><input id="pcompat" type="checkbox" checked> Compatible only</label>
+      </div>
+      <div id="pcount" aria-live="polite"></div>
+    </header>
+    <div id="plist"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var DATA_URL = '/pc-builder/parts.json';
+var CATS = [
+  {id:'cpu',label:'CPU'},
+  {id:'cooler',label:'CPU cooler'},
+  {id:'mobo',label:'Motherboard'},
+  {id:'ram',label:'Memory'},
+  {id:'storage',label:'Storage',multi:true},
+  {id:'gpu',label:'Video card'},
+  {id:'case',label:'Case'},
+  {id:'psu',label:'Power supply'}
+];
+var DATA = null, META = null;
+var S = {b:{cpu:null,cooler:null,mobo:null,ram:null,storage:[],gpu:null,'case':null,psu:null},cur:'GBP',rate:0.75,vat:false};
+var P = {cat:null,q:'',sort:'asc',compat:true,shown:50,trigger:null};
+var STORE_KEY = 'pcb.v1', SAVED_V = null;
+
+var $ = function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function say(t){$('#status').textContent = t}
+
+/* ---------- money ---------- */
+function mult(){return S.cur==='GBP' ? S.rate*(S.vat?1.2:1) : 1}
+function money(usd){
+  return new Intl.NumberFormat('en-GB',{style:'currency',currency:S.cur}).format(usd*mult());
+}
+
+/* ---------- spec text ---------- */
+function rng(v){return Array.isArray(v)?v.join('-'):v}
+function join(a){return a.filter(function(x){return x!=='' && x!=null && x!==false}).join('  ')}
+var SPEC = {
+  cpu:function(p){return join([p.cores?p.cores+' cores':'', p.base&&p.boost?p.base+'-'+p.boost+' GHz':(p.base?p.base+' GHz':''), p.tdp?p.tdp+' W':'', p.sock||'socket unknown', p.igpu?'iGPU':''])},
+  cooler:function(p){return join([p.rpm?rng(p.rpm)+' RPM':'', p.noise?rng(p.noise)+' dB':'', p.size?p.size+' mm':''])||'No specs listed'},
+  mobo:function(p){return join([p.sock||'socket unknown', p.ff, p.slots?p.slots+' RAM slots':'', p.maxmem?'max '+p.maxmem+' GB':'', p.ddr?'DDR'+p.ddr.join('/'):''])},
+  ram:function(p){return join(['DDR'+p.ddr+'-'+p.mhz, p.kit+' x '+p.gb+' GB', p.cas?'CL'+p.cas:''])},
+  storage:function(p){return join([p.cap?(p.cap>=1000?(p.cap/1000)+' TB':p.cap+' GB'):'', p.kind, p.ff&&p.ff!=='null'?p.ff:'', p.iface])},
+  gpu:function(p){return join([p.chip, p.vram?p.vram+' GB':'', p.len?p.len+' mm long':'', p.tbp?p.tbp+' W':''])},
+  'case':function(p){return join([p.type, p.panel])},
+  psu:function(p){return join([p.w?p.w+' W':'', p.eff?(p.eff==='plus'?'80+':'80+ '+p.eff):'', p.mod==='False'?'non-modular':(p.mod?(/Full/.test(p.mod)?'fully modular':String(p.mod).toLowerCase()+'-modular'):''), p.type])}
+};
+function searchQ(cat,p){
+  if(cat==='gpu' && p.chip && p.n.toLowerCase().indexOf(p.chip.toLowerCase())<0) return p.n+' '+p.chip;
+  if(cat==='ram') return p.n+' DDR'+p.ddr;
+  return p.n;
+}
+
+/* ---------- state helpers ---------- */
+function get(id){var i=S.b[id]; return (i==null||!DATA)?null:DATA[id][i]}
+function chosen(){
+  var out=[];
+  CATS.forEach(function(c){
+    if(c.multi){S.b.storage.forEach(function(i){out.push({cat:c.id,p:DATA[c.id][i]})})}
+    else {var p=get(c.id); if(p) out.push({cat:c.id,p:p})}
+  });
+  return out;
+}
+function draw(){
+  var cpu=get('cpu'), gpu=get('gpu');
+  if(!cpu && !gpu) return null;
+  var w=100, assumed=false;
+  if(cpu){ if(cpu.tdp) w+=cpu.tdp; else {w+=95; assumed=true} }
+  if(gpu){ if(gpu.tbp) w+=gpu.tbp; else {w+=200; assumed=true} }
+  return {w:w,assumed:assumed};
+}
+
+/* ---------- compatibility ---------- */
+function isCompat(cat,p){
+  var cpu=get('cpu'), mb=get('mobo'), ram=get('ram'), cs=get('case');
+  switch(cat){
+    case 'cpu': return !(mb && mb.sock && p.sock && mb.sock!==p.sock);
+    case 'mobo':
+      if(cpu && cpu.sock && p.sock && cpu.sock!==p.sock) return false;
+      if(cs && cs.ffr && p.ffr && p.ffr>cs.ffr) return false;
+      if(ram){
+        if(p.ddr && p.ddr.indexOf(ram.ddr)<0) return false;
+        if(p.slots && ram.kit>p.slots) return false;
+        if(p.maxmem && ram.kit*ram.gb>p.maxmem) return false;
+      }
+      return true;
+    case 'ram':
+      if(!mb) return true;
+      if(mb.ddr && mb.ddr.indexOf(p.ddr)<0) return false;
+      if(mb.slots && p.kit>mb.slots) return false;
+      if(mb.maxmem && p.kit*p.gb>mb.maxmem) return false;
+      return true;
+    case 'case': return !(mb && mb.ffr && p.ffr && mb.ffr>p.ffr);
+    case 'psu': var d=draw(); return !d || !p.w || p.w>=d.w;
+    default: return true;
+  }
+}
+function checks(){
+  var out=[], cpu=get('cpu'), mb=get('mobo'), ram=get('ram'), cs=get('case'), gpu=get('gpu'), psu=get('psu');
+  function add(l,t){out.push({l:l,t:t})}
+  if(cpu && mb){
+    if(cpu.sock && mb.sock){
+      if(cpu.sock===mb.sock) add('ok','CPU and board both use '+mb.sock+'.');
+      else add('err','The CPU is '+cpu.sock+' but the board is '+mb.sock+'.');
+    } else add('warn','Socket is missing for this CPU or board. Check the maker specs.');
+  }
+  if(ram && mb){
+    if(mb.ddr){
+      if(mb.ddr.indexOf(ram.ddr)<0) add('err','The board takes DDR'+mb.ddr.join('/')+' but the kit is DDR'+ram.ddr+'.');
+      else if(mb.ddr.length>1) add('warn','This board name exists in DDR4 and DDR5 versions. Confirm yours takes DDR'+ram.ddr+'.');
+      else add('ok','DDR'+ram.ddr+' memory suits this board.');
+    } else add('warn','Memory type for this board is not in the data.');
+    if(mb.slots && ram.kit>mb.slots) add('err','The kit has '+ram.kit+' modules but the board has '+mb.slots+' slots.');
+    if(mb.maxmem && ram.kit*ram.gb>mb.maxmem) add('err','The kit is '+(ram.kit*ram.gb)+' GB but the board tops out at '+mb.maxmem+' GB.');
+  }
+  if(mb && cs){
+    if(mb.ffr && cs.ffr){
+      if(mb.ffr>cs.ffr) add('err','A '+mb.ff+' board will not fit a '+cs.type+' case.');
+      else add('ok',mb.ff+' board fits this case.');
+    } else add('warn','Board or case size is not in the data. Check the case specs.');
+  }
+  if(cpu && !gpu && !cpu.igpu) add('warn','This CPU lists no integrated graphics. Add a video card to get a display.');
+  var d=draw();
+  if(psu && d && psu.w){
+    if(psu.w<d.w) add('err',psu.w+' W is below the estimated '+d.w+' W draw.');
+    else if(psu.w<d.w*1.25) add('warn',psu.w+' W leaves under 25% headroom over the estimated '+d.w+' W.');
+    else add('ok',psu.w+' W covers the estimated '+d.w+' W draw.');
+  }
+  return out;
+}
+
+/* ---------- render build ---------- */
+function links(cat,p){
+  var q=encodeURIComponent(searchQ(cat,p));
+  return '<a class="lnk" target="_blank" rel="noopener" href="https://www.ebay.co.uk/sch/i.html?_nkw='+q+'">eBay UK</a>'+
+         '<a class="lnk" target="_blank" rel="noopener" href="https://www.amazon.co.uk/s?k='+q+'">Amazon UK</a>';
+}
+function partHTML(cat,p,pos){
+  var change = cat==='storage' ? '' : '<button class="lnk" data-a="change" data-cat="'+cat+'">Change</button>';
+  return '<div class="part">'+
+    '<div class="nm">'+esc(p.n)+'</div>'+
+    '<div class="pr">'+money(p.p)+'</div>'+
+    '<div class="sp">'+esc(SPEC[cat](p))+'</div>'+
+    '<div class="act">'+change+'<button class="lnk" data-a="remove" data-cat="'+cat+'" data-pos="'+pos+'">Remove</button>'+links(cat,p)+'</div>'+
+  '</div>';
+}
+function renderSlots(){
+  var h='';
+  CATS.forEach(function(c){
+    var body='';
+    if(c.multi){
+      S.b.storage.forEach(function(i,pos){body+=partHTML(c.id,DATA[c.id][i],pos)});
+      if(S.b.storage.length<6) body+='<button class="btn add" data-a="choose" data-cat="'+c.id+'">'+(S.b.storage.length?'Add another drive':'Choose storage')+'</button>';
+    } else {
+      var p=get(c.id);
+      body = p ? partHTML(c.id,p,0) : '<button class="btn add" data-a="choose" data-cat="'+c.id+'">Choose '+c.label.toLowerCase().replace('cpu','CPU')+'</button>';
+    }
+    h+='<div class="slot"><div class="lab">'+c.label+'</div><div>'+body+'</div></div>';
+  });
+  $('#slots').innerHTML=h;
+}
+function renderSummary(){
+  var items=chosen(), sum=items.reduce(function(a,x){return a+x.p.p},0);
+  $('#total').textContent = items.length ? money(sum) : money(0);
+  $('#totalSub').textContent = items.length+' part'+(items.length===1?'':'s')+' chosen. Snapshot prices'+(S.cur==='GBP'?', converted at '+S.rate+(S.vat?' plus VAT':''):'')+'.';
+  var c=checks(), tag={ok:'[ok]',warn:'[!]',err:'[x]'};
+  $('#checks').innerHTML = c.length
+    ? c.map(function(x){return '<li><span class="'+x.l+'">'+tag[x.l]+'</span><span class="txt">'+esc(x.t)+'</span></li>'}).join('')
+    : '<li><span class="warn">[-]</span><span class="txt">Pick a CPU, motherboard, memory or case to start checking.</span></li>';
+  var d=draw();
+  $('#power').textContent = d ? 'Estimated draw about '+d.w+' W'+(d.assumed?' (includes an assumed figure for a part with no power data)':'')+'.' : '';
+}
+function saveState(){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify({v:META&&META.built,b:S.b,cur:S.cur,rate:S.rate,vat:S.vat}))}catch(e){}
+}
+function renderAll(){renderSlots();renderSummary();saveState()}
+
+/* ---------- picker ---------- */
+function candidates(){
+  var q=P.q.toLowerCase().split(/\s+/).filter(Boolean), arr=[];
+  DATA[P.cat].forEach(function(p,i){
+    if(P.compat && !isCompat(P.cat,p)) return;
+    for(var k=0;k<q.length;k++){ if(p._s.indexOf(q[k])<0) return; }
+    arr.push(i);
+  });
+  var L=DATA[P.cat];
+  if(P.sort==='desc') arr.sort(function(a,b){return L[b].p-L[a].p});
+  else if(P.sort==='name') arr.sort(function(a,b){return L[a].n.localeCompare(L[b].n)});
+  return arr;
+}
+function renderList(){
+  var arr=candidates(), L=DATA[P.cat], shown=arr.slice(0,P.shown);
+  $('#pcount').textContent = arr.length+' part'+(arr.length===1?'':'s')+' match';
+  if(!arr.length){
+    $('#plist').innerHTML='<div class="empty">No parts match. Clear the search or turn off "Compatible only".</div>';
+    return;
+  }
+  var h=shown.map(function(i){
+    var p=L[i], bad = !P.compat && !isCompat(P.cat,p);
+    return '<button class="prow" data-a="pick" data-idx="'+i+'">'+
+      '<span class="nm">'+esc(p.n)+'</span><span class="pr">'+money(p.p)+'</span>'+
+      '<span class="sp">'+esc(SPEC[P.cat](p))+(bad?'  <span class="bad">[conflicts with your build]</span>':'')+'</span></button>';
+  }).join('');
+  if(arr.length>shown.length) h+='<button class="btn more" data-a="more">Show 50 more</button>';
+  $('#plist').innerHTML=h;
+}
+function openPicker(cat,trigger){
+  P={cat:cat,q:'',sort:'asc',compat:true,shown:50,trigger:trigger};
+  var c=CATS.filter(function(x){return x.id===cat})[0];
+  $('#pTitle').textContent='Choose '+c.label.toLowerCase().replace('cpu','CPU');
+  $('#pq').value=''; $('#psort').value='asc'; $('#pcompat').checked=true;
+  $('#ov').classList.add('open'); document.body.style.overflow='hidden';
+  renderList(); $('#pq').focus();
+}
+function closePicker(){
+  $('#ov').classList.remove('open'); document.body.style.overflow='';
+  if(P.trigger && document.contains(P.trigger)) P.trigger.focus();
+}
+function pick(idx){
+  if(P.cat==='storage') S.b.storage.push(idx); else S.b[P.cat]=idx;
+  closePicker(); renderAll();
+}
+
+/* ---------- share / export ---------- */
+function toHash(){
+  var a=[];
+  CATS.forEach(function(c){
+    if(c.multi){ if(S.b.storage.length) a.push('storage='+S.b.storage.join('.')) }
+    else if(S.b[c.id]!=null) a.push(c.id+'='+S.b[c.id]);
+  });
+  a.push('v='+META.built);
+  return '#'+a.join('&');
+}
+function fromHash(){
+  if(!location.hash || location.hash.length<2) return false;
+  var q=new URLSearchParams(location.hash.slice(1)), any=false;
+  CATS.forEach(function(c){
+    var v=q.get(c.id); if(v==null) return;
+    if(c.multi){
+      S.b.storage=v.split('.').map(Number).filter(function(n){return Number.isInteger(n)&&n>=0&&n<DATA.storage.length}).slice(0,6);
+      any=true;
+    } else {
+      var n=Number(v); if(Number.isInteger(n)&&n>=0&&n<DATA[c.id].length){S.b[c.id]=n; any=true}
+    }
+  });
+  if(any && q.get('v') && q.get('v')!==META.built) say('This link was made with an older data snapshot, so some parts may differ from what was shared.');
+  return any;
+}
+function copy(text,okMsg){
+  function fail(){say('Copy failed. Select the text manually or try again.')}
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){say(okMsg)},fail);
+  } else fail();
+}
+function listText(){
+  var items=chosen(), lines=items.map(function(x){
+    var c=CATS.filter(function(k){return k.id===x.cat})[0];
+    return c.label+': '+x.p.n+' - '+money(x.p.p);
+  });
+  var sum=items.reduce(function(a,x){return a+x.p.p},0);
+  lines.push('Total: '+money(sum)+' (snapshot prices)');
+  return lines.join('\n');
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-a]'); if(!el) return;
+  var a=el.getAttribute('data-a'), cat=el.getAttribute('data-cat');
+  if(a==='choose'||a==='change') openPicker(cat,el);
+  else if(a==='remove'){
+    if(cat==='storage') S.b.storage.splice(Number(el.getAttribute('data-pos')),1); else S.b[cat]=null;
+    renderAll();
+  }
+  else if(a==='pick') pick(Number(el.getAttribute('data-idx')));
+  else if(a==='more'){P.shown+=50; renderList()}
+  else if(a==='close') closePicker();
+  else if(a==='copylist'){ if(chosen().length) copy(listText(),'Parts list copied.'); else say('Nothing to copy yet.') }
+  else if(a==='copylink'){
+    if(!chosen().length){say('Choose a part first.');return}
+    var url=location.origin+location.pathname+toHash();
+    history.replaceState(null,'',url); copy(url,'Share link copied.');
+  }
+  else if(a==='clear'){
+    if(chosen().length && window.confirm('Clear every part from this build?')){
+      CATS.forEach(function(c){S.b[c.id]=c.multi?[]:null});
+      history.replaceState(null,'',location.pathname); renderAll(); say('Build cleared.');
+    }
+  }
+});
+$('#ov').addEventListener('click',function(e){ if(e.target===$('#ov')) closePicker() });
+$('#pq').addEventListener('input',function(){P.q=this.value;P.shown=50;renderList()});
+$('#psort').addEventListener('change',function(){P.sort=this.value;renderList()});
+$('#pcompat').addEventListener('change',function(){P.compat=this.checked;P.shown=50;renderList()});
+document.addEventListener('keydown',function(e){
+  var open=$('#ov').classList.contains('open'); if(!open) return;
+  if(e.key==='Escape'){closePicker();return}
+  if(e.key==='Tab'){
+    var f=[].slice.call($('#ov').querySelectorAll('button,input,select')).filter(function(x){return !x.disabled});
+    if(!f.length) return;
+    var first=f[0], last=f[f.length-1];
+    if(e.shiftKey && document.activeElement===first){e.preventDefault();last.focus()}
+    else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first.focus()}
+  }
+});
+
+/* settings */
+function syncSettings(){
+  $('#cur').value=S.cur; $('#rate').value=S.rate; $('#vat').checked=S.vat;
+  var gbp=S.cur==='GBP'; $('#rateWrap').style.display=gbp?'':'none'; $('#vatWrap').style.display=gbp?'':'none';
+}
+$('#cur').addEventListener('change',function(){S.cur=this.value;syncSettings();renderAll();if($('#ov').classList.contains('open'))renderList()});
+$('#rate').addEventListener('input',function(){var v=parseFloat(this.value); if(v>0&&v<=2){S.rate=v;renderAll();if($('#ov').classList.contains('open'))renderList()}});
+$('#vat').addEventListener('change',function(){S.vat=this.checked;renderAll();if($('#ov').classList.contains('open'))renderList()});
+
+/* ---------- cursor (matches site style) ---------- */
+(function(){
+  if(!window.matchMedia || !matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  document.documentElement.classList.add('cur');
+  var o=$('#cursor-outer'), i=$('#cursor-inner'), x=0,y=0,ox=0,oy=0;
+  var k = matchMedia('(prefers-reduced-motion:reduce)').matches ? 1 : 0.18;
+  document.addEventListener('mousemove',function(e){
+    x=e.clientX;y=e.clientY; document.body.classList.add('on');
+    i.style.transform='translate('+x+'px,'+y+'px) translate(-50%,-50%)';
+  });
+  document.addEventListener('mouseover',function(e){
+    var t=e.target; if(!t.closest) return;
+    document.body.classList.toggle('ch',!!t.closest('a,button,select,label,summary,.prow'));
+    document.body.classList.toggle('ct',!!t.closest('input[type=search],input[type=text],input[type=number]'));
+  });
+  (function loop(){
+    ox+=(x-ox)*k; oy+=(y-oy)*k;
+    o.style.transform='translate('+ox+'px,'+oy+'px) translate(-50%,-50%)';
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ---------- boot ---------- */
+try{
+  var saved=JSON.parse(localStorage.getItem(STORE_KEY)||'null');
+  if(saved){
+    if(saved.cur==='GBP'||saved.cur==='USD') S.cur=saved.cur;
+    if(saved.rate>0&&saved.rate<=2) S.rate=saved.rate;
+    S.vat=!!saved.vat;
+    if(saved.b) S.b=Object.assign(S.b,saved.b);
+    SAVED_V=saved.v;
+  }
+}catch(e){}
+syncSettings();
+$('#slots').innerHTML='<div class="empty">Loading parts...</div>';
+
+fetch(DATA_URL).then(function(r){
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}).then(function(d){
+  DATA=d; META=d.meta;
+  if(SAVED_V!==META.built) S.b={cpu:null,cooler:null,mobo:null,ram:null,storage:[],gpu:null,'case':null,psu:null};
+  CATS.forEach(function(c){
+    DATA[c.id].forEach(function(p){p._s=(p.n+' '+SPEC[c.id](p)).toLowerCase()});
+    // drop saved indices that no longer exist in this snapshot
+    if(c.multi) S.b.storage=(S.b.storage||[]).filter(function(i){return Number.isInteger(i)&&DATA[c.id][i]}).slice(0,6);
+    else if(!(Number.isInteger(S.b[c.id])&&DATA[c.id][S.b[c.id]])) S.b[c.id]=null;
+  });
+  fromHash();
+  renderAll();
+}).catch(function(){
+  $('#slots').innerHTML='<div class="empty">Could not load '+esc(DATA_URL)+'. Check the file is deployed next to this page.</div>';
+});
+})();
+</script>
+</body>
+</html>
