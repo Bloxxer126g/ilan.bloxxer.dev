@@ -1,193 +1,163 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Suburani Book 1 · Vocab Checker</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Suburani · Vocabulary</title>
 <style>
-:root{--bg:#fbf3ea;--card:#fffaf4;--ink:#3b2a22;--mute:#8a6f60;--t:#c2603e;--td:#a24b2d;--tl:#f3d9cb;--line:#e8d3c3;--ok:#5d8a4a;--bad:#b23a2e}
+:root{--ink:#0b1220;--t:#1463ff;--td:#0b3fb8;--dim:#5b6b82;--line:#c5d0df;--panel:#f8fafc}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
-#app{max-width:640px;margin:0 auto;padding:28px 18px 60px}
-h1{font:700 28px Georgia,serif;color:var(--td);margin:0 0 2px}
-.sub{color:var(--mute);margin:0 0 22px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
-h2{font:600 13px system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+body{margin:0;color:var(--ink);background:#e6ebf2;background-image:linear-gradient(#d6dee9 1px,transparent 1px),linear-gradient(90deg,#d6dee9 1px,transparent 1px);background-size:26px 26px;font:15px/1.55 ui-monospace,"JetBrains Mono","Cascadia Code",Consolas,Menlo,monospace}
+#win{max-width:660px;margin:26px auto;border:1px solid var(--ink);background:var(--panel);box-shadow:8px 8px 0 rgba(11,18,32,.14)}
+.tb{display:flex;justify-content:space-between;background:var(--ink);color:#e6ebf2;padding:6px 12px;font-size:12px;letter-spacing:.08em}
+#app{padding:22px 24px 30px}
+@media(max-width:700px){#win{margin:0;box-shadow:none;border-width:0 0 1px}#app{padding:18px 14px 26px}}
+h1{margin:0;font-size:34px;letter-spacing:.14em;font-weight:700}
+.cur{color:var(--t);animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+.lead{margin:2px 0 8px;color:var(--t)}
+h2{font-size:13px;font-weight:400;color:var(--dim);margin:26px 0 10px;padding-bottom:5px;border-bottom:1px dashed var(--line);letter-spacing:.1em}
+h2 i{font-style:normal;color:var(--t);margin-right:10px}
 .row{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit}
-.chip.on{background:var(--t);border-color:var(--t);color:#fff}
-.chip:hover{border-color:var(--t)}
-button.main{background:var(--t);color:#fff;border:0;border-radius:12px;padding:14px 20px;font:600 17px inherit;cursor:pointer;width:100%}
-button.main:hover{background:var(--td)}
-button.main:disabled{background:#d9c3b6;cursor:not-allowed}
-button.ghost{background:none;border:1.5px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 18px;font:inherit;cursor:pointer}
-button.ghost:hover{border-color:var(--t)}
-.small{font-size:14px;color:var(--mute)}
-a.link,.link{color:var(--td);cursor:pointer;text-decoration:underline;background:none;border:0;font:inherit;padding:0}
-input[type=number]{width:70px;padding:8px;border:1.5px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
-.picklist{max-height:260px;overflow:auto;margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
-.picklist label{display:flex;gap:8px;padding:4px 0;cursor:pointer}
-.picklist b{font-family:Georgia,serif}
-.chh{font-weight:600;color:var(--td);margin:8px 0 2px}
-.q{text-align:center;padding:30px 18px}
-.dir{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
-.word{font:700 38px Georgia,serif;margin:10px 0 22px;color:var(--ink);word-break:break-word}
-.opts{display:grid;gap:10px}
-.opt{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:13px 16px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
-.opt:hover:not(:disabled){border-color:var(--t);background:var(--tl)}
-.opt.ok{background:#e6f0df;border-color:var(--ok)}
-.opt.bad{background:#f7dcd8;border-color:var(--bad)}
-.ans{width:100%;padding:14px;font:20px Georgia,serif;border:1.5px solid var(--line);border-radius:12px;text-align:center;background:#fff;color:var(--ink)}
-.ans:focus{outline:2px solid var(--t);border-color:var(--t)}
-.fb{min-height:48px;margin:16px 0 10px;font-size:18px}
-.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
-.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:6px}
-.bar i{display:block;height:100%;background:var(--t)}
-.top{display:flex;justify-content:space-between;color:var(--mute);font-size:14px;margin-bottom:12px}
-.score{font:700 54px Georgia,serif;color:var(--td);text-align:center}
-.miss{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
-.miss b{font-family:Georgia,serif}
-.btns{display:grid;gap:10px;margin-top:14px}
-</style></head><body><div id="app"></div>
-<input type="file" id="files" accept=".json,application/json" multiple hidden>
+.seg,.sq,.opt1{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--ink);cursor:pointer}
+.seg{padding:6px 12px}
+.seg:hover,.sq:hover,.opt1:hover:not(:disabled){border-color:var(--t);color:var(--td);background:#e8f0ff}
+.on,.seg.on:hover,.sq.on:hover{background:var(--t);border-color:var(--t);color:#fff}
+.sq{width:58px;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25}
+.sq b{font-size:19px}.sq span{font-size:11px;opacity:.7}
+.small{font-size:13px;color:var(--dim);margin:10px 0 0}
+.link{background:none;border:0;padding:0;font:inherit;color:var(--td);text-decoration:underline;cursor:pointer}
+.c{text-align:center}.mono{letter-spacing:.02em}
+.q2{display:grid;grid-template-columns:78px 1fr;gap:6px 10px;align-items:center;margin-bottom:10px}
+.q2 label{color:var(--dim);font-size:13px}
+input[type=number]{width:62px;font:inherit;padding:4px;border:1px solid var(--ink);background:#fff;color:var(--ink)}
+input[type=checkbox]{accent-color:var(--t)}
+.pl{max-height:240px;overflow:auto;margin-top:10px;border:1px solid var(--line);padding:6px 12px;background:#fff}
+.pl label{display:flex;gap:8px;padding:3px 0;cursor:pointer}
+.pl .ch{font-size:12px;color:var(--t);margin-top:8px}
+.go{display:block;width:100%;margin-top:24px;background:var(--ink);color:#e6ebf2;border:1px solid var(--ink);padding:13px;font:inherit;font-weight:700;letter-spacing:.14em;cursor:pointer}
+.go:hover:not(:disabled){background:var(--t);border-color:var(--t);color:#fff}
+.go:disabled{opacity:.35;cursor:not-allowed}
+.go.alt{background:transparent;color:var(--ink)}.go.alt:hover:not(:disabled){background:#e8f0ff;color:var(--td);border-color:var(--t)}
+.top{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:14px}
+.card{border:1px solid var(--ink);background:#fff;text-align:center;padding-bottom:18px;position:relative}
+.card:before,.card:after{content:"";position:absolute;width:10px;height:10px;border:2px solid var(--t)}
+.card:before{left:-2px;bottom:-2px;border-width:0 0 2px 2px}.card:after{right:-2px;bottom:-2px;border-width:0 2px 2px 0}
+.band{text-align:left;padding:6px 12px;font-size:12px;letter-spacing:.12em;color:var(--t);border-bottom:1px dashed var(--line)}
+.word{font-size:36px;font-weight:700;line-height:1.25;margin:26px 14px 20px;word-break:break-word}
+.mean{font-size:20px;color:var(--td);margin:0 16px 8px;padding-top:16px;border-top:1px dashed var(--line)}
+.opts{display:grid;gap:8px;padding:0 18px}
+.opt1{padding:10px 14px;text-align:left}
+.opt1.ok{background:#dff5e8;border-color:#0f9d58;color:var(--ink)}.opt1.bad{background:#fde4e4;border-color:#d93025;color:var(--ink)}
+.ans{width:calc(100% - 36px);border:0;border-bottom:2px solid var(--ink);background:transparent;text-align:center;font:inherit;font-size:22px;padding:6px;color:var(--ink);caret-color:var(--t)}
+.ans:focus{outline:0;border-color:var(--t)}
+.fb{min-height:28px;margin:14px 18px 0;font-size:17px;font-weight:700}.fb.ok{color:#0f9d58}.fb.bad{color:#d93025}
+.big{font-size:64px;font-weight:700;text-align:center;color:var(--t);margin:14px 0 0;line-height:1}
+.miss{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.btns{display:grid;gap:10px;margin-top:20px}.btns .go{margin:0}
+</style></head><body><div id="win"><div id="app"></div></div>
 <script>
-const $=s=>document.querySelector(s), app=$('#app');
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const BUILTIN={"1":[{"latin":"dormiō","english":"I sleep"},{"latin":"ego","english":"I"},{"latin":"frāter","english":"brother"},{"latin":"hōra","english":"hour"},{"latin":"in","english":["in","on"]},{"latin":"īnsula","english":"block of flats"},{"latin":"labōrō","english":"I work"},{"latin":"legō","english":"I read"},{"latin":"meus","english":"my"},{"latin":"nōn","english":"not"},{"latin":"pater","english":"father"},{"latin":"rīdeō","english":["I laugh","I smile"]},{"latin":"servus","english":["slave","enslaved person (male)"]},{"latin":"tū","english":"you (singular)"},{"latin":"turba","english":"crowd"},{"latin":"ubi?","english":"where?"},{"latin":"via","english":["street","road","way"]},{"latin":"sum","english":"I am"},{"latin":"es","english":"you (singular) are"},{"latin":"est","english":["he is","she is","it is"]}],"2":[{"latin":"cadō","english":"I fall"},{"latin":"cibus, cibum, m.","english":"food"},{"latin":"dūcō","english":["I lead","I take"]},{"latin":"et","english":"and"},{"latin":"fīlia, fīliam, f.","english":"daughter"},{"latin":"fīlius, fīlium, m.","english":"son"},{"latin":"forum, forum, n.","english":["forum","marketplace"]},{"latin":"habeō","english":["I have","I hold"]},{"latin":"habitō","english":"I live"},{"latin":"intrō","english":"I enter"},{"latin":"magnus","english":["big","large","great"]},{"latin":"pecūnia, pecūniam, f.","english":["money","sum of money"]},{"latin":"quaerō","english":["I search for","I look for","I ask"]},{"latin":"quoque","english":["also","too"]},{"latin":"salūtō","english":"I greet"},{"latin":"sed","english":"but"},{"latin":"spectō","english":["I look at","I watch"]},{"latin":"videō","english":"I see"},{"latin":"vīnum, vīnum, n.","english":"wine"},{"latin":"vocō","english":"I call"}],"3":[{"latin":"ambulō","english":"I walk"},{"latin":"amīcus, amīcum, m.","english":"friend"},{"latin":"ancilla, ancillam, f.","english":["slave","enslaved person (female)"]},{"latin":"clāmō","english":"I shout"},{"latin":"clāmor, clāmōrem, m.","english":["shout","shouting","noise"]},{"latin":"cum","english":"with"},{"latin":"currō","english":"I run"},{"latin":"dīcō","english":["I say","I speak","I tell"]},{"latin":"equus, equum, m.","english":"horse"},{"latin":"festīnō","english":"I hurry"},{"latin":"gladius, gladium, m.","english":"sword"},{"latin":"īnfēlīx","english":["unlucky","unhappy"]},{"latin":"laetus","english":"happy"},{"latin":"multus","english":["much","many"]},{"latin":"omnis","english":["all","every"]},{"latin":"per","english":["through","along"]},{"latin":"prīmus","english":"first"},{"latin":"senātor, senātōrem, m.","english":"senator"},{"latin":"urbs, urbem, f.","english":"city"},{"latin":"vincō","english":["I conquer","I win","I am victorious"]}]};
-const RAW={};
-let data={}, S={chs:new Set(),sel:'all',n:10,picked:new Set(),dir:'l2e',mode:'mc',shuffle:true}, Q=null, status='Looking for Chap1.json, Chap2.json…';
-
-/* ---------- loading ---------- */
-function addWords(ch,json,keep){
-  if(keep)RAW[ch]=json;
-  const arr=Array.isArray(json)?json:(json.words||[]);
-  data[ch]=arr.filter(x=>x&&x.latin&&x.english).map((x,i)=>({id:ch+'-'+i,ch,latin:String(x.latin).trim(),en:[].concat(x.english).map(s=>String(s).trim())}));
-}
-async function autoLoad(){
-  for(const c in BUILTIN)addWords(+c,BUILTIN[c]);            // built-in Ch 1-3 so it works offline
-  try{const s=JSON.parse(localStorage.getItem('suburani')||'{}');for(const c in s){addWords(+c,s[c],true)}}catch(e){} // files you loaded before
-  await Promise.all(Array.from({length:30},(_,i)=>i+1).map(async n=>{      // Chap*.json beside the page (when hosted)
-    try{const r=await fetch(`Chap${n}.json`);if(r.ok)addWords(n,await r.json())}catch(e){}
-  }));
-  avail().forEach(c=>S.chs.add(c));
-  status=`Loaded chapters: ${avail().join(', ')}`;
-  render();
-}
-$('#files').onchange=async e=>{
-  for(const f of e.target.files){
-    const m=f.name.match(/(\d+)/); if(!m)continue;
-    try{addWords(+m[1],JSON.parse(await f.text()),true);S.chs.add(+m[1])}catch(err){alert(f.name+' is not valid JSON')}
-  }
-  try{localStorage.setItem('suburani',JSON.stringify(RAW))}catch(e){}
-  status=`Loaded chapters: ${avail().join(', ')}`; render();
-};
+const BUILTIN={"1":[{"latin":"dormiō","english":"I sleep"},{"latin":"ego","english":"I"},{"latin":"frāter","english":"brother"},{"latin":"hōra","english":"hour"},{"latin":"in","english":["in","on"]},{"latin":"īnsula","english":"block of flats"},{"latin":"labōrō","english":"I work"},{"latin":"legō","english":"I read"},{"latin":"meus","english":"my"},{"latin":"nōn","english":"not"},{"latin":"pater","english":"father"},{"latin":"rīdeō","english":["I laugh","I smile"]},{"latin":"servus","english":["slave","enslaved person (male)"]},{"latin":"tū","english":"you (singular)"},{"latin":"turba","english":"crowd"},{"latin":"ubi?","english":"where?"},{"latin":"via","english":["street","road","way"]},{"latin":"sum","english":"I am"},{"latin":"es","english":"you (singular) are"},{"latin":"est","english":["he is","she is","it is"]}],"2":[{"latin":"cadō","english":"I fall"},{"latin":"cibus, cibum, m.","english":"food"},{"latin":"dūcō","english":["I lead","I take"]},{"latin":"et","english":"and"},{"latin":"fīlia, fīliam, f.","english":"daughter"},{"latin":"fīlius, fīlium, m.","english":"son"},{"latin":"forum, forum, n.","english":["forum","marketplace"]},{"latin":"habeō","english":["I have","I hold"]},{"latin":"habitō","english":"I live"},{"latin":"intrō","english":"I enter"},{"latin":"magnus","english":["big","large","great"]},{"latin":"pecūnia, pecūniam, f.","english":["money","sum of money"]},{"latin":"quaerō","english":["I search for","I look for","I ask"]},{"latin":"quoque","english":["also","too"]},{"latin":"salūtō","english":"I greet"},{"latin":"sed","english":"but"},{"latin":"spectō","english":["I look at","I watch"]},{"latin":"videō","english":"I see"},{"latin":"vīnum, vīnum, n.","english":"wine"},{"latin":"vocō","english":"I call"}],"3":[{"latin":"ambulō","english":"I walk"},{"latin":"amīcus, amīcum, m.","english":"friend"},{"latin":"ancilla, ancillam, f.","english":["slave","enslaved person (female)"]},{"latin":"clāmō","english":"I shout"},{"latin":"clāmor, clāmōrem, m.","english":["shout","shouting","noise"]},{"latin":"cum","english":"with"},{"latin":"currō","english":"I run"},{"latin":"dīcō","english":["I say","I speak","I tell"]},{"latin":"equus, equum, m.","english":"horse"},{"latin":"festīnō","english":"I hurry"},{"latin":"gladius, gladium, m.","english":"sword"},{"latin":"īnfēlīx","english":["unlucky","unhappy"]},{"latin":"laetus","english":"happy"},{"latin":"multus","english":["much","many"]},{"latin":"omnis","english":["all","every"]},{"latin":"per","english":["through","along"]},{"latin":"prīmus","english":"first"},{"latin":"senātor, senātōrem, m.","english":"senator"},{"latin":"urbs, urbem, f.","english":"city"},{"latin":"vincō","english":["I conquer","I win","I am victorious"]}],"4":[{"latin":"ad","english":["to","towards","at"]},{"latin":"adsum","english":["I am here","I am present"]},{"latin":"deus, deum, m.","english":"god"},{"latin":"dominus, dominum, m.","english":"master"},{"latin":"dōnum, dōnum, n.","english":["gift","present"]},{"latin":"laudō","english":"I praise"},{"latin":"nōs","english":["we","us"]},{"latin":"parvus","english":"small"},{"latin":"perīculum, perīculum, n.","english":"danger"},{"latin":"perterritus","english":"terrified"},{"latin":"puella, puellam, f.","english":"girl"},{"latin":"quod","english":"because"},{"latin":"rēx, rēgem, m.","english":"king"},{"latin":"Rōmānus","english":"Roman"},{"latin":"subitō","english":"suddenly"},{"latin":"templum, templum, n.","english":"temple"},{"latin":"teneō","english":["I hold","I keep","I possess"]},{"latin":"tollō","english":["I raise","I lift up","I hold up"]},{"latin":"veniō","english":"I come"},{"latin":"vōs","english":"you (plural)"}],"5":[{"latin":"aqua, aquam, f.","english":"water"},{"latin":"audiō, audīre","english":["hear","listen to"]},{"latin":"cupiō, cupere","english":["want","desire"]},{"latin":"custōs, custōdem, m.f.","english":"guard"},{"latin":"dēbeō, dēbēre","english":"owe"},{"latin":"dō, dare","english":"give"},{"latin":"effugiō, effugere","english":"escape"},{"latin":"iuvenis, iuvenem, m.f.","english":"young person"},{"latin":"maneō, manēre","english":["remain","stay"]},{"latin":"nēmō, nēminem","english":["no one","nobody"]},{"latin":"nōlō, nōlle","english":["don't want","refuse"]},{"latin":"nox, noctem, f.","english":"night"},{"latin":"portō, portāre","english":["carry","bear","take"]},{"latin":"possum, posse","english":["can","am able"]},{"latin":"pulcher","english":["beautiful","handsome"]},{"latin":"respondeō, respondēre","english":"reply"},{"latin":"taceō, tacēre","english":["am silent","am quiet"]},{"latin":"timeō, timēre","english":["fear","am afraid"]},{"latin":"vēndō, vēndere","english":"sell"},{"latin":"volō, velle","english":["want","wish","am willing"]}],"6":[{"latin":"ā, ab + abl.","english":["from","away from"]},{"latin":"capiō, capere","english":["take","catch","capture","adopt (a plan)"]},{"latin":"diēs, diem, m.","english":"day"},{"latin":"discēdō, discēdere","english":["depart","leave"]},{"latin":"ē, ex + abl.","english":["from","out of"]},{"latin":"exspectō, exspectāre","english":["wait for","expect"]},{"latin":"faciō, facere","english":["make","do"]},{"latin":"iam","english":["now","already"]},{"latin":"in + acc.","english":["into","onto"]},{"latin":"inquit","english":"says"},{"latin":"marītus, marītum, m.","english":"husband"},{"latin":"māter, mātrem, f.","english":"mother"},{"latin":"prope + acc.","english":"near"},{"latin":"rogō, rogāre","english":["ask","ask for"]},{"latin":"sedeō, sedēre","english":"sit"},{"latin":"stō, stāre","english":"stand"},{"latin":"tōtus","english":"whole"},{"latin":"trīstis","english":"sad"},{"latin":"tuus","english":["your (singular)","yours"]},{"latin":"uxor, uxōrem, f.","english":"wife"}]};
+const $=s=>document.querySelector(s),app=$('#app'),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ROM=' I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI XVII XVIII XIX XX'.split(' ');
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let data={},S={chs:new Set([1]),sel:'all',n:10,picked:new Set(),dir:'l2e',mode:'mc',learn:true,shuf:true},Q=null;
+function addWords(ch,arr){data[ch]=(Array.isArray(arr)?arr:arr.words||[]).filter(x=>x&&x.latin&&x.english).map((x,i)=>({id:ch+'-'+i,ch,latin:String(x.latin).trim(),en:[].concat(x.english).map(s=>String(s).trim())}))}
 const avail=()=>Object.keys(data).map(Number).sort((a,b)=>a-b);
 const chosen=()=>avail().filter(c=>S.chs.has(c)).flatMap(c=>data[c]);
-function selWords(){
-  const all=chosen();
-  if(S.sel=='first')return all.slice(0,S.n);
-  if(S.sel=='last')return all.slice(-S.n);
-  if(S.sel=='pick')return all.filter(w=>S.picked.has(w.id));
-  return all;
-}
+function selWords(){const a=chosen();return S.sel=='first'?a.slice(0,S.n):S.sel=='last'?a.slice(-S.n):S.sel=='pick'?a.filter(w=>S.picked.has(w.id)):a}
+for(const c in BUILTIN)addWords(+c,BUILTIN[c]);
+Promise.all(Array.from({length:30},(_,i)=>i+1).map(async n=>{try{const r=await fetch(`Chap${n}.json`);if(r.ok)addWords(n,await r.json())}catch(e){}})).then(()=>{if(!Q)render()});
 
-/* ---------- setup screen ---------- */
+/* setup */
 function render(){
-  Q=null;
-  const chs=avail();
-  const chip=(on,label,fn)=>`<button class="chip ${on?'on':''}" onclick="${fn}">${label}</button>`;
-  let h=`<h1>Suburani Book 1</h1><p class="sub">Vocab checker</p>
-  <div class="card"><h2>1 · Chapters</h2>
-  ${chs.length?`<div class="row">${chs.map(c=>chip(S.chs.has(c),'Ch '+c,`togCh(${c})`)).join('')}</div>
-  <p class="small" style="margin:10px 0 0"><button class="link" onclick="allCh(1)">Select all</button> · <button class="link" onclick="allCh(0)">Clear</button></p>`:''}</div>
-  <div class="card"><h2>2 · Which words</h2><div class="row">
-  ${chip(S.sel=='all','All',"setSel('all')")}${chip(S.sel=='first','First …',"setSel('first')")}${chip(S.sel=='last','Last …',"setSel('last')")}${chip(S.sel=='pick','Pick words',"setSel('pick')")}</div>`;
-  if(S.sel=='first'||S.sel=='last')h+=`<p style="margin:12px 0 0">${S.sel=='first'?'First':'Last'} <input type="number" min="1" value="${S.n}" oninput="S.n=Math.max(1,+this.value||1);upd()"> words of the chosen chapters</p>`;
+  Q=null;const chs=avail(),b=(on,t,f)=>`<button class="seg${on?' on':''}" onclick="${f}">${t}</button>`;
+  let h=`<h1>SUBURANI<span class="cur">_</span></h1><p class="lead">&gt; book_1 vocabulary trainer</p>
+  <h2><i>01</i>chapters</h2><div class="row">${chs.map(c=>`<button class="sq${S.chs.has(c)?' on':''}" onclick="togCh(${c})"><b>${String(c).padStart(2,"0")}</b><span>${data[c].length}w</span></button>`).join('')}</div>
+  <p class="small"><button class="link" onclick="allCh(1)">all</button> · <button class="link" onclick="allCh(0)">none</button></p>
+  <h2><i>02</i>words</h2><div class="row">${b(S.sel=='all','All',"setSel('all')")}${b(S.sel=='first','First …',"setSel('first')")}${b(S.sel=='last','Last …',"setSel('last')")}${b(S.sel=='pick','Pick words',"setSel('pick')")}</div>`;
+  if(S.sel=='first'||S.sel=='last')h+=`<p class="small">${S.sel=='first'?'First':'Last'} <input type="number" min="1" value="${S.n}" oninput="S.n=Math.max(1,+this.value||1);upd()"> words of the chosen chapters</p>`;
   if(S.sel=='pick'){
-    h+=`<p class="small" style="margin:10px 0 0"><button class="link" onclick="pickAll(1)">Tick all</button> · <button class="link" onclick="pickAll(0)">Untick all</button></p><div class="picklist">`;
-    avail().filter(c=>S.chs.has(c)).forEach(c=>{h+=`<div class="chh">Chapter ${c}</div>`+data[c].map(w=>`<label><input type="checkbox" ${S.picked.has(w.id)?'checked':''} onchange="tog('${w.id}',this.checked)"><span><b>${esc(w.latin)}</b> — ${esc(w.en.join(' / '))}</span></label>`).join('')});
+    h+=`<p class="small"><button class="link" onclick="pickAll(1)">tick all</button> · <button class="link" onclick="pickAll(0)">untick all</button></p><div class="pl">`;
+    avail().filter(c=>S.chs.has(c)).forEach(c=>{h+=`<div class="ch">chapter ${String(c).padStart(2,'0')}</div>`+data[c].map(w=>`<label><input type="checkbox" ${S.picked.has(w.id)?'checked':''} onchange="tog('${w.id}',this.checked)"><span><b>${esc(w.latin)}</b> — ${esc(w.en.join(' / '))}</span></label>`).join('')});
     h+=`</div>`;
   }
-  h+=`</div><div class="card"><h2>3 · Quiz style</h2>
-  <div class="row" style="margin-bottom:10px">${chip(S.dir=='l2e','Latin → English',"S.dir='l2e';render()")}${chip(S.dir=='e2l','English → Latin',"S.dir='e2l';render()")}${chip(S.dir=='mix','Mixed',"S.dir='mix';render()")}</div>
-  <div class="row">${chip(S.mode=='mc','Multiple choice',"S.mode='mc';render()")}${chip(S.mode=='type','Type the answer',"S.mode='type';render()")}</div>
-  <p class="small" style="margin:12px 0 0"><label><input type="checkbox" ${S.shuffle?'checked':''} onchange="S.shuffle=this.checked"> Shuffle order</label></p></div>
-  <button class="main" id="go" onclick="start()"></button>`;
-  app.innerHTML=h; upd();
+  h+=`<h2><i>03</i>quiz</h2>
+  <div class="q2"><label>Translate</label><div class="row">${b(S.dir=='l2e','Latin → English',"S.dir='l2e';render()")}${b(S.dir=='e2l','English → Latin',"S.dir='e2l';render()")}${b(S.dir=='mix','Mixed',"S.dir='mix';render()")}</div></div>
+  <div class="q2"><label>Answer</label><div class="row">${b(S.mode=='mc','Multiple choice',"S.mode='mc';render()")}${b(S.mode=='type','Type it',"S.mode='type';render()")}</div></div>
+  <div class="q2"><label>Method</label><div class="row">${b(S.learn,'Learn gradually',"S.learn=true;render()")}${b(!S.learn,'Test each once',"S.learn=false;render()")}</div></div>
+  <p class="small">${S.learn?'New words are shown to you first, a few at a time, and keep coming back until you get each one right twice in a row.':'Every chosen word is asked once.'}</p>
+  <p class="small"><label><input type="checkbox" ${S.shuf?'checked':''} onchange="S.shuf=this.checked"> Shuffle the order</label></p>
+  <button class="go" id="go" onclick="start()"></button>`;
+  app.innerHTML=h;upd();
 }
-function upd(){const n=selWords().length,b=$('#go');if(!b)return;b.disabled=!n;b.textContent=n?`Start · ${n} word${n==1?'':'s'}`:'Choose some words to start'}
-function togCh(c){S.chs.has(c)?S.chs.delete(c):S.chs.add(c);render()}
-function allCh(on){S.chs=new Set(on?avail():[]);render()}
-function setSel(s){S.sel=s;render()}
-function tog(id,on){on?S.picked.add(id):S.picked.delete(id);upd()}
-function pickAll(on){S.picked=new Set(on?chosen().map(w=>w.id):[]);render()}
+function upd(){const n=selWords().length,g=$('#go');if(!g)return;g.disabled=!n;g.textContent=n?`▶ BEGIN · ${n} WORD${n==1?'':'S'}`:'SELECT WORDS FIRST'}
+const togCh=c=>{S.chs.has(c)?S.chs.delete(c):S.chs.add(c);render()},allCh=on=>{S.chs=new Set(on?avail():[]);render()},setSel=s=>{S.sel=s;render()};
+const tog=(id,on)=>{on?S.picked.add(id):S.picked.delete(id);upd()},pickAll=on=>{S.picked=new Set(on?chosen().map(w=>w.id):[]);render()};
 
-/* ---------- quiz ---------- */
-const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+/* session */
 function start(words){
-  words=words||selWords();
-  let qs=words.map(w=>({w,d:S.dir=='mix'?(Math.random()<.5?'l2e':'e2l'):S.dir}));
-  if(S.shuffle)shuf(qs);
-  Q={qs,i:0,score:0,missed:[],answered:false,opts:[]};
-  showQ();
+  words=(words||selWords()).slice();if(S.shuf)shuf(words);
+  Q={learn:S.learn,fresh:words.slice(),act:[],words,i:0,asked:0,right:0,miss:{},last:null,mode:'',total:words.length};step();
 }
-const shown=(w,d)=>d=='l2e'?w.en.join(' / '):w.latin;       // what the answer looks like
-function norm(s,en){
-  s=s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(.*?\)/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
-  return en?s.replace(/^(to|a|an|the)\s+/,''):s;
+function step(){
+  if(!Q.learn)return Q.i<Q.words.length?ask(Q.words[Q.i]):results();
+  const live=Q.act.filter(a=>a.s<2);
+  if(Q.fresh.length&&live.length<3){const w=Q.fresh.shift();Q.act.push({w,s:0});return intro(w)}
+  if(!live.length)return results();
+  let p=live.length>1?live.filter(a=>a.w!==Q.last):live;const m=Math.min(...p.map(a=>a.s));p=p.filter(a=>a.s==m);
+  ask(p[Math.random()*p.length|0].w);
 }
-function accepted(w,d){
-  if(d=='l2e')return w.en.flatMap(e=>e.split(/[;\/]/)).map(e=>norm(e,1)).concat(w.en.map(e=>norm(e,1)));
-  const parts=w.latin.split('/').flatMap(p=>[p,p.split(',')[0]]);
-  return parts.map(p=>norm(p));
+function hdr(){
+  const done=Q.learn?Q.act.filter(a=>a.s>=2).length:Q.i,k=Math.round(done/Q.total*20);
+  return `<div class="top"><span class="mono">[${'█'.repeat(k)}${'░'.repeat(20-k)}] ${done}/${Q.total} ${Q.learn?'learned':'done'}</span><button class="link" onclick="render()">exit</button></div>`;
 }
-function showQ(){
-  const q=Q.qs[Q.i],{w,d}=q; Q.answered=false;
-  const prompt=d=='l2e'?w.latin:w.en.join(' / ');
-  let h=`<div class="top"><span>${Q.i+1} / ${Q.qs.length}</span><span>Score ${Q.score}</span></div>
-  <div class="bar"><i style="width:${Q.i/Q.qs.length*100}%"></i></div>
-  <div class="card q"><div class="dir">${d=='l2e'?'Latin → English':'English → Latin'}</div><div class="word">${esc(prompt)}</div>`;
+function intro(w){
+  Q.mode='intro';
+  app.innerHTML=hdr()+`<div class="card"><div class="band">[ NEW_WORD ]</div><div class="word">${esc(w.latin)}</div><div class="mean">→ ${esc(w.en.join(' · '))}</div></div><button class="go" onclick="step()">▶ GOT IT</button><p class="small c">// quiz incoming</p>`;
+}
+const shown=(w,d)=>d=='l2e'?w.en.join(' / '):w.latin;
+function ask(w){
+  const d=S.dir=='mix'?(Math.random()<.5?'l2e':'e2l'):S.dir;Q.cur={w,d};Q.mode='q';Q.ans=false;Q.last=w;
+  let h=hdr()+`<div class="card"><div class="band">[ ${d=='l2e'?'LATIN → ENGLISH':'ENGLISH → LATIN'} ]</div><div class="word">${esc(d=='l2e'?w.latin:w.en.join(' / '))}</div>`;
   if(S.mode=='mc'){
-    const pool=chosenPool(),right=shown(w,d);
-    const wrong=shuf(pool.filter(x=>x.id!=w.id).map(x=>shown(x,d)).filter((v,i,a)=>v!=right&&a.indexOf(v)==i)).slice(0,3);
-    Q.opts=shuf([right,...wrong]);
-    h+=`<div class="opts">${Q.opts.map((o,i)=>`<button class="opt" onclick="pickOpt(${i})">${i+1}. ${esc(o)}</button>`).join('')}</div>`;
-  }else h+=`<input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer">`+
-    `<p class="small" style="margin:10px 0 0">${d=='e2l'?'Macrons optional.':'Leading “to” optional.'}</p>`;
-  h+=`<div class="fb" id="fb"></div><button class="main" id="nx" onclick="${S.mode=='type'?'checkType()':'nextQ()'}" ${S.mode=='mc'?'hidden':''}>Check</button></div>
-  <p class="small" style="text-align:center"><button class="link" onclick="render()">Quit to setup</button></p>`;
-  app.innerHTML=h; if(S.mode=='type')$('#ans').focus();
+    const right=shown(w,d),wr=shuf(Object.values(data).flat().filter(x=>x.id!=w.id).map(x=>shown(x,d)).filter((v,i,a)=>v!=right&&a.indexOf(v)==i)).slice(0,3);
+    Q.opts=shuf([right,...wr]);
+    h+=`<div class="opts">${Q.opts.map((o,i)=>`<button class="opt1" onclick="pickOpt(${i})">${i+1}. ${esc(o)}</button>`).join('')}</div>`;
+  }else h+=`<input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type answer">`;
+  h+=`<div class="fb" id="fb"></div></div><button class="go" id="nx" ${S.mode=='mc'?'hidden':''} onclick="${S.mode=='type'?'checkType()':'step()'}">${S.mode=='type'?'▶ CHECK':'▶ NEXT'}</button>`;
+  app.innerHTML=h;if(S.mode=='type')$('#ans').focus();
 }
-const chosenPool=()=>Object.values(data).flat();
+function norm(s,en){s=s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(.*?\)/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();return en?s.replace(/^(to|a|an|the)\s+/,''):s}
+function accepted(w,d){
+  if(d=='l2e')return w.en.flatMap(e=>e.split(/[;\/]/)).concat(w.en).map(e=>norm(e,1));
+  return w.latin.split('/').flatMap(p=>[p,p.split(',')[0],p.split(',')[0].split('+')[0]]).map(p=>norm(p));
+}
 function finish(ok,right){
-  const q=Q.qs[Q.i]; Q.answered=true;
-  if(ok)Q.score++; else Q.missed.push(q.w);
-  const fb=$('#fb'); fb.className='fb '+(ok?'ok':'bad');
-  fb.textContent=ok?'✓ Correct':'✗ '+right;
-  const b=$('#nx'); b.hidden=false; b.textContent=Q.i+1<Q.qs.length?'Next →':'See results'; b.setAttribute('onclick','nextQ()'); b.focus();
+  const {w}=Q.cur;Q.ans=true;Q.asked++;if(ok)Q.right++;else Q.miss[w.id]=(Q.miss[w.id]||0)+1;
+  if(Q.learn){const a=Q.act.find(a=>a.w===w);a.s=ok?a.s+1:0}else Q.i++;
+  const f=$('#fb');f.className='fb '+(ok?'ok':'bad');f.textContent=ok?'✓ OK':'✗ ERR → '+right;
+  const n=$('#nx');n.hidden=false;n.textContent='▶ NEXT';n.setAttribute('onclick','step()');
 }
 function pickOpt(i){
-  if(Q.answered)return;
-  const q=Q.qs[Q.i],right=shown(q.w,q.d),ok=Q.opts[i]==right;
-  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(Q.opts[j]==right)b.classList.add('ok');else if(j==i)b.classList.add('bad')});
-  finish(ok,right);
+  if(Q.ans)return;const {w,d}=Q.cur,right=shown(w,d);
+  document.querySelectorAll('.opt1').forEach((b,j)=>{b.disabled=true;if(Q.opts[j]==right)b.classList.add('ok');else if(j==i)b.classList.add('bad')});
+  finish(Q.opts[i]==right,right);
 }
 function checkType(){
-  if(Q.answered)return;
-  const q=Q.qs[Q.i],v=$('#ans'),g=norm(v.value,q.d=='l2e');
-  if(!g){v.focus();return}
-  v.disabled=true; finish(accepted(q.w,q.d).includes(g),shown(q.w,q.d));
+  if(Q.ans)return;const {w,d}=Q.cur,v=$('#ans'),g=norm(v.value,d=='l2e');
+  if(!g){v.focus();return}v.disabled=true;finish(accepted(w,d).includes(g),shown(w,d));
 }
-function nextQ(){Q.i++;Q.i<Q.qs.length?showQ():results()}
 function results(){
-  const n=Q.qs.length,p=Math.round(Q.score/n*100);
-  let h=`<h1>Results</h1><p class="sub">${Q.score} out of ${n}</p><div class="card"><div class="score">${p}%</div></div>`;
-  if(Q.missed.length)h+=`<div class="card"><h2>To revise</h2>${Q.missed.map(w=>`<div class="miss"><b>${esc(w.latin)}</b><span>${esc(w.en.join(' / '))}</span></div>`).join('')}</div>`;
-  h+=`<div class="btns">${Q.missed.length?`<button class="main" onclick="start(Q.missed.slice())">Retry missed words (${Q.missed.length})</button>`:''}<button class="ghost" onclick="start(Q.qs.map(x=>x.w))">Try the same set again</button><button class="ghost" onclick="render()">Back to setup</button></div>`;
-  app.innerHTML=h;
+  Q.mode='res';const tr=Q.words.filter(w=>Q.miss[w.id]),pct=Q.asked?Math.round(Q.right/Q.asked*100):0;
+  app.innerHTML=`<h1>COMPLETE<span class="cur">_</span></h1>
+  <div class="big">${pct}%</div><p class="small c">correct: ${Q.right}/${Q.asked} · words: ${Q.total}</p>
+  ${tr.length?`<h2>needs work</h2>${tr.map(w=>`<div class="miss"><b>${esc(w.latin)}</b><span>${esc(w.en.join(' / '))}</span></div>`).join('')}`:''}
+  <div class="btns">${tr.length?`<button class="go" onclick="start(Q.words.filter(w=>Q.miss[w.id]))">▶ PRACTISE THESE (${tr.length})</button>`:''}<button class="go alt" onclick="start(Q.words)">↻ GO AGAIN</button><button class="go alt" onclick="render()">← BACK TO SETUP</button></div>`;
 }
 document.addEventListener('keydown',e=>{
-  if(!Q||!Q.qs||document.querySelector('.score'))return;
-  if(e.key=='Enter'){e.preventDefault();Q.answered?nextQ():(S.mode=='type'&&checkType())}
-  else if(S.mode=='mc'&&!Q.answered&&/^[1-4]$/.test(e.key)&&Q.opts[+e.key-1]!==undefined)pickOpt(+e.key-1);
+  if(!Q)return;
+  if(Q.mode=='intro'&&e.key=='Enter'){e.preventDefault();step()}
+  else if(Q.mode=='q'){
+    if(e.key=='Enter'){e.preventDefault();Q.ans?step():S.mode=='type'&&checkType()}
+    else if(S.mode=='mc'&&!Q.ans&&/^[1-4]$/.test(e.key)&&Q.opts[+e.key-1]!==undefined)pickOpt(+e.key-1);
+  }
 });
-render(); autoLoad();
+render();
 </script></body></html>
