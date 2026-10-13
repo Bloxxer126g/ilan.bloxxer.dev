@@ -182,3 +182,22 @@ footer{
   .project{width:140px;}
   nav{padding:0 16px;}
 }
+.beta-btn{
+  display:inline-block;
+  margin-top:20px;
+  padding:10px 22px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  color:var(--green);
+  background:rgba(0,255,136,.06);
+  border:1px solid var(--border2);
+  text-decoration:none;
+  transition:border-color .2s,background .2s,transform .2s;
+}
+.beta-btn::before{content:'> ';}
+.beta-btn:hover{
+  border-color:var(--green);
+  background:rgba(0,255,136,.12);
+  transform:translateY(-2px);
+}
