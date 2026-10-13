@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SKY-WATCH: live weather for any city, powered by Open-Meteo.">
+<title>SKY-WATCH</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;cursor:none!important}
+
+:root{
+  --green:#00ff88;--red:#ff4466;--yellow:#ffcc00;
+  --bg:#0a0a0f;--bg2:#0f0f1a;--bg3:#141420;
+  --border:#00ff8818;--border2:#00ff8840;
+  --text-dim:#00ff8855;--text-mid:#00ff8899;
+}
+
+html{background:var(--bg);}
+body{font-family:'Share Tech Mono',monospace;background:var(--bg);color:var(--green);min-height:100vh;font-size:14px;}
+a{color:inherit;text-decoration:none;}
+button{font:inherit;color:inherit;background:none;border:none;}
+:focus-visible{outline:1px solid var(--green);outline-offset:2px;}
+
+/* scanlines */
+body::before{
+  content:'';pointer-events:none;position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,255,136,.012) 3px,rgba(0,255,136,.012) 4px);
+  z-index:9000;
+}
+
+/* CURSOR */
+#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:32px;height:32px;border:1px solid rgba(0,255,136,.5);border-radius:50%;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s,background .2s;}
+#cursor-inner{position:fixed;pointer-events:none;z-index:99999;width:5px;height:5px;background:var(--green);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s;}
+body.ch #cursor-outer{width:44px;height:44px;border-color:rgba(0,255,136,.8);background:rgba(0,255,136,.06);}
+body.ch #cursor-inner{width:6px;height:6px;background:#00ffaa;}
+body.ct #cursor-outer{width:3px;height:28px;border-radius:2px;border-color:rgba(0,255,136,.7);}
+body.ct #cursor-inner{opacity:0;}
+@media(hover:none){
+  *,*::before,*::after{cursor:auto!important}
+  #cursor-outer,#cursor-inner{display:none;}
+  input[type=text]{font-size:16px;}   /* stops iOS Safari zooming in when the box is tapped */
+}
+
+/* NAV */
+nav{background:var(--bg);border-bottom:1px solid var(--border2);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;letter-spacing:3px;white-space:nowrap;}
+.logo span{color:var(--red);}
+.nav-right{display:flex;align-items:center;}
+.nav-right a{font-size:11px;letter-spacing:2px;color:var(--text-mid);padding:0 18px;height:56px;display:flex;align-items:center;border-left:1px solid var(--border);transition:color .15s,background .15s;white-space:nowrap;}
+.nav-right a:hover{color:var(--green);background:rgba(0,255,136,.05);}
+
+/* HERO */
+.hero{text-align:center;padding:60px 40px 44px;border-bottom:1px solid var(--border);}
+.badge{display:inline-block;background:rgba(255,68,102,.12);border:1px solid var(--red);color:var(--red);font-size:10px;letter-spacing:3px;padding:4px 14px;margin-bottom:20px;}
+.hero h1{font-family:'Orbitron',monospace;font-size:44px;font-weight:900;line-height:1.1;margin-bottom:12px;letter-spacing:1px;text-wrap:balance;}
+.hero h1 span{color:var(--red);}
+.hero p{font-size:13px;color:var(--text-mid);max-width:520px;margin:0 auto;line-height:1.7;}
+
+/* SEARCH CARD */
+.planner{max-width:800px;margin:0 auto;padding:44px 24px 0;}
+.planner-card{background:var(--bg2);border:1px solid var(--border2);padding:28px;}
+.card-title{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;margin-bottom:20px;color:var(--green);}
+.form-row{margin-bottom:18px;position:relative;}
+.form-row label,.form-row .form-label{font-size:10px;letter-spacing:2px;color:var(--text-mid);display:block;margin-bottom:6px;}
+.input-wrap{position:relative;}
+input[type=text]{
+  width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--green);
+  font-family:'Share Tech Mono',monospace;font-size:13px;padding:11px 14px;outline:none;
+  transition:border-color .15s;letter-spacing:.5px;
+}
+input[type=text]:focus{border-color:var(--green);}
+input[type=text]::placeholder{color:var(--text-dim);}
+.autocomplete{
+  position:absolute;top:100%;left:0;right:0;z-index:200;
+  background:var(--bg3);border:1px solid var(--border2);border-top:none;
+  max-height:220px;overflow-y:auto;display:none;
+}
+.autocomplete.open{display:block;}
+.ac-item{padding:9px 14px;font-size:12px;color:var(--text-mid);letter-spacing:.5px;border-bottom:1px solid var(--border);}
+.ac-item:last-child{border-bottom:none;}
+.ac-item:hover,.ac-item.selected{background:rgba(0,255,136,.06);color:var(--green);}
+.ac-item .ac-zone{float:right;font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.form-row-2 .form-row{margin-bottom:0;}
+.unit-tabs{display:flex;border:1px solid var(--border2);}
+.utab{flex:1;padding:10px 6px;font-size:11px;letter-spacing:1px;color:var(--text-mid);background:var(--bg);border-right:1px solid var(--border2);transition:background .15s,color .15s;}
+.utab:last-child{border-right:none;}
+.utab:hover{color:var(--green);background:rgba(0,255,136,.04);}
+.utab.active{background:rgba(0,255,136,.1);color:var(--green);}
+.readout{padding:11px 14px;border:1px solid var(--border);background:var(--bg);font-size:13px;color:var(--text-mid);letter-spacing:.5px;font-variant-numeric:tabular-nums;}
+.btn-plan{
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:3px;
+  padding:14px 32px;border:none;background:var(--green);color:var(--bg);
+  width:100%;margin-top:6px;transition:background .15s,transform .1s;
+}
+.btn-plan:hover{background:#00ffaa;}
+.btn-plan:active{transform:scale(.99);}
+
+/* LOADING + ERROR */
+.loading-state{text-align:center;padding:36px 24px 0;display:none;}
+.loading-state.visible{display:block;}
+.spinner-big{display:inline-block;width:36px;height:36px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-txt{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:2px;color:var(--text-mid);}
+.error-state{background:rgba(255,68,102,.06);border:1px solid rgba(255,68,102,.3);padding:18px 22px;display:none;margin-top:24px;}
+.error-state.visible{display:block;}
+.error-state p{font-size:12px;color:var(--red);line-height:1.7;overflow-wrap:anywhere;}
+
+/* RESULTS */
+.results{max-width:800px;margin:0 auto;padding:32px 24px 40px;}
+.status-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.place-name{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:2px;text-transform:uppercase;overflow-wrap:anywhere;}
+.place-name small{display:block;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:400;letter-spacing:1px;color:var(--text-mid);margin-top:5px;text-transform:none;}
+.chip{font-size:9px;letter-spacing:2px;padding:5px 10px;border:1px solid var(--border2);color:var(--green);background:rgba(0,255,136,.08);white-space:nowrap;}
+.chip.snap{color:var(--yellow);border-color:rgba(255,204,0,.35);background:rgba(255,204,0,.07);}
+.chip.wait{color:var(--text-mid);border-color:var(--border);background:transparent;}
+.note{font-size:11px;color:var(--text-mid);line-height:1.7;margin:-4px 0 16px;display:none;}
+.note.visible{display:block;}
+.note b{color:var(--yellow);font-weight:400;}
+.note a{color:var(--green);text-decoration:underline;text-underline-offset:3px;}
+
+.now-card{background:var(--bg2);border:1px solid var(--border2);display:grid;grid-template-columns:1.1fr 1fr;}
+.now-main{padding:28px;display:flex;align-items:center;gap:22px;border-right:1px solid var(--border);}
+.now-icon{font-size:56px;line-height:1;}
+.now-temp{font-family:'Orbitron',monospace;font-size:56px;font-weight:900;line-height:1;letter-spacing:1px;font-variant-numeric:tabular-nums;}
+.now-temp span{font-size:18px;font-weight:700;color:var(--text-mid);margin-left:4px;vertical-align:top;line-height:1.4;letter-spacing:2px;}
+.now-cond{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;margin-top:10px;}
+.now-cond.severe{color:var(--red);}
+.now-range{font-size:11px;color:var(--text-mid);margin-top:7px;letter-spacing:.5px;}
+.now-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+.stat{background:var(--bg2);padding:16px 10px;text-align:center;}
+.stat-val{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.stat-val.yellow{color:var(--yellow);}
+.stat-val.red{color:var(--red);}
+.stat-label{font-size:9px;letter-spacing:2px;color:var(--text-mid);margin-top:6px;}
+.sun-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);}
+
+.section-title{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;margin:32px 0 14px;}
+
+.hours-strip{display:flex;overflow-x:auto;border:1px solid var(--border2);background:var(--bg2);scrollbar-color:var(--border2) var(--bg);}
+.hour{flex:0 0 70px;padding:14px 6px;text-align:center;border-right:1px solid var(--border);}
+.hour:last-child{border-right:none;}
+.hour.now{background:rgba(0,255,136,.06);}
+.hour-time{font-size:10px;color:var(--text-mid);letter-spacing:1px;}
+.hour.now .hour-time{color:var(--green);}
+.hour-icon{font-size:20px;line-height:1;margin:9px 0;}
+.hour-temp{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.hour-rain{font-size:9px;color:var(--text-mid);margin-top:6px;letter-spacing:.5px;min-height:12px;}
+.hour-rain.wet{color:var(--yellow);}
+
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
+.day{
+  background:var(--bg2);border:1px solid var(--border2);padding:16px 8px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;
+  position:relative;overflow:hidden;transition:border-color .2s,transform .2s;
+}
+/* the fly-in only runs on the first paint, not every time the numbers change */
+.days-grid.animate .day{animation:ProjectAppear .6s both;animation-delay:calc(var(--i) * 70ms);}
+.day::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(0,255,136,.07) 0%,transparent 70%);opacity:0;transition:opacity .25s;}
+.day:hover{border-color:var(--green);transform:translateY(-4px);}
+.day:hover::before{opacity:1;}
+.day.today{border-color:var(--green);}
+.day-name{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px;}
+.day-date{font-size:9px;color:var(--text-mid);letter-spacing:1px;}
+.day-icon{font-size:26px;line-height:1;margin:4px 0;}
+.day-hi{font-family:'Orbitron',monospace;font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;}
+.day-lo{font-size:11px;color:var(--text-mid);font-variant-numeric:tabular-nums;margin-top:-4px;}
+.day-rain{font-size:9px;color:var(--text-mid);letter-spacing:.5px;}
+.day-rain.wet{color:var(--yellow);}
+.day-desc{font-size:9px;color:var(--text-mid);line-height:1.4;}
+
+footer{border-top:1px solid var(--border);margin-top:40px;padding:22px 24px 30px;text-align:center;font-size:10px;color:var(--text-dim);letter-spacing:2px;line-height:1.9;}
+.blink{animation:blink 1.2s infinite;display:inline-block;}
+@keyframes blink{
+  0%{scale:1;opacity:100%;}
+  50%{scale:0;opacity:0%;transform:translate(0,10px);}
+  100%{scale:1;opacity:100%;}
+}
+@keyframes ProjectAppear{
+  from{scale:0;opacity:0%;transform:translate(0,100px);}
+  to{scale:1;opacity:100%;}
+}
+
+@media(max-width:720px){
+  .days-grid{grid-template-columns:repeat(4,1fr);}
+  .now-card{grid-template-columns:1fr;}
+  .now-main{border-right:none;border-bottom:1px solid var(--border);}
+  .sun-row{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:480px){
+  nav{padding:0 14px;}
+  .logo{font-size:14px;letter-spacing:2px;}
+  .nav-right a{padding:0 10px;font-size:9px;letter-spacing:1px;}
+  .hero{padding:44px 20px 32px;}
+  .hero h1{font-size:32px;}
+  .days-grid{grid-template-columns:repeat(2,1fr);}
+  .form-row-2{grid-template-columns:1fr;gap:18px;}
+  .now-temp{font-size:44px;}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;}
+}
+@media print{
+  :root{--green:#0b5c3b;--red:#b3123a;--yellow:#7a5b00;--bg:#fff;--bg2:#fff;--bg3:#fff;--border:#bbb;--border2:#888;--text-dim:#555;--text-mid:#333;}
+  body::before,#cursor-outer,#cursor-inner,.nav-right,.planner,.blink{display:none!important;}
+  nav{position:static;}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor-outer" style="left:0;top:0;"></div>
+<div id="cursor-inner"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="https://ilan.bloxxer.dev">SKY<span>-WATCH</span></a>
+  <div class="nav-right">
+    <a href="https://open-meteo.com" target="_blank" rel="noopener">OPEN-METEO</a>
+    <a href="https://ilan.bloxxer.dev">ALL PROJECTS</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">LIVE WEATHER STATION</div>
+  <h1>Check The <span>Sky.</span></h1>
+  <p>Type any city or country on Earth. We pull the current conditions, the next 24 hours and a 7-day outlook straight from Open-Meteo. No account, no API key.</p>
+</div>
+
+<!-- SEARCH -->
+<div class="planner">
+  <div class="planner-card">
+    <div class="card-title">// PICK A LOCATION</div>
+
+    <div class="form-row">
+      <label for="city-input">PLACE — CITY, TOWN OR COUNTRY</label>
+      <div class="input-wrap">
+        <input type="text" id="city-input" placeholder="e.g. London or Japan" autocomplete="off" maxlength="80" value="London" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="city-ac">
+        <div class="autocomplete" id="city-ac" role="listbox" aria-label="Matching places"></div>
+      </div>
+    </div>
+
+    <div class="form-row-2">
+      <div class="form-row">
+        <div class="form-label" id="units-label">UNITS</div>
+        <div class="unit-tabs" id="unit-tabs" role="group" aria-labelledby="units-label">
+          <button class="utab active" data-u="c" type="button" aria-pressed="true">°C · KM/H</button>
+          <button class="utab" data-u="f" type="button" aria-pressed="false">°F · MPH</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">LOCAL TIME AT LOCATION</div>
+        <div class="readout" id="local-time">--:--</div>
+      </div>
+    </div>
+
+    <button class="btn-plan" id="go-btn" type="button">GET FORECAST</button>
+  </div>
+
+  <div class="loading-state" id="loading">
+    <div class="spinner-big"></div>
+    <div class="loading-txt">CONTACTING SATELLITES...</div>
+  </div>
+  <div class="error-state" id="error"><p id="error-text"></p></div>
+</div>
+
+<!-- RESULTS -->
+<div class="results" id="results">
+  <div class="status-row">
+    <div class="place-name" id="place-name"></div>
+    <div class="chip" id="status-chip"></div>
+  </div>
+  <div class="note" id="note"></div>
+
+  <div class="now-card">
+    <div class="now-main">
+      <div class="now-icon" id="now-icon"></div>
+      <div>
+        <div class="now-temp" id="now-temp"></div>
+        <div class="now-cond" id="now-cond"></div>
+        <div class="now-range" id="now-range"></div>
+      </div>
+    </div>
+    <div class="now-stats" id="now-stats"></div>
+    <div class="sun-row" id="sun-row"></div>
+  </div>
+
+  <div class="section-title">// NEXT 24 HOURS</div>
+  <div class="hours-strip" id="hours"></div>
+
+  <div class="section-title">// 7-DAY OUTLOOK</div>
+  <div class="days-grid" id="days"></div>
+</div>
+
+<footer>
+  * weather data sourced live from the Open-Meteo API — free, no key needed<br>
+  ** forecasts are model estimates — always check a local service before you plan around them<br>
+  SKY-WATCH &nbsp;|&nbsp; ILAN.BLOXXER.DEV &nbsp;|&nbsp; <span class="blink">_</span>
+</footer>
+
+<script>
+/* ---------- custom cursor (same as the rest of the site) ---------- */
+(function(){
+  var o=document.getElementById('cursor-outer'),i=document.getElementById('cursor-inner');
+  if(!o||!i)return;
+  var mx=0,my=0,ox=0,oy=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;i.style.left=mx+'px';i.style.top=my+'px';});
+  (function a(){ox+=(mx-ox)*.12;oy+=(my-oy)*.12;o.style.left=Math.round(ox*10)/10+'px';o.style.top=Math.round(oy*10)/10+'px';requestAnimationFrame(a);})();
+  document.addEventListener('mouseover',function(e){
+    var t=e.target;
+    if(t.closest('a,button,.ac-item,.day')){document.body.classList.add('ch');}
+    else if(t.closest('input')){document.body.classList.add('ct');}
+  });
+  document.addEventListener('mouseout',function(e){
+    var t=e.target;
+    if(t.closest('a,button,.ac-item,.day'))document.body.classList.remove('ch');
+    if(t.closest('input'))document.body.classList.remove('ct');
+  });
+})();
+
+/* Where the live page lives. Left empty until the page has a public home. */
+const LIVE_URL='';
+/* Are we inside a locked-down preview (the claude.ai artifact viewer)? */
+const IN_PREVIEW=/claude/i.test(location.hostname)||(function(){try{return window.self!==window.top;}catch(e){return true;}})();
+
+/* ---------- saved snapshot: London, fetched 11 Sep 2026 18:15 local ---------- */
+/* Used only when the live fetch fails (e.g. inside a locked-down preview, or offline). */
+const SNAPSHOT={
+  place:{name:'London',admin1:'England',country:'United Kingdom',latitude:51.5072,longitude:-0.1276},
+  data:{
+    timezone:'Europe/London',timezone_abbreviation:'GMT+1',
+    current:{time:'2026-09-11T18:15',temperature_2m:21.7,relative_humidity_2m:46,apparent_temperature:20.5,is_day:1,precipitation:0,weather_code:1,wind_speed_10m:7.6,wind_direction_10m:309,wind_gusts_10m:17.6,cloud_cover:22,pressure_msl:1022},
+    hourly:{
+      time:['2026-09-11T18:00','2026-09-11T19:00','2026-09-11T20:00','2026-09-11T21:00','2026-09-11T22:00','2026-09-11T23:00','2026-09-12T00:00','2026-09-12T01:00','2026-09-12T02:00','2026-09-12T03:00','2026-09-12T04:00','2026-09-12T05:00','2026-09-12T06:00','2026-09-12T07:00','2026-09-12T08:00','2026-09-12T09:00','2026-09-12T10:00','2026-09-12T11:00','2026-09-12T12:00','2026-09-12T13:00','2026-09-12T14:00','2026-09-12T15:00','2026-09-12T16:00','2026-09-12T17:00'],
+      temperature_2m:[21.8,21.3,20.8,20.2,19.9,19.6,18.8,17.8,17.0,16.3,15.6,14.9,14.5,14.0,14.4,15.3,17.1,18.7,20.3,21.7,22.7,23.2,23.4,22.6],
+      precipitation_probability:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,0,1],
+      weather_code:[1,0,0,0,0,1,2,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,3,3],
+      is_day:[1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1],
+      uv_index:[0.15,0,0,0,0,0,0,0,0,0,0,0,0,0,0.25,0.75,1.75,2.75,3.55,3.75,3.4,2.25,1.15,0.4]
+    },
+    daily:{
+      time:['2026-09-11','2026-09-12','2026-09-13','2026-09-14','2026-09-15','2026-09-16','2026-09-17'],
+      weather_code:[53,3,63,3,3,3,3],
+      temperature_2m_max:[22.0,23.4,22.1,23.6,20.6,18.8,19.7],
+      temperature_2m_min:[16.2,14.0,18.0,16.5,16.4,13.2,14.2],
+      precipitation_probability_max:[76,12,67,4,24,6,20],
+      sunrise:['2026-09-11T06:28','2026-09-12T06:30','2026-09-13T06:32','2026-09-14T06:33','2026-09-15T06:35','2026-09-16T06:36','2026-09-17T06:38'],
+      sunset:['2026-09-11T19:24','2026-09-12T19:21','2026-09-13T19:19','2026-09-14T19:17','2026-09-15T19:15','2026-09-16T19:12','2026-09-17T19:10'],
+      uv_index_max:[3.7,3.75,1.55,4.45,2.15,4.2,3.75]
+    }
+  }
+};
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const WMO={
+  0:['Clear sky','☀️','🌙'],1:['Mainly clear','🌤️','🌙'],2:['Partly cloudy','⛅','☁️'],3:['Overcast','☁️','☁️'],
+  45:['Fog','🌫️'],48:['Freezing fog','🌫️'],
+  51:['Light drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy drizzle','🌧️'],56:['Freezing drizzle','🌧️'],57:['Freezing drizzle','🌧️'],
+  61:['Light rain','🌧️'],63:['Rain','🌧️'],65:['Heavy rain','🌧️'],66:['Freezing rain','🌧️'],67:['Freezing rain','🌧️'],
+  71:['Light snow','🌨️'],73:['Snow','🌨️'],75:['Heavy snow','❄️'],77:['Snow grains','🌨️'],
+  80:['Light showers','🌦️'],81:['Showers','🌧️'],82:['Violent showers','⛈️'],85:['Snow showers','🌨️'],86:['Heavy snow showers','❄️'],
+  95:['Thunderstorm','⛈️'],96:['Thunder + hail','⛈️'],99:['Thunder + heavy hail','⛈️']
+};
+const SEVERE=[65,67,75,82,86,95,96,99];
+const wmo=(code,isDay)=>{const w=WMO[code]||['Unknown','❔'];return{text:w[0],icon:isDay?w[1]:(w[2]||w[1]),severe:SEVERE.includes(code)};};
+const DIRS=['N','NE','E','SE','S','SW','W','NW'];
+const compass=deg=>deg==null?'':DIRS[Math.round(deg/45)%8];
+const DOW=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function dateBits(iso){const [y,m,d]=iso.slice(0,10).split('-').map(Number);const dow=new Date(Date.UTC(y,m-1,d)).getUTCDay();return{d,mon:MON[m-1],dow:DOW[dow],year:y};}
+const hhmm=iso=>(iso||'').slice(11,16);
+const uvLabel=u=>u<3?'LOW':u<6?'MODERATE':u<8?'HIGH':u<11?'VERY HIGH':'EXTREME';
+const uvClass=u=>u>=8?'red':u>=6?'yellow':'';
+/* Open-Meteo can send null for a reading it doesn't have: show a dash rather than crash. */
+const fmt=(x,f)=>x==null?'—':f(x);
+
+const state={unit:'c',place:null,data:null,mode:'wait',results:[],selected:-1,req:0,settled:false};
+const temp=c=>fmt(c,v=>Math.round(state.unit==='c'?v:v*9/5+32)+'°');
+const wind=k=>fmt(k,v=>state.unit==='c'?Math.round(v)+' km/h':Math.round(v*0.621371)+' mph');
+
+/* ---------- rendering ---------- */
+function render(){
+  const p=state.place,d=state.data,c=d.current,dy=d.daily,h=d.hourly;
+  const where=[p.admin1,p.country].filter(Boolean).join(', ');
+  $('#place-name').innerHTML=esc(p.name)+'<small>'+esc(where)+(where?' &nbsp;·&nbsp; ':'')+p.latitude.toFixed(2)+', '+p.longitude.toFixed(2)+'</small>';
+
+  const chip=$('#status-chip'),note=$('#note');
+  const b=dateBits(c.time);
+  if(state.mode==='live'){
+    chip.className='chip';chip.innerHTML='<span class="blink">●</span> LIVE · UPDATED '+hhmm(c.time)+' '+esc(d.timezone_abbreviation||'');
+    note.className='note';note.textContent='';
+  }else if(state.mode==='wait'){
+    chip.className='chip wait';chip.innerHTML='<span class="blink">●</span> CONNECTING…';
+    note.className='note';note.textContent='';
+  }else{
+    chip.className='chip snap';chip.textContent='● SNAPSHOT · '+b.d+' '+b.mon+' '+b.year+' '+hhmm(c.time);
+    note.className='note visible';
+    let msg='<b>Showing a saved London forecast from '+b.d+' '+b.mon+'.</b> ';
+    if(IN_PREVIEW){
+      msg+='This preview blocks outside services, so live weather can\'t load here.';
+      msg+=LIVE_URL?' <a href="'+esc(LIVE_URL)+'" target="_blank" rel="noopener">Open the live version</a> for real-time weather anywhere on Earth.'
+                   :' Open the page from a normal web host, or straight from the file, for live weather.';
+    }else{
+      msg+='The live weather service couldn\'t be reached — check your connection and press GET FORECAST to retry.';
+    }
+    note.innerHTML=msg;
+  }
+  $('#local-time').textContent=hhmm(c.time)+' '+(d.timezone_abbreviation||'');
+
+  const today=c.time.slice(0,10);
+  const t=Math.max(0,dy.time.indexOf(today));          /* near midnight the API's first day can be yesterday */
+
+  const w=wmo(c.weather_code,c.is_day==null?1:c.is_day);
+  $('#now-icon').textContent=w.icon;
+  $('#now-temp').innerHTML=temp(c.temperature_2m).replace('°','')+'<span>°'+(state.unit==='c'?'C':'F')+'</span>';
+  const cond=$('#now-cond');cond.textContent=w.text.toUpperCase();cond.className='now-cond'+(w.severe?' severe':'');
+  $('#now-range').textContent='H '+temp(dy.temperature_2m_max[t])+' · L '+temp(dy.temperature_2m_min[t])+' · feels like '+temp(c.apparent_temperature);
+
+  const gust=c.wind_gusts_10m;
+  const stats=[
+    ['WIND',(wind(c.wind_speed_10m)+' '+compass(c.wind_direction_10m)).trim(),''],
+    ['GUSTS',wind(gust),gust>=60?'red':gust>=40?'yellow':''],
+    ['HUMIDITY',fmt(c.relative_humidity_2m,v=>v+'%'),''],
+    ['CLOUD COVER',fmt(c.cloud_cover,v=>v+'%'),''],
+    ['PRESSURE',fmt(c.pressure_msl,v=>Math.round(v)+' hPa'),''],
+    ['RAIN NOW',fmt(c.precipitation,v=>v.toFixed(1)+' mm'),c.precipitation>=2?'yellow':'']
+  ];
+  $('#now-stats').innerHTML=stats.map(s=>'<div class="stat"><div class="stat-val '+s[2]+'">'+esc(s[1])+'</div><div class="stat-label">'+s[0]+'</div></div>').join('');
+
+  /* Sunrise/sunset. Near the poles Open-Meteo marks "no sunrise/no sunset" days with 00:00 stamps. */
+  const sr=dy.sunrise[t]||'',ss=dy.sunset[t]||'';
+  const polar=hhmm(sr)==='00:00'&&hhmm(ss)==='00:00';
+  const polarDay=polar&&ss.slice(0,10)>sr.slice(0,10);
+  let sunCells;
+  if(polar||!sr||!ss){
+    sunCells=[['SUNRISE','—',''],['SUNSET','—',''],['DAYLIGHT',polarDay?'24h · POLAR DAY':(polar?'0h · POLAR NIGHT':'—'),'']];
+  }else{
+    const a=hhmm(sr),z=hhmm(ss);
+    const mins=(((+z.slice(0,2))*60+(+z.slice(3)))-((+a.slice(0,2))*60+(+a.slice(3)))+1440)%1440;
+    sunCells=[['SUNRISE',a,''],['SUNSET',z,''],['DAYLIGHT',Math.floor(mins/60)+'h '+String(mins%60).padStart(2,'0')+'m','']];
+  }
+  const uv=dy.uv_index_max[t];
+  sunCells.push(['UV MAX',fmt(uv,v=>v.toFixed(1)+' · '+uvLabel(v)),uv==null?'':uvClass(uv)]);
+  $('#sun-row').innerHTML=sunCells.map(s=>'<div class="stat"><div class="stat-val '+s[2]+'">'+s[1]+'</div><div class="stat-label">'+s[0]+'</div></div>').join('');
+
+  const nowHour=c.time.slice(0,13);
+  $('#hours').innerHTML=h.time.map((tm,i)=>{
+    const isDay=h.is_day?h.is_day[i]:1;
+    const hw=wmo(h.weather_code[i],isDay);const pp=h.precipitation_probability[i];
+    const isNow=tm.slice(0,13)===nowHour;
+    return '<div class="hour'+(isNow?' now':'')+'"><div class="hour-time">'+(isNow?'NOW':hhmm(tm))+'</div><div class="hour-icon">'+hw.icon+'</div><div class="hour-temp">'+temp(h.temperature_2m[i])+'</div><div class="hour-rain'+(pp>=50?' wet':'')+'">'+(pp>0?pp+'%':'')+'</div></div>';
+  }).join('');
+
+  const daysEl=$('#days');
+  daysEl.classList.toggle('animate',!state.settled);
+  daysEl.innerHTML=dy.time.map((tm,i)=>{
+    const db=dateBits(tm);const dw=wmo(dy.weather_code[i],true);const pp=dy.precipitation_probability_max[i];
+    const isToday=tm===today;
+    return '<div class="day'+(isToday?' today':'')+'" style="--i:'+i+'"><div class="day-name">'+(isToday?'TODAY':db.dow)+'</div><div class="day-date">'+db.d+' '+db.mon+'</div><div class="day-icon">'+dw.icon+'</div><div class="day-hi">'+temp(dy.temperature_2m_max[i])+'</div><div class="day-lo">'+temp(dy.temperature_2m_min[i])+'</div><div class="day-rain'+(pp>=50?' wet':'')+'">'+fmt(pp,v=>v+'% rain')+'</div><div class="day-desc">'+dw.text+'</div></div>';
+  }).join('');
+  if(state.mode!=='wait')state.settled=true;
+}
+
+/* ---------- network ---------- */
+function forecastURL(p){
+  return 'https://api.open-meteo.com/v1/forecast?latitude='+p.latitude+'&longitude='+p.longitude
+    +'&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,pressure_msl'
+    +'&hourly=temperature_2m,precipitation_probability,weather_code,is_day,uv_index'
+    +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max'
+    +'&timezone=auto&forecast_days=7&forecast_hours=24';
+}
+const geoURL=q=>'https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=6&language=en&format=json';
+
+async function getJSON(url){
+  const c=new AbortController();const t=setTimeout(()=>c.abort(),9000);
+  try{const r=await fetch(url,{signal:c.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json();}
+  finally{clearTimeout(t);}
+}
+
+const loading=$('#loading'),errBox=$('#error'),errText=$('#error-text');
+function showError(msg){errText.textContent=msg;errBox.classList.add('visible');}
+function hideError(){errBox.classList.remove('visible');}
+
+async function loadPlace(place,quiet){
+  const my=++state.req;                                  /* if a newer request starts, this one's reply is ignored */
+  hideError();loading.classList.add('visible');
+  try{
+    const data=await getJSON(forecastURL(place));
+    if(my!==state.req)return;
+    state.place=place;state.data=data;state.mode='live';render();
+  }catch(e){
+    if(my!==state.req)return;
+    if(quiet){ if(state.mode==='wait'){state.mode='snapshot';render();} }
+    else showError('Couldn\'t fetch live weather right now. Check your connection and try again — still showing the last forecast.');
+  }finally{ if(my===state.req)loading.classList.remove('visible'); }
+}
+
+/* ---------- built-in country list: every ISO country + territory, mapped to its capital ---------- */
+/* Searchable even when the online city lookup is unreachable. [name, code, capital, lat, lon] */
+const COUNTRIES=[["Afghanistan","AF","Kabul",34.53,69.17],["Albania","AL","Tirana",41.33,19.82],["Algeria","DZ","Algiers",36.73,3.09],["American Samoa","AS","Pago Pago",-14.28,-170.7],["Andorra","AD","Andorra la Vella",42.51,1.52],["Angola","AO","Luanda",-8.84,13.23],["Anguilla","AI","The Valley",18.22,-63.06],["Antarctica","AQ","Antarctica",-90,0],["Antigua and Barbuda","AG","Saint John's",17.05,-61.8],["Argentina","AR","Buenos Aires",-34.61,-58.38],["Armenia","AM","Yerevan",40.18,44.51],["Aruba","AW","Oranjestad",12.52,-70.03],["Australia","AU","Canberra",-35.28,149.13],["Austria","AT","Vienna",48.21,16.37],["Azerbaijan","AZ","Baku",40.38,49.89],["Bahamas","BS","Nassau",25.06,-77.34],["Bahrain","BH","Manama",26.23,50.59],["Bangladesh","BD","Dhaka",23.71,90.41],["Barbados","BB","Bridgetown",13.11,-59.62],["Belarus","BY","Minsk",53.9,27.57],["Belgium","BE","Brussels",50.85,4.35],["Belize","BZ","Belmopan",17.25,-88.76],["Benin","BJ","Porto-Novo",6.5,2.6],["Bermuda","BM","Hamilton",32.29,-64.78],["Bhutan","BT","Thimphu",27.47,89.64],["Bolivia","BO","Sucre",-19.03,-65.26],["Bosnia and Herzegovina","BA","Sarajevo",43.85,18.36],["Botswana","BW","Gaborone",-24.65,25.91],["Bouvet Island","BV","Bouvet Island",-54.43,3.4],["Brazil","BR","Brasília",-15.78,-47.93],["British Indian Ocean Territory","IO","Diego Garcia",-6,71.5],["British Virgin Islands","VG","Road Town",18.43,-64.62],["Brunei","BN","Bandar Seri Begawan",4.89,114.94],["Bulgaria","BG","Sofia",42.7,23.32],["Burkina Faso","BF","Ouagadougou",12.37,-1.53],["Burundi","BI","Gitega",-3.43,29.92],["Cambodia","KH","Phnom Penh",11.56,104.92],["Cameroon","CM","Yaoundé",3.87,11.52],["Canada","CA","Ottawa",45.41,-75.7],["Cape Verde","CV","Praia",14.93,-23.51],["Caribbean Netherlands","BQ","Kralendijk",12.15,-68.27],["Cayman Islands","KY","George Town",19.29,-81.37],["Central African Republic","CF","Bangui",4.36,18.55],["Chad","TD","N'Djamena",12.11,15.04],["Chile","CL","Santiago",-33.46,-70.65],["China","CN","Beijing",39.91,116.4],["Christmas Island","CX","Flying Fish Cove",-10.42,105.68],["Cocos (Keeling) Islands","CC","West Island",-12.16,96.82],["Colombia","CO","Bogotá",4.61,-74.08],["Comoros","KM","Moroni",-11.7,43.26],["Congo","CG","Brazzaville",-4.27,15.28],["Cook Islands","CK","Avarua",-21.21,-159.78],["Costa Rica","CR","San José",9.93,-84.08],["Croatia","HR","Zagreb",45.81,15.98],["Cuba","CU","Havana",23.13,-82.38],["Curaçao","CW","Willemstad",12.12,-68.89],["Cyprus","CY","Nicosia",35.17,33.35],["Czechia","CZ","Prague",50.09,14.42],["DR Congo","CD","Kinshasa",-4.33,15.31],["Denmark","DK","Copenhagen",55.68,12.57],["Djibouti","DJ","Djibouti",11.59,43.15],["Dominica","DM","Roseau",15.3,-61.39],["Dominican Republic","DO","Santo Domingo",18.47,-69.89],["Ecuador","EC","Quito",-0.23,-78.52],["Egypt","EG","Cairo",30.06,31.25],["El Salvador","SV","San Salvador",13.69,-89.19],["Equatorial Guinea","GQ","Malabo",3.76,8.78],["Eritrea","ER","Asmara",15.34,38.93],["Estonia","EE","Tallinn",59.44,24.75],["Eswatini","SZ","Lobamba",-26.47,31.2],["Ethiopia","ET","Addis Ababa",9.02,38.75],["Falkland Islands","FK","Stanley",-51.69,-57.86],["Faroe Islands","FO","Tórshavn",62.01,-6.77],["Fiji","FJ","Suva",-18.14,178.43],["Finland","FI","Helsinki",60.17,24.94],["France","FR","Paris",48.85,2.35],["French Guiana","GF","Cayenne",4.94,-52.33],["French Polynesia","PF","Papeetē",-17.53,-149.57],["French Southern and Antarctic Lands","TF","Port-aux-Français",-49.35,70.22],["Gabon","GA","Libreville",0.39,9.45],["Gambia","GM","Banjul",13.45,-16.58],["Georgia","GE","Tbilisi",41.69,44.83],["Germany","DE","Berlin",52.52,13.41],["Ghana","GH","Accra",5.56,-0.2],["Gibraltar","GI","Gibraltar",36.14,-5.35],["Greece","GR","Athens",37.98,23.73],["Greenland","GL","Nuuk",64.18,-51.72],["Grenada","GD","St. George's",12.05,-61.75],["Guadeloupe","GP","Basse-Terre",16.0,-61.73],["Guam","GU","Hagåtña",13.48,144.75],["Guatemala","GT","Guatemala City",14.64,-90.51],["Guernsey","GG","St. Peter Port",49.47,-2.58],["Guinea","GN","Conakry",9.54,-13.68],["Guinea-Bissau","GW","Bissau",11.86,-15.6],["Guyana","GY","Georgetown",6.8,-58.16],["Haiti","HT","Port-au-Prince",18.54,-72.34],["Heard Island and McDonald Islands","HM","Heard Island and McDonald Islands",-53.1,72.52],["Honduras","HN","Tegucigalpa",14.08,-87.21],["Hong Kong","HK","City of Victoria",22.27,114.19],["Hungary","HU","Budapest",47.5,19.04],["Iceland","IS","Reykjavik",64.14,-21.9],["India","IN","New Delhi",28.62,77.21],["Indonesia","ID","Jakarta",-6.21,106.85],["Iran","IR","Tehran",35.69,51.42],["Iraq","IQ","Baghdad",33.34,44.4],["Ireland","IE","Dublin",53.33,-6.25],["Isle of Man","IM","Douglas",54.15,-4.48],["Israel","IL","Jerusalem",31.77,35.22],["Italy","IT","Rome",41.89,12.51],["Ivory Coast","CI","Yamoussoukro",6.82,-5.28],["Jamaica","JM","Kingston",18.0,-76.79],["Japan","JP","Tokyo",35.69,139.69],["Jersey","JE","Saint Helier",49.19,-2.1],["Jordan","JO","Amman",31.96,35.95],["Kazakhstan","KZ","Astana",51.18,71.45],["Kenya","KE","Nairobi",-1.28,36.82],["Kiribati","KI","South Tarawa",1.42,173],["Kosovo","XK","Pristina",42.67,21.17],["Kuwait","KW","Kuwait City",29.37,47.97],["Kyrgyzstan","KG","Bishkek",42.87,74.59],["Laos","LA","Vientiane",17.97,102.6],["Latvia","LV","Riga",56.95,24.11],["Lebanon","LB","Beirut",33.89,35.5],["Lesotho","LS","Maseru",-29.32,27.48],["Liberia","LR","Monrovia",6.3,-10.8],["Libya","LY","Tripoli",32.89,13.19],["Liechtenstein","LI","Vaduz",47.14,9.52],["Lithuania","LT","Vilnius",54.69,25.28],["Luxembourg","LU","Luxembourg",49.75,6.17],["Macau","MO","Macau",22.17,113.55],["Madagascar","MG","Antananarivo",-18.91,47.54],["Malawi","MW","Lilongwe",-13.97,33.79],["Malaysia","MY","Kuala Lumpur",3.14,101.69],["Maldives","MV","Malé",4.18,73.51],["Mali","ML","Bamako",12.61,-7.98],["Malta","MT","Valletta",35.9,14.51],["Marshall Islands","MH","Majuro",7.09,171.38],["Martinique","MQ","Fort-de-France",14.6,-61.07],["Mauritania","MR","Nouakchott",18.09,-15.98],["Mauritius","MU","Port Louis",-20.16,57.5],["Mayotte","YT","Mamoudzou",-12.78,45.23],["Mexico","MX","Mexico City",19.43,-99.13],["Micronesia","FM","Palikir",6.92,158.16],["Moldova","MD","Chișinău",47.01,28.86],["Monaco","MC","Monaco",43.74,7.42],["Mongolia","MN","Ulan Bator",47.91,106.88],["Montenegro","ME","Podgorica",42.44,19.26],["Montserrat","MS","Plymouth",16.71,-62.21],["Morocco","MA","Rabat",34.01,-6.83],["Mozambique","MZ","Maputo",-25.97,32.58],["Myanmar","MM","Naypyidaw",19.74,96.21],["Namibia","NA","Windhoek",-22.56,17.08],["Nauru","NR","Yaren",-0.55,166.93],["Nepal","NP","Kathmandu",27.7,85.32],["Netherlands","NL","Amsterdam",52.37,4.89],["New Caledonia","NC","Nouméa",-22.27,166.45],["New Zealand","NZ","Wellington",-41.29,174.78],["Nicaragua","NI","Managua",12.13,-86.25],["Niger","NE","Niamey",13.51,2.11],["Nigeria","NG","Abuja",9.06,7.5],["Niue","NU","Alofi",-19.05,-169.92],["Norfolk Island","NF","Kingston",-29.05,167.97],["North Korea","KP","Pyongyang",39.03,125.75],["North Macedonia","MK","Skopje",42.0,21.43],["Northern Mariana Islands","MP","Saipan",15.21,145.75],["Norway","NO","Oslo",59.91,10.75],["Oman","OM","Muscat",23.58,58.41],["Pakistan","PK","Islamabad",33.72,73.04],["Palau","PW","Ngerulmud",7.5,134.62],["Palestine","PS","Ramallah",31.9,35.2],["Panama","PA","Panama City",8.99,-79.52],["Papua New Guinea","PG","Port Moresby",-9.48,147.15],["Paraguay","PY","Asunción",-25.29,-57.65],["Peru","PE","Lima",-12.04,-77.03],["Philippines","PH","Manila",14.6,120.98],["Pitcairn Islands","PN","Adamstown",-25.07,-130.1],["Poland","PL","Warsaw",52.23,21.01],["Portugal","PT","Lisbon",38.73,-9.15],["Puerto Rico","PR","San Juan",18.47,-66.11],["Qatar","QA","Doha",25.29,51.53],["Romania","RO","Bucharest",44.43,26.11],["Russia","RU","Moscow",55.75,37.62],["Rwanda","RW","Kigali",-1.95,30.06],["Réunion","RE","Saint-Denis",-20.88,55.45],["Saint Barthélemy","BL","Gustavia",17.9,-62.85],["Saint Helena, Ascension and Tristan da Cunha","SH","Jamestown",-15.92,-5.72],["Saint Kitts and Nevis","KN","Basseterre",17.3,-62.72],["Saint Lucia","LC","Castries",14.0,-61.01],["Saint Martin","MF","Marigot",18.07,-63.08],["Saint Pierre and Miquelon","PM","Saint-Pierre",46.78,-56.18],["Saint Vincent and the Grenadines","VC","Kingstown",13.16,-61.23],["Samoa","WS","Apia",-13.83,-171.77],["San Marino","SM","City of San Marino",43.77,12.42],["Saudi Arabia","SA","Riyadh",24.69,46.72],["Senegal","SN","Dakar",14.69,-17.44],["Serbia","RS","Belgrade",44.8,20.47],["Seychelles","SC","Victoria",-4.62,55.46],["Sierra Leone","SL","Freetown",8.49,-13.24],["Singapore","SG","Singapore",1.29,103.85],["Sint Maarten","SX","Philipsburg",18.03,-63.05],["Slovakia","SK","Bratislava",48.15,17.11],["Slovenia","SI","Ljubljana",46.05,14.51],["Solomon Islands","SB","Honiara",-9.43,159.95],["Somalia","SO","Mogadishu",2.04,45.34],["South Africa","ZA","Pretoria",-25.74,28.19],["South Georgia","GS","King Edward Point",-54.28,-36.49],["South Korea","KR","Seoul",37.57,126.98],["South Sudan","SS","Juba",4.85,31.58],["Spain","ES","Madrid",40.42,-3.7],["Sri Lanka","LK","Colombo",6.94,79.85],["Sudan","SD","Khartoum",15.55,32.53],["Suriname","SR","Paramaribo",5.87,-55.17],["Svalbard and Jan Mayen","SJ","Longyearbyen",78.22,15.65],["Sweden","SE","Stockholm",59.33,18.07],["Switzerland","CH","Bern",46.95,7.45],["Syria","SY","Damascus",33.51,36.29],["São Tomé and Príncipe","ST","São Tomé",0.34,6.73],["Taiwan","TW","Taipei",25.05,121.53],["Tajikistan","TJ","Dushanbe",38.54,68.78],["Tanzania","TZ","Dodoma",-6.17,35.74],["Thailand","TH","Bangkok",13.75,100.5],["Timor-Leste","TL","Dili",-8.56,125.57],["Togo","TG","Lomé",6.13,1.22],["Tokelau","TK","Fakaofo",-9,-172],["Tonga","TO","Nuku'alofa",-21.14,-175.2],["Trinidad and Tobago","TT","Port of Spain",10.67,-61.52],["Tunisia","TN","Tunis",36.82,10.17],["Turkmenistan","TM","Ashgabat",37.95,58.38],["Turks and Caicos Islands","TC","Cockburn Town",21.46,-71.14],["Tuvalu","TV","Funafuti",-8.52,179.19],["Türkiye","TR","Ankara",39.92,32.85],["Uganda","UG","Kampala",0.32,32.58],["Ukraine","UA","Kyiv",50.45,30.52],["United Arab Emirates","AE","Abu Dhabi",24.45,54.4],["United Kingdom","GB","London",51.51,-0.13],["United States","US","Washington D.C.",38.9,-77.04],["United States Minor Outlying Islands","UM","United States Minor Outlying Islands",19.3,166.63],["United States Virgin Islands","VI","Charlotte Amalie",18.34,-64.93],["Uruguay","UY","Montevideo",-34.9,-56.19],["Uzbekistan","UZ","Tashkent",41.26,69.22],["Vanuatu","VU","Port Vila",-17.74,168.31],["Vatican City","VA","Vatican City",41.9,12.45],["Venezuela","VE","Caracas",10.49,-66.88],["Vietnam","VN","Hanoi",21.02,105.84],["Wallis and Futuna","WF","Mata-Utu",-13.28,-176.17],["Western Sahara","EH","El Aaiún",24.5,-13],["Yemen","YE","Sana'a",15.48,44.22],["Zambia","ZM","Lusaka",-15.41,28.29],["Zimbabwe","ZW","Harare",-17.83,31.05],["Åland Islands","AX","Mariehamn",60.1,19.93]];
+/* Country rows go ABOVE the online city matches only when the query clearly means the country
+   (its 2-letter code, or 4+ letters of its name); otherwise cities win — "tok" should find Tokyo before Tokelau. */
+function localMatches(q){
+  const l=q.toLowerCase(),starts=[],inc=[];
+  for(const c of COUNTRIES){const n=c[0].toLowerCase();if(n.startsWith(l)||c[1].toLowerCase()===l)starts.push(c);else if(n.includes(l))inc.push(c);}
+  return starts.concat(inc).slice(0,4).map(c=>({name:c[0],country_code:c[1],capital:c[2],latitude:c[3],longitude:c[4],isCountry:true,
+    top:c[1].toLowerCase()===l||c[0].toLowerCase()===l||(l.length>=4&&c[0].toLowerCase().startsWith(l))}));
+}
+
+/* ---------- search + autocomplete ---------- */
+const input=$('#city-input'),ac=$('#city-ac');
+let debounce=null;
+const rowKey=r=>r?r.name+'|'+r.latitude+'|'+r.longitude:null;
+const rowLabel=r=>(r.isCountry||!r.admin1||r.admin1===r.name)?r.name:r.name+', '+r.admin1;
+
+function closeAC(){ac.classList.remove('open');ac.innerHTML='';state.results=[];state.selected=-1;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');}
+function drawAC(){
+  if(!state.results.length){closeAC();return;}
+  ac.innerHTML=state.results.map((r,i)=>'<div class="ac-item'+(i===state.selected?' selected':'')+'" role="option" id="ac-'+i+'" aria-selected="'+(i===state.selected)+'" data-i="'+i+'"><span>'+esc(rowLabel(r))+'</span><span class="ac-zone">'+esc(r.isCountry?'COUNTRY':(r.country_code||''))+'</span></div>').join('');
+  ac.classList.add('open');input.setAttribute('aria-expanded','true');
+  if(state.selected>=0)input.setAttribute('aria-activedescendant','ac-'+state.selected);else input.removeAttribute('aria-activedescendant');
+}
+function setResults(list,keepKey){state.results=list;state.selected=keepKey?list.findIndex(r=>rowKey(r)===keepKey):-1;drawAC();}
+async function search(q){
+  /* built-in countries show instantly; online city matches slot in when they arrive, keeping any highlighted row */
+  const local=localMatches(q),top=local.filter(r=>r.top),rest=local.filter(r=>!r.top);
+  setResults(top.concat(rest),null);
+  try{
+    const j=await getJSON(geoURL(q));
+    if(input.value.trim()!==q)return state.results;           /* user kept typing: ignore stale reply */
+    const api=(j.results||[]).filter(r=>!(r.feature_code||'').startsWith('PCL'))   /* countries already covered */
+      .map(r=>({name:r.name,admin1:r.admin1,country:r.country,country_code:r.country_code,latitude:r.latitude,longitude:r.longitude}));
+    setResults(top.concat(api,rest),rowKey(state.results[state.selected]));
+    return state.results;
+  }catch(e){
+    if(!local.length)closeAC();
+    return local.length?local:null;
+  }
+}
+function choose(i){
+  const r=state.results[i];if(!r)return;
+  clearTimeout(debounce);
+  input.value=r.name;closeAC();
+  if(r.isCountry)loadPlace({name:r.name,admin1:(r.capital&&r.capital!==r.name)?'Capital: '+r.capital:'',country:'',latitude:r.latitude,longitude:r.longitude},false);
+  else loadPlace({name:r.name,admin1:r.admin1,country:r.country,latitude:r.latitude,longitude:r.longitude},false);
+}
+async function go(){
+  clearTimeout(debounce);                                   /* Enter right after typing must not fire a second search */
+  const q=input.value.trim();if(!q)return;
+  if(state.selected>=0&&state.results.length){choose(state.selected);return;}
+  hideError();loading.classList.add('visible');
+  const res=await search(q);
+  loading.classList.remove('visible');
+  if(res===null){showError('Couldn\'t reach the location search right now. Check your connection and try again.');return;}
+  if(!res.length){showError('No place called "'+q+'" found. Try a bigger nearby town, or check the spelling.');return;}
+  choose(0);
+}
+
+input.addEventListener('input',()=>{clearTimeout(debounce);const q=input.value.trim();if(q.length<2){closeAC();return;}debounce=setTimeout(()=>search(q),250);});
+input.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'&&state.results.length){e.preventDefault();state.selected=Math.min(state.selected+1,state.results.length-1);drawAC();}
+  else if(e.key==='ArrowUp'&&state.results.length){e.preventDefault();state.selected=Math.max(state.selected-1,0);drawAC();}
+  else if(e.key==='Enter'){e.preventDefault();go();}
+  else if(e.key==='Escape'){closeAC();}
+});
+ac.addEventListener('mousedown',e=>{const it=e.target.closest('.ac-item');if(it){e.preventDefault();choose(+it.dataset.i);}});
+document.addEventListener('click',e=>{if(!e.target.closest('.input-wrap'))closeAC();});
+$('#go-btn').addEventListener('click',go);
+$('#unit-tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.utab');if(!b)return;
+  state.unit=b.dataset.u;
+  document.querySelectorAll('.utab').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',on);});
+  if(state.data)render();
+});
+
+/* ---------- boot: paint the snapshot instantly (marked CONNECTING), then go live or fall back ---------- */
+state.place=SNAPSHOT.place;state.data=SNAPSHOT.data;state.mode='wait';render();
+loadPlace(SNAPSHOT.place,true);
+</script>
+</body>
+</html>
