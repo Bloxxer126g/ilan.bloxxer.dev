@@ -111,15 +111,15 @@
 
 <script>
     document.getElementById('findBtn').addEventListener('click', runSearch);
-    document.getElementById('codeField').addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
+    document.getElementById('codeField').addEventListener('keypress', function(e) { if (e.key === 'Enter') runSearch(); });
 
     async function runSearch() {
-        const inputVal = document.getElementById('codeField').value;
-        const cleanCode = inputVal.replace(/[^0-9X]/gi, '');
+        var inputVal = document.getElementById('codeField').value;
+        var cleanCode = inputVal.replace(/[^0-9X]/gi, '');
         
-        const uiOutput = document.getElementById('output');
-        const uiAlert = document.getElementById('alert-box');
-        const uiStatus = document.getElementById('status');
+        var uiOutput = document.getElementById('output');
+        var uiAlert = document.getElementById('alert-box');
+        var uiStatus = document.getElementById('status');
 
         uiOutput.style.display = 'none';
         uiAlert.style.display = 'none';
@@ -132,27 +132,28 @@
 
         uiStatus.style.display = 'block';
 
-        // AllOrigins bypass avoids absolute direct fetches and bypasses mixed content locks completely
-        const bridgeUrl = `https://allorigins.win{encodeURIComponent('https://openlibrary.org:' + cleanCode + '&format=json&jscmd=data')}`;
+        // Using safe explicit string concatenation to strictly avoid string literal interpolation bugs
+        var baseProxy = "https://allorigins.win";
+        var targetUrl = "https://openlibrary.org:" + cleanCode + "&format=json&jscmd=data";
+        var finalUrl = baseProxy + encodeURIComponent(targetUrl);
         
         try {
-            const response = await fetch(bridgeUrl);
+            var response = await fetch(finalUrl);
             if (!response.ok) throw new Error("Bridge connection rejected.");
 
-            const wrapper = await response.json();
-            // AllOrigins wraps original response contents inside a stringified .contents object
-            const data = JSON.parse(wrapper.contents);
-            const bookKey = `ISBN:${cleanCode}`;
+            var wrapper = await response.json();
+            var data = JSON.parse(wrapper.contents);
+            var bookKey = "ISBN:" + cleanCode;
 
             if (data && data[bookKey]) {
-                const info = data[bookKey];
+                var info = data[bookKey];
 
                 document.getElementById('bookTitle').innerText = info.title || "Information Unlisted";
-                document.getElementById('bookAuthor').innerText = info.authors ? info.authors.map(a => a.name).join(', ') : "Unknown Contributor";
+                document.getElementById('bookAuthor').innerText = info.authors ? info.authors.map(function(a) { return a.name; }).join(', ') : "Unknown Contributor";
                 document.getElementById('bookDate').innerText = info.publish_date || "Unknown Timeline";
                 
-                const imgElement = document.getElementById('bookImg');
-                imgElement.src = `https://openlibrary.org{cleanCode}-M.jpg`;
+                var imgElement = document.getElementById('bookImg');
+                imgElement.src = "https://openlibrary.org" + cleanCode + "-M.jpg";
                 
                 imgElement.onerror = function() {
                     this.src = 'https://placeholders.dev';
@@ -162,32 +163,33 @@
                 uiOutput.style.display = 'block';
                 return;
             } else {
-                // Secondary execution chain through the bridge if OpenLibrary has no record
                 await fallbackGoogleChain(cleanCode, uiStatus, uiAlert, uiOutput);
             }
             
         } catch (err) {
-            // Ultimate fallback run if primary layout execution crashes out
             await fallbackGoogleChain(cleanCode, uiStatus, uiAlert, uiOutput);
         }
     }
 
     async function fallbackGoogleChain(isbn, loader, alertBox, view) {
-        const fallbackBridge = `https://allorigins.win{encodeURIComponent('https://googleapis.com:' + isbn)}`;
+        var baseProxy = "https://allorigins.win";
+        var googleUrl = "https://googleapis.com:" + isbn;
+        var finalUrl = baseProxy + encodeURIComponent(googleUrl);
+
         try {
-            const response = await fetch(fallbackBridge);
-            const wrapper = await response.json();
-            const data = JSON.parse(wrapper.contents);
+            var response = await fetch(finalUrl);
+            var wrapper = await response.json();
+            var data = JSON.parse(wrapper.contents);
 
             if (data && data.totalItems > 0 && data.items) {
-                const info = data.items[0].volumeInfo;
+                var info = data.items[0].volumeInfo; // Extract primary entry index
                 
                 document.getElementById('bookTitle').innerText = info.title || "Information Unlisted";
                 document.getElementById('bookAuthor').innerText = info.authors ? info.authors.join(', ') : "Unknown Contributor";
                 document.getElementById('bookDate').innerText = info.publishedDate || "Unknown Timeline";
                 
-                const imgElement = document.getElementById('bookImg');
-                imgElement.src = `https://openlibrary.org{isbn}-M.jpg`;
+                var imgElement = document.getElementById('bookImg');
+                imgElement.src = "https://openlibrary.org" + isbn + "-M.jpg";
                 imgElement.onerror = function() {
                     if (info.imageLinks && info.imageLinks.thumbnail) {
                         this.src = info.imageLinks.thumbnail.replace('http://', 'https://');
@@ -200,12 +202,12 @@
                 view.style.display = 'block';
             } else {
                 loader.style.display = 'none';
-                alertBox.innerHTML = `<strong>Not Found:</strong> No valid records for ISBN: <b>${isbn}</b>.`;
+                alertBox.innerHTML = "<strong>Not Found:</strong> No valid records found for ISBN: <b>" + isbn + "</b> inside index registries.";
                 alertBox.style.display = 'block';
             }
         } catch(e) {
             loader.style.display = 'none';
-            alertBox.innerHTML = `<strong>Data Bridge Halted</strong><br>The browser is blocking external calls inside this subdirectory layer.`;
+            alertBox.innerHTML = "<strong>Data Bridge Halted</strong><br>The secure data query failed to evaluate.";
             alertBox.style.display = 'block';
         }
     }
