@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Info Utility</title>
+    <title>Secure Book Search</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -21,79 +21,44 @@
         }
         h1 { font-size: 24px; margin-top: 0; margin-bottom: 8px; }
         p { color: #4b5563; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
-        .search-row {
-            display: flex;
-            gap: 8px;
-        }
+        .search-row { display: flex; gap: 8px; }
         input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 16px;
-            outline: none;
+            flex: 1; padding: 12px; border: 1px solid #d1d5db;
+            border-radius: 6px; font-size: 16px; outline: none;
         }
         input:focus { border-color: #2563eb; }
         button {
-            padding: 12px 20px;
-            background-color: #2563eb;
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
+            padding: 12px 20px; background-color: #2563eb; color: #ffffff;
+            border: none; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer;
         }
         button:hover { background-color: #1d4ed8; }
-        #status {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #4b5563;
-            display: none;
-        }
+        #status { margin-top: 15px; font-size: 14px; color: #2563eb; font-weight: bold; display: none; }
         #alert-box {
-            margin-top: 15px;
-            padding: 12px;
-            background-color: #fef2f2;
-            border: 1px solid #fee2e2;
-            border-radius: 6px;
-            color: #991b1b;
-            font-size: 13px;
-            display: none;
-            line-height: 1.4;
+            margin-top: 15px; padding: 12px; background-color: #fef2f2;
+            border: 1px solid #fee2e2; border-radius: 6px; color: #991b1b; font-size: 13px; display: none;
         }
-        #output {
-            margin-top: 25px;
-            display: none;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
-        }
+        #output { margin-top: 25px; display: none; border-top: 1px solid #e5e7eb; padding-top: 20px; }
         .card { display: flex; gap: 20px; }
         .cover {
-            width: 110px;
-            height: 160px;
-            background-color: #f3f4f6;
-            border-radius: 6px;
-            object-fit: cover;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 110px; height: 160px; background-color: #f3f4f6;
+            border-radius: 6px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .meta h2 { margin: 0 0 8px 0; font-size: 20px; color: #111827; }
         .meta p { margin: 6px 0; font-size: 14px; color: #374151; }
-        .meta strong { color: #111827; }
     </style>
 </head>
 <body>
 
 <div class="app-box">
-    <h1>Book Lookup</h1>
-    <p>Enter an ISBN code to get cover image and publication specs.</p>
+    <h1>Book Information Directory</h1>
+    <p>Enter an ISBN code to extract book specifications securely via Vercel Serverless.</p>
     
     <div class="search-row">
         <input type="text" id="codeField" placeholder="e.g. 9780140449136">
         <button id="findBtn">Search</button>
     </div>
 
-    <div id="status">Querying secure cloud directories...</div>
+    <div id="status">Calling secure runtime worker...</div>
     <div id="alert-box"></div>
 
     <div id="output">
@@ -109,108 +74,57 @@
 </div>
 
 <script>
-    // Obfuscating endpoints to prevent rigid local blockers from reading strings like "api/books" or "googleapis"
-    const segmentA = "https://openlibrary.org";
-    const segmentB = "https://googleapis.com" + "/books/v1/volumes?q=isbn:";
-
     document.getElementById('findBtn').addEventListener('click', runSearch);
-    document.getElementById('codeField').addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
+    document.getElementById('codeField').addEventListener('keypress', function(e) { if (e.key === 'Enter') runSearch(); });
 
     async function runSearch() {
-        const inputVal = document.getElementById('codeField').value;
-        const cleanCode = inputVal.replace(/[^0-9X]/gi, '');
+        var inputVal = document.getElementById('codeField').value;
+        var cleanCode = inputVal.replace(/[^0-9X]/gi, '');
         
-        const uiOutput = document.getElementById('output');
-        const uiAlert = document.getElementById('alert-box');
-        const uiStatus = document.getElementById('status');
+        var uiOutput = document.getElementById('output');
+        var uiAlert = document.getElementById('alert-box');
+        var uiStatus = document.getElementById('status');
 
         uiOutput.style.display = 'none';
         uiAlert.style.display = 'none';
         
         if (!cleanCode) {
-            uiAlert.innerText = 'Please input a valid numeric identity value.';
+            uiAlert.innerText = 'Please input a valid ISBN identifier.';
             uiAlert.style.display = 'block';
             return;
         }
 
         uiStatus.style.display = 'block';
 
-        // PATH 1: Trying OpenLibrary endpoint structure via native JSON configuration
         try {
-            const dataUrl = `${segmentA}/books/${cleanCode}.json`;
-            const check = await fetch(dataUrl, { method: 'GET', mode: 'cors' });
-            
-            if (check.ok) {
-                const book = await check.json();
-                
-                document.getElementById('bookTitle').innerText = book.title || "Untitled";
-                document.getElementById('bookDate').innerText = book.publish_date || "Unknown date";
-                document.getElementById('bookAuthor').innerText = "Details in Cover View";
+            // Reaching out to your own native infrastructure backend file route (Zero CORS Interference)
+            var response = await fetch('/api/lookup?isbn=' + cleanCode);
+            var data = await response.json();
 
-                // Resolve authors asynchronously if array presents keys
-                if (book.authors && book.authors.length > 0) {
-                    try {
-                        const authorInfo = await fetch(`${segmentA}${book.authors[0].key}.json`);
-                        if (authorInfo.ok) {
-                            const authorData = await authorInfo.json();
-                            document.getElementById('bookAuthor').innerText = authorData.name || "Multiple Authors";
-                        }
-                    } catch {
-                        document.getElementById('bookAuthor').innerText = "Authorized Contributor";
-                    }
-                }
-
-                setCoverAndDisplay(cleanCode, uiStatus, uiOutput);
-                return;
-            }
-        } catch (e) {
-            console.log("Path 1 blocked or empty. Moving to Path 2 fallback.");
-        }
-
-        // PATH 2: Fallback routing disguised safely
-        try {
-            const backupCheck = await fetch(`${segmentB}${cleanCode}`);
-            if (!backupCheck.ok) throw new Error("Endpoints structural block");
-
-            const backupData = await backupCheck.json();
-            if (backupData.totalItems > 0 && backupData.items) {
-                const info = backupData.items[0].volumeInfo;
+            if (response.ok && data.success) {
+                document.getElementById('bookTitle').innerText = data.title;
+                document.getElementById('bookAuthor').innerText = data.author;
+                document.getElementById('bookDate').innerText = data.published;
                 
-                document.getElementById('bookTitle').innerText = info.title || "Information Unlisted";
-                document.getElementById('bookAuthor').innerText = info.authors ? info.authors.join(', ') : "Unknown Contributor";
-                document.getElementById('bookDate').innerText = info.publishedDate || "Unknown Timeline";
+                var imgElement = document.getElementById('bookImg');
+                imgElement.src = "https://openlibrary.org" + cleanCode + "-M.jpg";
                 
-                const imgElement = document.getElementById('bookImg');
-                if (info.imageLinks && info.imageLinks.thumbnail) {
-                    imgElement.src = info.imageLinks.thumbnail.replace('http://', 'https://');
-                } else {
-                    imgElement.src = `https://openlibrary.org{cleanCode}-M.jpg`;
-                }
-                
-                imgElement.onerror = function() { this.src = 'https://placeholders.dev'; };
+                imgElement.onerror = function() {
+                    this.src = data.image || 'https://placeholders.dev';
+                };
 
                 uiStatus.style.display = 'none';
                 uiOutput.style.display = 'block';
-                return;
+            } else {
+                uiStatus.style.display = 'none';
+                uiAlert.innerText = data.error || 'Book info not located.';
+                uiAlert.style.display = 'block';
             }
         } catch (err) {
-            console.error(err);
+            uiStatus.style.display = 'none';
+            uiAlert.innerText = 'A communication failure occurred between the UI layer and serverless backend worker.';
+            uiAlert.style.display = 'block';
         }
-
-        // If both failed due to environment issues
-        uiStatus.style.display = 'none';
-        uiAlert.innerHTML = `<strong>Local Connection Dropped</strong><br>Your browser completely blocked the connection out of security caution. <br><br>💡 <strong>To fix this right now:</strong> Turn off your browser's Ad Blocker / Shield extension (like Brave Shields, uBlock Origin, or AdBlock Plus) for this website page and hit search again.`;
-        uiAlert.style.display = 'block';
-    }
-
-    function setCoverAndDisplay(isbn, loader, view) {
-        const imgElement = document.getElementById('bookImg');
-        imgElement.src = `https://openlibrary.org{isbn}-M.jpg`;
-        imgElement.onerror = function() {
-            this.src = 'https://placeholders.dev';
-        };
-        loader.style.display = 'none';
-        view.style.display = 'block';
     }
 </script>
 
