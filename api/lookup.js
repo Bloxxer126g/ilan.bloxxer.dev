@@ -8,24 +8,21 @@ export default async function handler(req, res) {
   const cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
 
   if (!cleanIsbn) {
-    return res.status(400).json({ success: false, error: 'Missing valid ISBN number string.' });
+    return res.status(400).json({ success: false, error: 'Missing valid ISBN string.' });
   }
 
-  // Mandatory custom request header mapping to prevent cloud runtime filtering
   const requestHeaders = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     'Accept': 'application/json'
   };
 
-  // --- TIER 1: GOOGLE BOOKS ENDPOINT ---
+  // --- TIER 1: GOOGLE BOOKS STRICT ISBN ---
   try {
-    const googleUrl = `https://googleapis.com{cleanIsbn}`;
-    const response = await fetch(googleUrl, { headers: requestHeaders });
-    
+    const response = await fetch(`https://googleapis.com{cleanIsbn}`, { headers: requestHeaders });
     if (response.ok) {
       const data = await response.json();
-      if (data && data.totalItems > 0 && data.items) {
-        const info = data.items[0].volumeInfo; // Safely read first index entry item
+      if (data && data.totalItems > 0 && data.items && data.items[0]) {
+        const info = data.items[0].volumeInfo; // Fixed: Added [0] index
         return res.status(200).json({
           success: true,
           title: info.title || 'Untitled Book',
@@ -35,17 +32,15 @@ export default async function handler(req, res) {
         });
       }
     }
-  } catch (e) { console.error('Google Books pipeline bypassed:', e.message); }
+  } catch (e) { console.error('Tier 1 error:', e.message); }
 
-  // --- TIER 2: GOOGLE BOOKS KEYWORD FAILSAFE ---
+  // --- TIER 2: GOOGLE BOOKS GENERAL KEYWORD ---
   try {
-    const backupUrl = `https://googleapis.com{cleanIsbn}`;
-    const response = await fetch(backupUrl, { headers: requestHeaders });
-    
+    const response = await fetch(`https://googleapis.com{cleanIsbn}`, { headers: requestHeaders });
     if (response.ok) {
       const data = await response.json();
-      if (data && data.totalItems > 0 && data.items) {
-        const info = data.items[0].volumeInfo;
+      if (data && data.totalItems > 0 && data.items && data.items[0]) {
+        const info = data.items[0].volumeInfo; // Fixed: Added [0] index
         return res.status(200).json({
           success: true,
           title: info.title || 'Untitled Book',
@@ -55,17 +50,15 @@ export default async function handler(req, res) {
         });
       }
     }
-  } catch (e) { console.error('Google Keyword pipeline bypassed:', e.message); }
+  } catch (e) { console.error('Tier 2 error:', e.message); }
 
   // --- TIER 3: OPEN LIBRARY FUZZY SEARCH ---
   try {
-    const olUrl = `https://openlibrary.org{cleanIsbn}`;
-    const response = await fetch(olUrl, { headers: requestHeaders });
-    
+    const response = await fetch(`https://openlibrary.org{cleanIsbn}`, { headers: requestHeaders });
     if (response.ok) {
       const data = await response.json();
-      if (data && data.docs && data.docs.length > 0) {
-        const item = data.docs[0];
+      if (data && data.docs && data.docs.length > 0 && data.docs[0]) {
+        const item = data.docs[0]; // Fixed: Added [0] index
         return res.status(200).json({
           success: true,
           title: item.title || 'Unknown Title',
@@ -75,7 +68,7 @@ export default async function handler(req, res) {
         });
       }
     }
-  } catch (e) { console.error('OpenLibrary text engine bypassed:', e.message); }
+  } catch (e) { console.error('Tier 3 error:', e.message); }
 
   return res.status(404).json({ 
     success: false, 
