@@ -5,87 +5,90 @@ export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 
   const { isbn } = req.query;
-  const cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
+  let cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
 
   if (!cleanIsbn) {
     return res.status(400).json({ success: false, error: 'Missing valid ISBN string.' });
   }
 
-  // --- TIER 1: GOOGLE BOOKS API ---
-  try {
-    const googleUrl = `https://googleapis.com{cleanIsbn}`;
-    const gResponse = await fetch(googleUrl);
-    if (gResponse.ok) {
-      const gData = await gResponse.json();
-      if (gData && gData.totalItems > 0 && gData.items) {
-        const info = gData.items[0].volumeInfo;
-        let thumb = info.imageLinks?.thumbnail || '';
-        return res.status(200).json({
-          success: true,
-          title: info.title || 'Untitled Book',
-          author: info.authors ? info.authors.join(', ') : 'Unknown Author',
-          published: info.publishedDate || 'Unknown Date',
-          image: thumb.replace('http://', 'https://') || `https://openlibrary.org{cleanIsbn}-M.jpg`
-        });
-      }
-    }
-  } catch (e) { console.error('Google Books skipped:', e.message); }
+  // Generate an alternative 10-digit search parameter if a 13-digit code is provided
+  let fallbackIsbn = '';
+  if (cleanIsbn.length === 13 && cleanIsbn.startsWith('978')) {
+    fallbackIsbn = convertToIsbn10(cleanIsbn);
+  }
 
-  // --- TIER 2: OPEN LIBRARY API ---
-  try {
-    const olUrl = `https://openlibrary.org{cleanIsbn}&format=json&jscmd=data`;
-    const olResponse = await fetch(olUrl);
-    if (olResponse.ok) {
-      const olData = await olResponse.json();
-      const bookKey = `ISBN:${cleanIsbn}`;
-      if (olData && olData[bookKey]) {
-        const info = olData[bookKey];
-        return res.status(200).json({
-          success: true,
-          title: info.title || 'Untitled Book',
-          author: info.authors ? info.authors.map(a => a.name).join(', ') : 'Unknown Author',
-          published: info.publish_date || 'Unknown Date',
-          image: `https://openlibrary.org{cleanIsbn}-M.jpg`
-        });
-      }
-    }
-  } catch (e) { console.error('OpenLibrary skipped:', e.message); }
+  // --- RUN LOOKUP PIPELINE ---
+  let bookData = await queryRegistries(cleanIsbn);
+  
+  // If the 13-digit lookup yields nothing, re-run using the 10-digit format
+  if (!bookData && fallbackIsbn) {
+    console.log(`Re-querying index registries with 10-digit fallback: ${fallbackIsbn}`);
+    bookData = await queryRegistries(fallbackIsbn);
+  }
 
-  // --- TIER 3: OPEN-SOURCE METADATA FALLBACK ---
-  // If API index aggregators don't know it, we strike a raw semantic micro-service block
-  try {
-    const fallbackUrl = `https://isbndb.com{cleanIsbn}`; 
-    // Since we don't have an ISBNdb premium private API key, we fetch from their public metadata endpoint wrapper
-    const metaResponse = await fetch(`https://openlibrary.org{cleanIsbn}`);
-    if (metaResponse.ok) {
-      const metaData = await metaResponse.json();
-      if (metaData && metaData.docs && metaData.docs.length > 0) {
-        const doc = metaData.docs[0];
-        return res.status(200).json({
-          success: true,
-          title: doc.title || 'Unknown Title',
-          author: doc.author_name ? doc.author_name.join(', ') : 'Unknown Author',
-          published: doc.publish_date ? doc.publish_date[0] : 'Unknown Date',
-          image: `https://openlibrary.org{cleanIsbn}-M.jpg`
-        });
-      }
+  if (bookData) {
+    // Keep cover mapping tied to the primary scanned value for structural consistency
+    if (!bookData.image || bookData.image.includes('placeholder')) {
+      bookData.image = `https://openlibrary.org{cleanIsbn}-M.jpg`;
     }
-  } catch (e) { console.error('Meta-registry search skipped:', e.message); }
-
-  // --- HARD FAIL PLATFORM FALLBACK FOR SPECIAL COMICS/NOVELS ---
-  // Since we explicitly resolved 9781788452809 dynamically, we hardwire standard backup data structures directly into the node code logic
-  if (cleanIsbn === '9781788452809') {
-    return res.status(200).json({
-      success: true,
-      title: 'Bunny vs Monkey: Rise of the Maniacal Badger',
-      author: 'Jamie Smart',
-      published: '7 July 2022',
-      image: `https://openlibrary.org{cleanIsbn}-M.jpg`
-    });
+    return res.status(200).json({ success: true, ...bookData });
   }
 
   return res.status(404).json({ 
     success: false, 
     error: `No book records found inside index registries for ISBN: ${cleanIsbn}` 
   });
+}
+
+// Master query utility encapsulating multi-tier endpoints
+async function queryRegistries(code) {
+  // 1. Google Books Endpoint
+  try {
+    const response = await fetch(`https://googleapis.com{code}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.totalItems > 0 && data.items) {
+        const info = data.items[0].volumeInfo;
+        return {
+          title: info.title || 'Untitled Book',
+          author: info.authors ? info.authors.join(', ') : 'Unknown Author',
+          published: info.publishedDate || 'Unknown Date',
+          image: info.imageLinks?.thumbnail?.replace('http://', 'https://') || ''
+        };
+      }
+    }
+  } catch (e) { console.error('Google Books failed:', e.message); }
+
+  // 2. OpenLibrary Endpoint
+  try {
+    const response = await fetch(`https://openlibrary.org{code}&format=json&jscmd=data`);
+    if (response.ok) {
+      const data = await response.json();
+      const key = `ISBN:${code}`;
+      if (data && data[key]) {
+        const info = data[key];
+        return {
+          title: info.title || 'Untitled Book',
+          author: info.authors ? info.authors.map(a => a.name).join(', ') : 'Unknown Author',
+          published: info.publish_date || 'Unknown Date',
+          image: `https://openlibrary.org{code}-M.jpg`
+        };
+      }
+    }
+  } catch (e) { console.error('OpenLibrary failed:', e.message); }
+
+  return null;
+}
+
+// Math conversion utility calculation (978-to-10-Digit checksum generator)
+function convertToIsbn10(isbn13) {
+  let start = isbn13.substring(3, 12);
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(start.charAt(i)) * (10 - i);
+  }
+  let checksum = 11 - (sum % 11);
+  if (checksum === 10) checksum = 'X';
+  else if (checksum === 11) checksum = '0';
+  return start + checksum;
 }
