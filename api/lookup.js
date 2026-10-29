@@ -8,59 +8,64 @@ export default async function handler(req, res) {
   const cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
 
   if (!cleanIsbn) {
-    return res.status(400).json({ success: false, error: 'Missing valid ISBN identifier string.' });
+    return res.status(400).json({ success: false, error: 'Missing valid ISBN number string.' });
   }
 
-  // --- TIER 1: RAW INTENT STRING KEYWORD SCAN (Fixes Vintage Paperback matching) ---
+  // Mandatory custom request header mapping to prevent cloud runtime filtering
+  const requestHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json'
+  };
+
+  // --- TIER 1: GOOGLE BOOKS ENDPOINT ---
   try {
-    // Dropping 'isbn:' prefix forces Google to query the full barcode metadata string index
-    const keywordUrl = `https://googleapis.com{cleanIsbn}`;
-    const response = await fetch(keywordUrl);
+    const googleUrl = `https://googleapis.com{cleanIsbn}`;
+    const response = await fetch(googleUrl, { headers: requestHeaders });
     
     if (response.ok) {
       const data = await response.json();
       if (data && data.totalItems > 0 && data.items) {
-        const info = data.items[0].volumeInfo; // Extract highest statistical index match
-        let thumb = info.imageLinks?.thumbnail || '';
-        
+        const info = data.items[0].volumeInfo; // Safely read first index entry item
         return res.status(200).json({
           success: true,
           title: info.title || 'Untitled Book',
           author: info.authors ? info.authors.join(', ') : 'Unknown Author',
           published: info.publishedDate || 'Unknown Date',
-          image: thumb.replace('http://', 'https://') || `https://openlibrary.org{cleanIsbn}-M.jpg`
+          image: info.imageLinks?.thumbnail?.replace('http://', 'https://') || `https://openlibrary.org{cleanIsbn}-M.jpg`
         });
       }
     }
-  } catch (e) { console.error('Keyword fallback search skipped:', e.message); }
+  } catch (e) { console.error('Google Books pipeline bypassed:', e.message); }
 
-  // --- TIER 2: STRICT IDENTIFIER PATTERN SCAN ---
+  // --- TIER 2: GOOGLE BOOKS KEYWORD FAILSAFE ---
   try {
-    const directUrl = `https://googleapis.com{cleanIsbn}`;
-    const response = await fetch(directUrl);
+    const backupUrl = `https://googleapis.com{cleanIsbn}`;
+    const response = await fetch(backupUrl, { headers: requestHeaders });
+    
     if (response.ok) {
       const data = await response.json();
       if (data && data.totalItems > 0 && data.items) {
         const info = data.items[0].volumeInfo;
-        let thumb = info.imageLinks?.thumbnail || '';
         return res.status(200).json({
           success: true,
           title: info.title || 'Untitled Book',
           author: info.authors ? info.authors.join(', ') : 'Unknown Author',
           published: info.publishedDate || 'Unknown Date',
-          image: thumb.replace('http://', 'https://') || `https://openlibrary.org{cleanIsbn}-M.jpg`
+          image: info.imageLinks?.thumbnail?.replace('http://', 'https://') || `https://openlibrary.org{cleanIsbn}-M.jpg`
         });
       }
     }
-  } catch (e) { console.error('Strict ID lookup skipped:', e.message); }
+  } catch (e) { console.error('Google Keyword pipeline bypassed:', e.message); }
 
-  // --- TIER 3: OPEN LIBRARY GENERAL TERM SEARCH ---
+  // --- TIER 3: OPEN LIBRARY FUZZY SEARCH ---
   try {
-    const searchResponse = await fetch(`https://openlibrary.org{cleanIsbn}`);
-    if (searchResponse.ok) {
-      const searchData = await searchResponse.json();
-      if (searchData && searchData.docs && searchData.docs.length > 0) {
-        const item = searchData.docs[0];
+    const olUrl = `https://openlibrary.org{cleanIsbn}`;
+    const response = await fetch(olUrl, { headers: requestHeaders });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.docs && data.docs.length > 0) {
+        const item = data.docs[0];
         return res.status(200).json({
           success: true,
           title: item.title || 'Unknown Title',
@@ -70,7 +75,7 @@ export default async function handler(req, res) {
         });
       }
     }
-  } catch (e) { console.error('Fuzzy OpenLibrary check skipped:', e.message); }
+  } catch (e) { console.error('OpenLibrary text engine bypassed:', e.message); }
 
   return res.status(404).json({ 
     success: false, 
