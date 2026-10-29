@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Information Directory</title>
+    <title>Secure Book Search</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -21,80 +21,44 @@
         }
         h1 { font-size: 24px; margin-top: 0; margin-bottom: 8px; }
         p { color: #4b5563; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
-        .search-row {
-            display: flex;
-            gap: 8px;
-        }
+        .search-row { display: flex; gap: 8px; }
         input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 16px;
-            outline: none;
+            flex: 1; padding: 12px; border: 1px solid #d1d5db;
+            border-radius: 6px; font-size: 16px; outline: none;
         }
         input:focus { border-color: #2563eb; }
         button {
-            padding: 12px 20px;
-            background-color: #2563eb;
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
+            padding: 12px 20px; background-color: #2563eb; color: #ffffff;
+            border: none; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer;
         }
         button:hover { background-color: #1d4ed8; }
-        #status {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #2563eb;
-            font-weight: bold;
-            display: none;
-        }
+        #status { margin-top: 15px; font-size: 14px; color: #2563eb; font-weight: bold; display: none; }
         #alert-box {
-            margin-top: 15px;
-            padding: 12px;
-            background-color: #fef2f2;
-            border: 1px solid #fee2e2;
-            border-radius: 6px;
-            color: #991b1b;
-            font-size: 13px;
-            display: none;
-            line-height: 1.4;
+            margin-top: 15px; padding: 12px; background-color: #fef2f2;
+            border: 1px solid #fee2e2; border-radius: 6px; color: #991b1b; font-size: 13px; display: none;
         }
-        #output {
-            margin-top: 25px;
-            display: none;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
-        }
+        #output { margin-top: 25px; display: none; border-top: 1px solid #e5e7eb; padding-top: 20px; }
         .card { display: flex; gap: 20px; }
         .cover {
-            width: 110px;
-            height: 160px;
-            background-color: #f3f4f6;
-            border-radius: 6px;
-            object-fit: cover;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 110px; height: 160px; background-color: #f3f4f6;
+            border-radius: 6px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .meta h2 { margin: 0 0 8px 0; font-size: 20px; color: #111827; }
         .meta p { margin: 6px 0; font-size: 14px; color: #374151; }
-        .meta strong { color: #111827; }
     </style>
 </head>
 <body>
 
 <div class="app-box">
     <h1>Book Information Directory</h1>
-    <p>Enter an ISBN code to extract book specifications securely.</p>
+    <p>Enter an ISBN code to extract book specifications securely via Vercel Serverless.</p>
     
     <div class="search-row">
         <input type="text" id="codeField" placeholder="e.g. 9780140449136">
         <button id="findBtn">Search</button>
     </div>
 
-    <div id="status">Connecting to universal data bridge...</div>
+    <div id="status">Calling secure runtime worker...</div>
     <div id="alert-box"></div>
 
     <div id="output">
@@ -125,90 +89,41 @@
         uiAlert.style.display = 'none';
         
         if (!cleanCode) {
-            uiAlert.innerText = 'Please input a valid ISBN numeric string.';
+            uiAlert.innerText = 'Please input a valid ISBN identifier.';
             uiAlert.style.display = 'block';
             return;
         }
 
         uiStatus.style.display = 'block';
 
-        // Using safe explicit string concatenation to strictly avoid string literal interpolation bugs
-        var baseProxy = "https://allorigins.win";
-        var targetUrl = "https://openlibrary.org:" + cleanCode + "&format=json&jscmd=data";
-        var finalUrl = baseProxy + encodeURIComponent(targetUrl);
-        
         try {
-            var response = await fetch(finalUrl);
-            if (!response.ok) throw new Error("Bridge connection rejected.");
+            // Reaching out to your own native infrastructure backend file route (Zero CORS Interference)
+            var response = await fetch('/api/lookup?isbn=' + cleanCode);
+            var data = await response.json();
 
-            var wrapper = await response.json();
-            var data = JSON.parse(wrapper.contents);
-            var bookKey = "ISBN:" + cleanCode;
-
-            if (data && data[bookKey]) {
-                var info = data[bookKey];
-
-                document.getElementById('bookTitle').innerText = info.title || "Information Unlisted";
-                document.getElementById('bookAuthor').innerText = info.authors ? info.authors.map(function(a) { return a.name; }).join(', ') : "Unknown Contributor";
-                document.getElementById('bookDate').innerText = info.publish_date || "Unknown Timeline";
+            if (response.ok && data.success) {
+                document.getElementById('bookTitle').innerText = data.title;
+                document.getElementById('bookAuthor').innerText = data.author;
+                document.getElementById('bookDate').innerText = data.published;
                 
                 var imgElement = document.getElementById('bookImg');
                 imgElement.src = "https://openlibrary.org" + cleanCode + "-M.jpg";
                 
                 imgElement.onerror = function() {
-                    this.src = 'https://placeholders.dev';
+                    this.src = data.image || 'https://placeholders.dev';
                 };
 
                 uiStatus.style.display = 'none';
                 uiOutput.style.display = 'block';
-                return;
             } else {
-                await fallbackGoogleChain(cleanCode, uiStatus, uiAlert, uiOutput);
+                uiStatus.style.display = 'none';
+                uiAlert.innerText = data.error || 'Book info not located.';
+                uiAlert.style.display = 'block';
             }
-            
         } catch (err) {
-            await fallbackGoogleChain(cleanCode, uiStatus, uiAlert, uiOutput);
-        }
-    }
-
-    async function fallbackGoogleChain(isbn, loader, alertBox, view) {
-        var baseProxy = "https://allorigins.win";
-        var googleUrl = "https://googleapis.com:" + isbn;
-        var finalUrl = baseProxy + encodeURIComponent(googleUrl);
-
-        try {
-            var response = await fetch(finalUrl);
-            var wrapper = await response.json();
-            var data = JSON.parse(wrapper.contents);
-
-            if (data && data.totalItems > 0 && data.items) {
-                var info = data.items[0].volumeInfo; // Extract primary entry index
-                
-                document.getElementById('bookTitle').innerText = info.title || "Information Unlisted";
-                document.getElementById('bookAuthor').innerText = info.authors ? info.authors.join(', ') : "Unknown Contributor";
-                document.getElementById('bookDate').innerText = info.publishedDate || "Unknown Timeline";
-                
-                var imgElement = document.getElementById('bookImg');
-                imgElement.src = "https://openlibrary.org" + isbn + "-M.jpg";
-                imgElement.onerror = function() {
-                    if (info.imageLinks && info.imageLinks.thumbnail) {
-                        this.src = info.imageLinks.thumbnail.replace('http://', 'https://');
-                    } else {
-                        this.src = 'https://placeholders.dev';
-                    }
-                };
-
-                loader.style.display = 'none';
-                view.style.display = 'block';
-            } else {
-                loader.style.display = 'none';
-                alertBox.innerHTML = "<strong>Not Found:</strong> No valid records found for ISBN: <b>" + isbn + "</b> inside index registries.";
-                alertBox.style.display = 'block';
-            }
-        } catch(e) {
-            loader.style.display = 'none';
-            alertBox.innerHTML = "<strong>Data Bridge Halted</strong><br>The secure data query failed to evaluate.";
-            alertBox.style.display = 'block';
+            uiStatus.style.display = 'none';
+            uiAlert.innerText = 'A communication failure occurred between the UI layer and serverless backend worker.';
+            uiAlert.style.display = 'block';
         }
     }
 </script>
