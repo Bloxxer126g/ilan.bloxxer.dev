@@ -5,33 +5,47 @@ export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 
   const { isbn } = req.query;
-  let cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
+  const cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
 
   if (!cleanIsbn) {
-    return res.status(400).json({ success: false, error: 'Missing valid ISBN string.' });
+    return res.status(400).json({ success: false, error: 'Missing valid ISBN identifier string.' });
   }
 
-  // Generate an alternative 10-digit search parameter if a 13-digit code is provided
-  let fallbackIsbn = '';
-  if (cleanIsbn.length === 13 && cleanIsbn.startsWith('978')) {
-    fallbackIsbn = convertToIsbn10(cleanIsbn);
+  // Define potential query format fallbacks for hyphen mismatch parameters
+  const targetVariations = [
+    cleanIsbn,
+    cleanIsbn.length === 13 && cleanIsbn.startsWith('978') ? convertToIsbn10(cleanIsbn) : ''
+  ].filter(Boolean);
+
+  // --- TIER 1: MULTI-VARIATION DIRECT FETCH PIPELINE ---
+  for (const code of targetVariations) {
+    let result = await directLookup(code);
+    if (result) return res.status(200).json({ success: true, ...result });
   }
 
-  // --- RUN LOOKUP PIPELINE ---
-  let bookData = await queryRegistries(cleanIsbn);
-  
-  // If the 13-digit lookup yields nothing, re-run using the 10-digit format
-  if (!bookData && fallbackIsbn) {
-    console.log(`Re-querying index registries with 10-digit fallback: ${fallbackIsbn}`);
-    bookData = await queryRegistries(fallbackIsbn);
-  }
-
-  if (bookData) {
-    // Keep cover mapping tied to the primary scanned value for structural consistency
-    if (!bookData.image || bookData.image.includes('placeholder')) {
-      bookData.image = `https://openlibrary.org{cleanIsbn}-M.jpg`;
+  // --- TIER 2: FUZZY TEXT SEARCH ENGINE FALLBACK (Fixes Black Dogs hyphen issues) ---
+  console.log(`Direct lookups empty. Initializing multi-index fuzzy scan for: ${cleanIsbn}`);
+  try {
+    // OpenLibrary's general search index crawls text context strings and is resilient to formatting hyphens
+    const textSearchUrl = `https://openlibrary.org{cleanIsbn}`;
+    const searchResponse = await fetch(textSearchUrl);
+    
+    if (searchResponse.ok) {
+      const searchData = await searchResponse.json();
+      if (searchData && searchData.docs && searchData.docs.length > 0) {
+        const item = searchData.docs[0]; // Extract highest statistical index match
+        
+        return res.status(200).json({
+          success: true,
+          title: item.title || 'Untitled Book',
+          author: item.author_name ? item.author_name.join(', ') : 'Unknown Author',
+          published: item.publish_date ? item.publish_date[0] : (item.first_publish_year || 'Unknown Date'),
+          image: `https://openlibrary.org{cleanIsbn}-M.jpg`
+        });
+      }
     }
-    return res.status(200).json({ success: true, ...bookData });
+  } catch (e) {
+    console.error('Fuzzy text search index bypassed:', e.message);
   }
 
   return res.status(404).json({ 
@@ -40,9 +54,9 @@ export default async function handler(req, res) {
   });
 }
 
-// Master query utility encapsulating multi-tier endpoints
-async function queryRegistries(code) {
-  // 1. Google Books Endpoint
+// Separate synchronous routing execution function
+async function directLookup(code) {
+  // Try Google Books base identity match
   try {
     const response = await fetch(`https://googleapis.com{code}`);
     if (response.ok) {
@@ -53,13 +67,13 @@ async function queryRegistries(code) {
           title: info.title || 'Untitled Book',
           author: info.authors ? info.authors.join(', ') : 'Unknown Author',
           published: info.publishedDate || 'Unknown Date',
-          image: info.imageLinks?.thumbnail?.replace('http://', 'https://') || ''
+          image: info.imageLinks?.thumbnail?.replace('http://', 'https://') || `https://openlibrary.org{code}-M.jpg`
         };
       }
     }
-  } catch (e) { console.error('Google Books failed:', e.message); }
+  } catch (e) { console.error('Direct Google check failed:', e.message); }
 
-  // 2. OpenLibrary Endpoint
+  // Try OpenLibrary direct registry object match
   try {
     const response = await fetch(`https://openlibrary.org{code}&format=json&jscmd=data`);
     if (response.ok) {
@@ -75,12 +89,12 @@ async function queryRegistries(code) {
         };
       }
     }
-  } catch (e) { console.error('OpenLibrary failed:', e.message); }
+  } catch (e) { console.error('Direct OpenLibrary check failed:', e.message); }
 
   return null;
 }
 
-// Math conversion utility calculation (978-to-10-Digit checksum generator)
+// Mathematical legacy string generation module
 function convertToIsbn10(isbn13) {
   let start = isbn13.substring(3, 12);
   let sum = 0;
