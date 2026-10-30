@@ -277,8 +277,9 @@ footer{
     scale: 1;
     opacity: 100%;
   }
+}
   /* DISCORD FAB */
-.discord-fab{
+  .discord-fab{
   position:fixed;
   bottom:64px;right:28px;
   width:52px;height:52px;
