@@ -7,271 +7,188 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TUBE-ROUTE — London Underground Journey Planner</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;cursor:none!important}
-
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --green:#00ff88;--red:#ff4466;--yellow:#ffcc00;
-  --bg:#0a0a0f;--bg2:#0f0f1a;--bg3:#141420;
-  --border:#00ff8818;--border2:#00ff8840;
-  --text-dim:#00ff8855;--text-mid:#00ff8899;
+  --bg:#06110c;--card:#0d1e16;--card2:#12281d;--ink:#e7f4ea;--ink2:#c9e3d3;--mut:#8aa596;--line:#1c3528;
+  --blue:#5ee3a1;--blue-soft:#123425;--teal:#5ee3a1;--amber:#f5b94a;--coral:#ff7075;--onacc:#04130b;--accHi:#8ff0c0;
+  --disp:'Sora','Public Sans',system-ui,sans-serif;--body:'Public Sans',system-ui,sans-serif;--r:28px;
+  /* names the journey script still uses inline */
+  --green:#e7f4ea;--red:#ff7075;--yellow:#f5b94a;--text-mid:#a9cdb9;--text-dim:#8aa596;--border:#1c3528;--border2:#284d3a;--bg2:#0d1e16;--bg3:#0f2219;
 }
+html{background:var(--bg)}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){*{cursor:none!important}}
 
-body{font-family:'Share Tech Mono',monospace;background:var(--bg);color:var(--green);min-height:100vh;}
-a{color:inherit;text-decoration:none;}
+/* cursor */
+#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:8px;height:8px;border-radius:50%;background:var(--blue);transform:translate(-50%,-50%);transition:width .2s,height .2s,border-radius .2s,background .15s}
+body.cg #cursor-outer{background:var(--onacc)}
+#cursor-inner{display:none}
+body.ct #cursor-outer{width:3px;height:26px;border-radius:2px}
+body.cd #cursor-outer{width:5px;height:5px}
+.ripple{position:fixed;pointer-events:none;z-index:99998;width:14px;height:14px;border:1.5px solid var(--blue);border-radius:50%;margin:-7px 0 0 -7px;animation:rip .75s ease-out forwards}
+@keyframes rip{from{transform:scale(1);opacity:.9}to{transform:scale(6);opacity:0}}
+@media(hover:none){#cursor-outer,#cursor-inner{display:none}input[type=text]{font-size:16px}}
 
-body::before{
-  content:'';pointer-events:none;position:fixed;inset:0;
-  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,255,136,.012) 3px,rgba(0,255,136,.012) 4px);
-  z-index:9000;
-}
+/* nav */
+nav{position:sticky;top:14px;z-index:100;max-width:1120px;margin:14px auto 0;padding:8px 8px 8px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(13,30,22,.82);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;width:calc(100% - 32px)}
+.logo{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.3px}
+.logo span{color:var(--blue)}
+.nav-right{display:flex;align-items:center;gap:6px}
+.nav-right a{font-size:14px;font-weight:500;color:var(--mut);padding:10px 18px;border-radius:999px}
+.nav-right a:hover{color:var(--ink);background:var(--card2)}
+.nav-right a.cta{background:var(--blue);color:var(--onacc);display:flex;align-items:center;gap:10px;padding:10px 10px 10px 20px}
+.nav-right a.cta:hover{background:var(--accHi);color:var(--onacc)}
+.arr{width:26px;height:26px;border-radius:50%;background:var(--onacc);color:var(--blue);display:grid;place-items:center;font-size:13px}
+.nav-right a.cta,.btn-plan,.btn-ghost,.discord-fab,.nav-right a,.jtab,.cal-nav,.cal-today-btn{transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s,color .2s,border-color .2s}
+.arr{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 
-/* CURSOR */
-#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:32px;height:32px;border:1px solid rgba(0,255,136,.5);border-radius:50%;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s,background .2s;}
-#cursor-inner{position:fixed;pointer-events:none;z-index:99999;width:5px;height:5px;background:var(--green);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s;}
-body.ch #cursor-outer{width:44px;height:44px;border-color:rgba(0,255,136,.8);background:rgba(0,255,136,.06);}
-body.ch #cursor-inner{width:6px;height:6px;background:#00ffaa;}
-body.ct #cursor-outer{width:3px;height:28px;border-radius:2px;border-color:rgba(0,255,136,.7);}
-body.ct #cursor-inner{opacity:0;}
+/* hero */
+.hero{max-width:1120px;margin:0 auto;padding:72px 24px 40px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 10px;font-size:13px;font-weight:500;color:var(--mut);margin-bottom:26px}
+.badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(94,227,161,.2)}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(44px,8vw,96px);line-height:1;letter-spacing:-.045em;max-width:12ch;text-wrap:balance}
+.hero h1 span{color:var(--blue)}
+.hero p{margin-top:24px;max-width:54ch;color:var(--mut);font-size:17px;line-height:1.6}
 
-/* NAV */
-nav{background:var(--bg);border-bottom:1px solid var(--border2);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
-.logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;letter-spacing:3px;}
-.logo span{color:var(--red);}
-.nav-right{display:flex;align-items:center;}
-.nav-right a{font-size:11px;letter-spacing:2px;color:var(--text-mid);padding:0 18px;height:56px;display:flex;align-items:center;border-left:1px solid var(--border);transition:color .15s,background .15s;}
-.nav-right a:hover{color:var(--green);background:rgba(0,255,136,.05);}
+/* planner */
+.planner{max-width:1120px;margin:0 auto;padding:0 24px}
+.planner-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:28px 24px}
+.card-title{grid-column:1/-1;font-family:var(--disp);font-weight:600;font-size:20px;letter-spacing:-.02em}
+.field label{font-size:13px;font-weight:500;color:var(--mut);display:block;margin-bottom:8px}
+.input-wrap{position:relative}
+input[type=text]{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:16px;color:var(--ink);font:500 16px var(--body);padding:15px 18px;outline:none;transition:border-color .15s,background .15s}
+input[type=text]:focus{border-color:var(--blue);background:#0a1a12}
+input[type=text]::placeholder{color:#6f8a7b}
+.date-display{cursor:pointer}
+.autocomplete{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:200;background:#0f2219;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.5);max-height:260px;overflow-y:auto;display:none;padding:6px}
+.autocomplete.open{display:block}
+.ac-item{padding:11px 14px;font-size:14px;border-radius:12px;color:var(--ink2)}
+.ac-item:hover,.ac-item.selected{background:var(--blue-soft);color:var(--blue)}
+.ac-item .ac-zone{float:right;font-size:12px;color:var(--mut)}
+.ac-item .ac-line{font-size:12px;color:var(--mut);margin-top:2px;clear:both}
+.check-row{grid-column:1/-1;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink2);user-select:none}
+.check-row em{font-style:normal;color:var(--mut)}
+.check-row input{position:absolute;opacity:0;pointer-events:none}
+.check-box{width:22px;height:22px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);display:grid;place-items:center;flex-shrink:0;transition:background .2s,border-color .2s}
+.check-row:hover .check-box{border-color:var(--blue)}
+.check-row input:checked+.check-box{background:var(--blue);border-color:var(--blue)}
+.check-row input:checked+.check-box::after{content:'';width:5px;height:10px;border:solid var(--onacc);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.check-row input:focus-visible+.check-box{outline:2px solid var(--blue);outline-offset:3px}
+.btn-plan{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;background:var(--blue);color:var(--onacc);font:600 16px var(--disp);border-radius:999px;padding:10px 10px 10px 30px}
+.btn-plan .arr{width:44px;height:44px;font-size:18px}
+.btn-plan:hover{background:var(--accHi)}
+.btn-plan:disabled{background:var(--line);color:var(--mut)}
+.btn-plan:disabled .arr{background:var(--bg);color:var(--mut)}
+.nav-right a.cta:hover,.btn-plan:not(:disabled):hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(94,227,161,.4)}
+.nav-right a.cta:active,.btn-plan:not(:disabled):active{transform:translateY(0) scale(.97);box-shadow:none}
+.nav-right a.cta:hover .arr,.btn-plan:not(:disabled):hover .arr{transform:translateX(5px) rotate(-45deg) scale(1.12)}
+.nav-right a:not(.cta):hover{transform:translateY(-2px)}
+.btn-ghost{border:1px solid var(--line);border-radius:999px;padding:10px 20px;font-size:14px;font-weight:600;color:var(--ink2)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-3px);box-shadow:0 10px 24px rgba(94,227,161,.2)}
 
-/* HERO */
-.hero{text-align:center;padding:60px 40px 44px;border-bottom:1px solid var(--border);}
-.badge{display:inline-block;background:rgba(255,68,102,.12);border:1px solid var(--red);color:var(--red);font-size:10px;letter-spacing:3px;padding:4px 14px;margin-bottom:20px;}
-.hero h1{font-family:'Orbitron',monospace;font-size:44px;font-weight:900;line-height:1.1;margin-bottom:12px;}
-.hero h1 span{color:var(--red);}
-.hero p{font-size:13px;color:var(--text-mid);max-width:500px;margin:0 auto;line-height:1.7;}
+/* calendar */
+.calendar-pop{position:absolute;top:calc(100% + 8px);left:0;z-index:300;background:#0f2219;border:1px solid var(--line);border-radius:22px;width:300px;padding:16px;display:none;box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.calendar-pop.open{display:block}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nav{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--card2);color:var(--ink);font-size:18px;user-select:none}
+.cal-nav:hover{background:var(--blue);color:var(--onacc);transform:translateY(-2px)}
+.cal-title{font-family:var(--disp);font-size:15px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{font-size:12px;color:var(--mut);text-align:center;padding:4px 0 8px}
+.cal-day{aspect-ratio:1/1;display:grid;place-items:center;font-size:13px;color:var(--ink2);border-radius:12px;border:1.5px solid transparent;transition:background .15s,color .15s,border-color .15s}
+.cal-day:not(.cal-day-empty):hover{background:var(--blue-soft);color:var(--blue)}
+.cal-day-dim{color:var(--mut);opacity:.5}
+.cal-day-empty{cursor:default}
+.cal-day-past{opacity:.28}
+.cal-day.cal-day-past:hover{background:transparent!important;color:var(--ink2)!important}
+.cal-day-today{border-color:var(--amber);color:var(--amber)}
+.cal-day-selected,.cal-day-selected:hover{background:var(--blue)!important;border-color:var(--blue);color:var(--onacc)!important;font-weight:600}
+.cal-foot{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);text-align:center}
+.cal-today-btn{font-size:13px;font-weight:600;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:8px 18px}
+.cal-today-btn:hover{color:var(--blue);border-color:var(--blue);transform:translateY(-2px)}
 
-/* PLANNER FORM */
-.planner{max-width:720px;margin:0 auto;padding:48px 24px 0;}
-.planner-card{background:var(--bg2);border:1px solid var(--border2);padding:28px;}
-.card-title{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;margin-bottom:20px;color:var(--green);}
+/* loading + error */
+.loading-state{text-align:center;padding:36px 24px 0;display:none}
+.loading-state.visible{display:block}
+.spinner-big{display:inline-block;width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:14px;color:var(--mut)}
+.error-state{background:#2a1215;border:1px solid #5a2327;border-radius:20px;padding:16px 22px;display:none;margin-top:20px;grid-column:1/-1}
+.error-state.visible{display:block}
+.error-state p{font-size:14px;color:#ff8a8e;overflow-wrap:anywhere}
 
-.form-row{margin-bottom:18px;position:relative;}
-.form-row label{font-size:10px;letter-spacing:2px;color:var(--text-mid);display:block;margin-bottom:6px;}
+/* results */
+.results{max-width:1120px;margin:0 auto;padding:56px 24px 40px;display:none}
+.results.visible{display:block}
+.results-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.results-kicker{font-size:14px;color:var(--mut);margin-bottom:6px}
+.results-title{font-family:var(--disp);font-size:clamp(26px,4.5vw,44px);font-weight:700;letter-spacing:-.04em;line-height:1.08;overflow-wrap:anywhere}
+.journey-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.jtab{flex:1 1 140px;padding:14px 12px;text-align:center;font-size:13px;color:var(--mut);background:var(--card);border:1px solid var(--line);border-radius:22px}
+.jtab:hover{border-color:var(--blue);color:var(--ink);transform:translateY(-3px)}
+.jtab.active{background:var(--blue);border-color:var(--blue);color:var(--onacc)}
+.jtab-tag{display:block;font-size:11px;font-weight:600;margin-bottom:4px;opacity:.8}
+.jtab .jtab-time{font-family:var(--disp);font-size:20px;font-weight:700;letter-spacing:-.02em;display:block;margin-bottom:2px}
 
-.input-wrap{position:relative;}
-input[type=text]{
-  width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--green);
-  font-family:'Share Tech Mono',monospace;font-size:13px;padding:11px 14px;outline:none;
-  transition:border-color .15s;letter-spacing:.5px;
-}
-input[type=text]:focus{border-color:var(--green);}
-input[type=text]::placeholder{color:var(--text-dim);}
+.journey-detail{background:var(--card);border:1px solid var(--line);border-radius:32px;overflow:hidden}
+.journey-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);position:relative}
+.js-stat{background:#0c3b28;padding:26px 12px;text-align:center}
+.js-val{font-family:var(--disp);font-size:clamp(24px,3.4vw,38px);font-weight:700;letter-spacing:-.04em;color:#fff}
+.js-val.yellow{color:var(--amber)}
+.js-val.red{color:var(--coral)}
+.js-label{font-size:13px;color:#8fb6a0;margin-top:4px}
+.steps-wrap{padding:32px}
+.journey-step{display:flex;gap:18px}
+.step-spine{display:flex;flex-direction:column;align-items:center;min-width:20px}
+.step-dot{width:12px;height:12px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:4px;box-shadow:0 0 0 2px var(--card),0 0 0 3px rgba(231,244,234,.22)}
+.step-line{width:3px;flex:1;min-height:14px;margin:4px 0;border-radius:2px;box-shadow:0 0 0 1px rgba(231,244,234,.14)}
+.step-body{padding-bottom:22px;flex:1}
+.step-name{font-family:var(--disp);font-size:17px;font-weight:600;letter-spacing:-.01em}
+.step-sub{font-size:14px;color:var(--text-mid);margin-top:4px;line-height:1.5}
+.step-pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 12px;margin-top:8px;border:1px solid;border-radius:999px}
 
-/* Autocomplete dropdown */
-.autocomplete{
-  position:absolute;top:100%;left:0;right:0;z-index:200;
-  background:var(--bg3);border:1px solid var(--border2);border-top:none;
-  max-height:220px;overflow-y:auto;display:none;
-}
-.autocomplete.open{display:block;}
-.ac-item{padding:9px 14px;font-size:12px;color:var(--text-mid);letter-spacing:.5px;border-bottom:1px solid var(--border);}
-.ac-item:last-child{border-bottom:none;}
-.ac-item:hover,.ac-item.selected{background:rgba(0,255,136,.06);color:var(--green);}
-.ac-item .ac-zone{float:right;font-size:10px;color:var(--text-dim);letter-spacing:1px;}
-.ac-item .ac-line{font-size:10px;color:var(--text-dim);margin-top:2px;}
+.line-status-strip{background:var(--card);border:1px solid var(--line);border-radius:28px;margin-top:16px;padding:24px 28px}
+.lss-title{font-family:var(--disp);font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:10px}
+.lss-row{display:flex;align-items:center;gap:12px;font-size:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.lss-row:last-child{border-bottom:none}
+.lss-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 2px var(--card),0 0 0 3px rgba(231,244,234,.22)}
+.lss-name{font-family:var(--disp);font-size:14px;font-weight:600;min-width:140px}
+.lss-msg{color:var(--text-mid);flex:1}
+.lss-badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;white-space:nowrap}
+.status-ok{background:#123425;color:var(--blue)}
+.status-warn{background:#3a2a0a;color:#f5c36b}
+.status-err{background:#3a1519;color:#ff8a8e}
+.status-na{background:var(--card2);color:var(--mut)}
 
-.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card2);border:1px solid var(--blue);color:var(--ink);font-size:14px;font-weight:500;padding:12px 24px;border-radius:999px;transition:transform .3s ease;z-index:9999;white-space:nowrap;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
 
-select{
-  width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--green);
-  font-family:'Share Tech Mono',monospace;font-size:12px;padding:11px 14px;outline:none;
-  transition:border-color .15s;appearance:none;letter-spacing:.5px;
-}
-select:focus{border-color:var(--green);}
-select option{background:var(--bg2);}
+footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
+.blink{animation:blink 1.2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-.btn-plan{
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:3px;
-  padding:14px 32px;border:none;background:var(--green);color:var(--bg);
-  width:100%;margin-top:6px;transition:background .15s,transform .1s;
-}
-.btn-plan:hover{background:#00ffaa;}
-.btn-plan:active{transform:scale(.99);}
-.btn-plan:disabled{background:var(--border2);color:var(--text-dim);cursor:not-allowed!important;}
+.discord-fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;display:grid;place-items:center;background:var(--blue);color:var(--onacc);border-radius:50%;z-index:500}
+.discord-fab:hover{background:var(--accHi);transform:translateY(-6px) scale(1.12) rotate(-8deg);box-shadow:0 14px 30px rgba(94,227,161,.45)}
+.discord-fab:active{transform:scale(.95)}
+.discord-fab-ring{display:none}
 
-/* CALENDAR PICKER */
-.date-display{cursor:pointer;}
-.calendar-pop{
-  position:absolute;top:100%;left:0;z-index:300;
-  background:var(--bg3);border:1px solid var(--border2);
-  width:280px;padding:14px;display:none;
-  box-shadow:0 8px 24px rgba(0,0,0,.5);
-}
-.calendar-pop.open{display:block;}
-.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.cal-nav{
-  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
-  background:var(--bg);border:1px solid var(--border2);color:var(--green);
-  font-size:13px;transition:border-color .15s,background .15s;user-select:none;
-}
-.cal-nav:hover{border-color:var(--green);background:rgba(0,255,136,.06);}
-.cal-title{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;color:var(--green);}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-dow{
-  font-size:9px;letter-spacing:1px;color:var(--text-dim);
-  text-align:center;padding:4px 0 8px;
-}
-.cal-day{
-  aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
-  font-size:11px;color:var(--text-mid);background:var(--bg);
-  border:1px solid transparent;transition:border-color .15s,background .15s,color .15s;
-}
-.cal-day:not(.cal-day-empty):hover{border-color:var(--green);color:var(--green);}
-.cal-day-dim{color:var(--text-dim);opacity:.5;}
-.cal-day-empty{background:transparent;cursor:default!important;}
-.cal-day-today{border-color:var(--yellow);color:var(--yellow);}
-.cal-day-selected{background:rgba(0,255,136,.15);border-color:var(--green);color:var(--green);font-weight:700;}
-.cal-foot{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);text-align:center;}
-.cal-today-btn{
-  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
-  color:var(--text-mid);background:none;border:1px solid var(--border2);
-  padding:6px 14px;transition:color .15s,border-color .15s;
-}
-.cal-today-btn:hover{color:var(--green);border-color:var(--green);}
-
-/* LOADING STATE */
-.loading-state{text-align:center;padding:48px 24px;display:none;}
-.loading-state.visible{display:block;}
-.spinner-big{
-  display:inline-block;width:36px;height:36px;
-  border:2px solid var(--border2);border-top-color:var(--green);
-  border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loading-txt{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:2px;color:var(--text-mid);}
-
-/* ERROR STATE */
-.error-state{background:rgba(255,68,102,.06);border:1px solid rgba(255,68,102,.3);padding:20px 24px;display:none;margin-top:24px;}
-.error-state.visible{display:block;}
-.error-state p{font-size:12px;color:var(--red);line-height:1.7;}
-
-/* RESULTS */
-.results{max-width:720px;margin:0 auto;padding:32px 24px 80px;display:none;}
-.results.visible{display:block;}
-
-/* Journey option tabs */
-.journey-tabs{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border2);}
-.jtab{
-  flex:1;padding:10px 6px;text-align:center;font-size:10px;letter-spacing:1px;
-  color:var(--text-mid);border-right:1px solid var(--border2);
-  background:var(--bg2);transition:background .15s,color .15s;
-}
-.jtab:last-child{border-right:none;}
-.jtab:hover{background:rgba(0,255,136,.04);color:var(--green);}
-.jtab.active{background:rgba(0,255,136,.08);color:var(--green);border-bottom:2px solid var(--green);}
-.jtab .jtab-time{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;display:block;margin-bottom:2px;}
-
-/* Journey detail card */
-.journey-detail{background:var(--bg2);border:1px solid var(--border2);padding:0;}
-
-/* Summary bar */
-.journey-summary{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:1px;background:var(--border);border-bottom:1px solid var(--border2);
-}
-.js-stat{background:var(--bg2);padding:16px 12px;text-align:center;}
-.js-val{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;}
-.js-val.yellow{color:var(--yellow);}
-.js-val.red{color:var(--red);}
-.js-label{font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-top:4px;}
-
-/* Steps */
-.steps-wrap{padding:24px;}
-.journey-step{display:flex;gap:16px;}
-.step-spine{display:flex;flex-direction:column;align-items:center;min-width:20px;}
-.step-dot{width:10px;height:10px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:3px;}
-.step-line{width:2px;flex:1;min-height:14px;margin:3px 0;}
-.step-body{padding-bottom:18px;flex:1;}
-.step-name{font-size:13px;font-weight:500;letter-spacing:.5px;}
-.step-sub{font-size:11px;color:var(--text-mid);margin-top:3px;line-height:1.5;}
-.step-pill{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:10px;letter-spacing:1px;padding:2px 9px;margin-top:5px;
-  border:1px solid;
-}
-
-/* Line status strip */
-.line-status-strip{border-top:1px solid var(--border2);padding:16px 24px;}
-.lss-title{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-bottom:10px;}
-.lss-row{display:flex;align-items:center;gap:10px;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border);}
-.lss-row:last-child{border-bottom:none;}
-.lss-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.lss-name{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;min-width:100px;}
-.lss-msg{color:var(--text-mid);flex:1;}
-.lss-badge{font-size:9px;letter-spacing:1px;padding:2px 8px;}
-
-.status-ok  {background:rgba(0,255,136,.12);color:var(--green);border:1px solid var(--border2);}
-.status-warn{background:rgba(255,204,0,.1); color:var(--yellow);border:1px solid rgba(255,204,0,.3);}
-.status-err {background:rgba(255,68,102,.1);color:var(--red);  border:1px solid rgba(255,68,102,.3);}
-
-/* Disclaimer */
-.disclaimer{font-size:10px;color:var(--text-dim);text-align:center;padding:16px 24px;border-top:1px solid var(--border);line-height:1.9;}
-
-/* Toast */
-#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg2);border:1px solid var(--green);color:var(--green);font-size:12px;padding:12px 24px;letter-spacing:1px;transition:transform .3s ease;z-index:9999;white-space:nowrap;pointer-events:none;}
-#toast.show{transform:translateX(-50%) translateY(0);}
-
-/* Footer */
-footer{border-top:1px solid var(--border);padding:28px 40px;text-align:center;font-size:10px;color:var(--text-dim);line-height:2.2;margin-top:40px;}
-.blink{animation:blink 1.2s step-end infinite;}
-@keyframes blink{50%{opacity:0;}}
-
-/* Responsive */
+@media(max-width:860px){.journey-summary{grid-template-columns:1fr 1fr}.planner-card{padding:24px}}
 @media(max-width:600px){
-  nav{padding:0 16px;}
-  .nav-right a{padding:0 10px;font-size:9px;}
-  .hero h1{font-size:28px;}
-  .hero{padding:36px 20px 30px;}
-  .form-row-2{grid-template-columns:1fr;}
-  .journey-summary{grid-template-columns:1fr 1fr;}
-  .journey-tabs{flex-wrap:wrap;}
-  .jtab{flex:0 0 50%;}
-  .calendar-pop{width:250px;}
+  .hero{padding-top:48px}
+  .nav-right a:not(.cta){display:none}
+  .planner-card{grid-template-columns:1fr}
+  .steps-wrap{padding:22px 18px}
+  .lss-row{flex-wrap:wrap}
+  .lss-name{min-width:0}
+  .calendar-pop{width:min(300px,calc(100vw - 64px))}
 }
-/* DISCORD FAB */
-.discord-fab{
-  position:fixed;
-  bottom:64px;right:28px;
-  width:52px;height:52px;
-  display:flex;align-items:center;justify-content:center;
-  background:var(--bg2);
-  border:1px solid var(--border2);
-  color:var(--green);
-  z-index:500;
-  transition:border-color .2s,color .2s,background .2s,transform .2s;
-}
-.discord-fab:hover{
-  border-color:var(--green);
-  color:#00ffaa;
-  background:rgba(0,255,136,.08);
-  transform:translateY(-3px);
-}
-.discord-fab-ring{
-  position:absolute;inset:-1px;
-  border:1px solid var(--border2);
-  animation:discordPulse 2.4s ease-out infinite;
-  pointer-events:none;
-}
-@keyframes discordPulse{
-  0%{transform:scale(1);opacity:.6;border-color:var(--border2);}
-  70%{transform:scale(1.6);opacity:0;border-color:var(--green);}
-  100%{transform:scale(1.6);opacity:0;}
-}
-
-@media(max-width:480px){
-  .discord-fab{bottom:18px;right:18px;width:46px;height:46px;}
-}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media print{body{background:#fff}#cursor-outer,#cursor-inner,nav,.planner,.discord-fab{display:none!important}}
 </style>
 </head>
 <body>
@@ -279,118 +196,106 @@ footer{border-top:1px solid var(--border);padding:28px 40px;text-align:center;fo
 <div id="cursor-outer"></div>
 <div id="cursor-inner"></div>
 
-<!-- NAV -->
 <nav>
-  <span class="logo" onclick="location.href='https://ilan.bloxxer.dev'">TUBE<span>-ROUTE</span></span>
+  <a class="logo" href="https://ilan.bloxxer.dev">TUBE<span>-ROUTE</span></a>
   <div class="nav-right">
-    <a href="https://tfl.gov.uk/tube-dlr-overground/status/" target="_blank" rel="noopener">TFL STATUS</a>
-    <a href="https://citymapper.com" target="_blank" rel="noopener">CITYMAPPER</a>
+    <a href="https://tfl.gov.uk/tube-dlr-overground/status/" target="_blank" rel="noopener">TfL status</a>
+    <a class="cta" href="https://citymapper.com" target="_blank" rel="noopener">Citymapper <span class="arr">&rarr;</span></a>
   </div>
 </nav>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="badge">LONDON UNDERGROUND PLANNER</div>
-  <h1>Plan Your <span>Route.</span></h1>
-  <p>Enter any two London stations. We query TfL live, find tube-only routes, and show you disruptions in real time.</p>
-</div>
+<header class="hero">
+  <div class="badge">London Underground planner</div>
+  <h1>Plan your <span>route.</span></h1>
+  <p>Enter any two London stations. We query TfL live, find Tube and Elizabeth line routes, and show you disruptions in real time.</p>
+</header>
 
-<!-- PLANNER FORM -->
 <div class="planner">
   <div class="planner-card">
-    <div class="card-title">// ENTER YOUR JOURNEY</div>
+    <div class="card-title">Enter your journey</div>
 
-    <div class="form-row">
-      <label>FROM — ORIGIN STATION OR ADDRESS</label>
+    <div class="field">
+      <label for="from-input">From: origin station or address</label>
       <div class="input-wrap">
         <input type="text" id="from-input" placeholder="e.g. Highgate" autocomplete="off">
         <div class="autocomplete" id="from-ac"></div>
       </div>
     </div>
 
-    <div class="form-row">
-      <label>TO — DESTINATION STATION OR ADDRESS</label>
+    <div class="field">
+      <label for="to-input">To: destination station or address</label>
       <div class="input-wrap">
         <input type="text" id="to-input" placeholder="e.g. Mansion House" autocomplete="off">
         <div class="autocomplete" id="to-ac"></div>
       </div>
     </div>
 
-    <div class="form-row-2">
-      <div class="form-row" style="margin-bottom:0;">
-        <label>DATE</label>
-        <div class="input-wrap">
-          <input type="text" id="date-input" class="date-display" placeholder="DD/MM/YY" readonly autocomplete="off">
-          <div class="calendar-pop" id="cal-pop">
-            <div class="cal-head">
-              <div class="cal-nav" id="cal-prev">&#x2039;</div>
-              <div class="cal-title" id="cal-title"></div>
-              <div class="cal-nav" id="cal-next">&#x203A;</div>
-            </div>
-            <div class="cal-grid" id="cal-grid"></div>
-            <div class="cal-foot">
-              <button type="button" class="cal-today-btn" id="cal-today-btn">TODAY</button>
-            </div>
+    <div class="field">
+      <label for="date-input">Date</label>
+      <div class="input-wrap">
+        <input type="text" id="date-input" class="date-display" placeholder="DD/MM/YY" readonly autocomplete="off">
+        <div class="calendar-pop" id="cal-pop">
+          <div class="cal-head">
+            <div class="cal-nav" id="cal-prev">&#x2039;</div>
+            <div class="cal-title" id="cal-title"></div>
+            <div class="cal-nav" id="cal-next">&#x203A;</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-foot">
+            <button type="button" class="cal-today-btn" id="cal-today-btn">Today</button>
           </div>
         </div>
       </div>
-      <div>
-        <label>TIME</label>
-        <input type="text" id="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off">
-      </div>
     </div>
 
-    <button class="btn-plan" id="plan-btn" onclick="planJourney()">PLAN JOURNEY</button>
-  </div>
+    <div class="field">
+      <label for="time-input">Time</label>
+      <input type="text" id="time-input" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off">
+    </div>
 
-  <!-- Error -->
-  <div class="error-state" id="error-state">
-    <p id="error-msg"></p>
+
+    <button class="btn-plan" id="plan-btn" onclick="planJourney()">Plan journey <span class="arr">&rarr;</span></button>
+
+    <div class="error-state" id="error-state">
+      <p id="error-msg"></p>
+    </div>
   </div>
 </div>
 
-<!-- Loading -->
-<div class="loading-state" id="loading-state" style="max-width:720px;margin:0 auto;">
+<div class="loading-state" id="loading-state" style="max-width:1120px;margin:0 auto;">
   <div class="spinner-big"></div>
-  <div class="loading-txt" id="loading-txt">QUERYING TFL API...</div>
+  <div class="loading-txt" id="loading-txt">Querying the TfL API…</div>
 </div>
 
-<!-- Results -->
-<div class="results" id="results">
-
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+<main class="results" id="results">
+  <div class="results-head">
     <div>
-      <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--text-dim);margin-bottom:4px;">// ROUTE FOUND</div>
-      <div style="font-size:14px;letter-spacing:.5px;" id="results-heading"></div>
+      <div class="results-kicker" id="results-kicker">Route found</div>
+      <div class="results-title" id="results-heading"></div>
     </div>
-    <button onclick="resetForm()" style="background:none;border:1px solid var(--border2);color:var(--text-mid);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;padding:6px 14px;">&#x21A9; NEW SEARCH</button>
+    <button class="btn-ghost" onclick="resetForm()">&#x21A9; New search</button>
   </div>
 
-  <!-- Journey option tabs -->
   <div class="journey-tabs" id="journey-tabs"></div>
-
-  <!-- Active journey detail -->
   <div class="journey-detail" id="journey-detail"></div>
 
-  <!-- Line status for lines used -->
-  <div class="line-status-strip" id="line-status-strip" style="background:var(--bg2);border:1px solid var(--border2);margin-top:16px;">
-    <div class="lss-title">LIVE LINE STATUS</div>
+  <div class="line-status-strip" id="line-status-strip">
+    <div class="lss-title">Live line status</div>
     <div id="lss-rows">
-      <div style="font-size:11px;color:var(--text-dim);padding:8px 0;">Loading status...</div>
+      <div style="font-size:14px;color:var(--text-dim);padding:8px 0;">Loading status…</div>
     </div>
   </div>
-</div>
+</main>
 
 <footer>
-  * journey data sourced live from the TfL Unified API<br>
-  ** tube-only routes shown — bus/walking legs filtered where possible<br>
-  *** always confirm times with Citymapper or the TfL app before travel<br>
-  ILAN.BLOXXER.DEV &nbsp;|&nbsp; Created with the use of AI &nbsp;|&nbsp; <span class="blink">_</span>
+  Journey data comes live from the TfL Unified API.<br>
+  Tube and Elizabeth line routes are shown, with walking links where needed. Buses are left out.<br>
+  Always confirm times with Citymapper or the TfL app before you travel.<br>
+  ilan.bloxxer.dev &nbsp;|&nbsp; Created with the use of AI &nbsp;|&nbsp; <span class="blink">_</span>
 </footer>
 
 <div id="toast"></div>
-<a href="https://discord.gg/vfW7kdccHK" target="_blank" rel="noopener" class="discord-fab" title="Join the Discord">
-  <span class="discord-fab-ring"></span>
+<a href="https://discord.gg/vfW7kdccHK" target="_blank" rel="noopener" class="discord-fab" title="Join the Discord" aria-label="Join the Discord">
   <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
     <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.07.07 0 0 0-.073.035c-.211.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.07.07 0 0 0-.073-.035A19.74 19.74 0 0 0 3.68 4.37a.064.064 0 0 0-.03.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.055 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.01c.12.099.246.197.373.291a.077.077 0 0 1-.006.128 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.106c.36.698.772 1.364 1.225 1.994a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.673-3.549-13.66a.061.061 0 0 0-.03-.028ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.955 2.419-2.157 2.419Zm7.974 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.946 2.419-2.157 2.419Z"/>
   </svg>
@@ -400,15 +305,14 @@ footer{border-top:1px solid var(--border);padding:28px 40px;text-align:center;fo
 
 // ─── Cursor ───────────────────────────────────────────────────────────────────
 (function(){
-  var o=document.getElementById('cursor-outer'),i=document.getElementById('cursor-inner');
-  if(!o||!i)return;
-  var mx=0,my=0,ox=0,oy=0;
-  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;i.style.left=mx+'px';i.style.top=my+'px';});
-  (function a(){ox+=(mx-ox)*.12;oy+=(my-oy)*.12;o.style.left=Math.round(ox*10)/10+'px';o.style.top=Math.round(oy*10)/10+'px';requestAnimationFrame(a);})();
-  function addH(el){el.addEventListener('mouseenter',function(){document.body.classList.add('ch');});el.addEventListener('mouseleave',function(){document.body.classList.remove('ch');});}
-  function addT(el){el.addEventListener('mouseenter',function(){document.body.classList.add('ct');});el.addEventListener('mouseleave',function(){document.body.classList.remove('ct');});}
-  document.querySelectorAll('a,button,.jtab,.cal-nav,.cal-day:not(.cal-day-empty),.cal-today-btn,.date-display').forEach(addH);
-  document.querySelectorAll('input,select').forEach(addT);
+  var o=document.getElementById('cursor-outer');
+  if(!o)return;
+  var GREEN='a.cta,.btn-plan:not(:disabled),.discord-fab,.jtab.active,.cal-day-selected,.cal-nav:hover';
+  document.addEventListener('mousemove',function(e){o.style.left=e.clientX+'px';o.style.top=e.clientY+'px';});
+  document.addEventListener('mouseover',function(e){var t=e.target;document.body.classList.toggle('cg',!!t.closest(GREEN));document.body.classList.toggle('ct',!!t.closest('input'));});
+  document.addEventListener('mouseleave',function(){document.body.classList.remove('cg');});
+  document.addEventListener('mousedown',function(e){document.body.classList.add('cd');if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;var r=document.createElement('span');r.className='ripple';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';if(e.target.closest(GREEN))r.style.borderColor='#04130b';document.body.appendChild(r);setTimeout(function(){r.remove();},800);});
+  document.addEventListener('mouseup',function(){document.body.classList.remove('cd');});
 })();
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
@@ -434,11 +338,38 @@ var LINE_COLOURS={
   'elizabeth':    {bg:'#6950A1',fg:'#fff'},
   'dlr':          {bg:'#00A4A7',fg:'#fff'},
   'overground':   {bg:'#EE7C0E',fg:'#fff'},
+  'tram':         {bg:'#84B817',fg:'#000'},
+  'lioness':      {bg:'#FFA600',fg:'#000'},
+  'mildmay':      {bg:'#0071CE',fg:'#fff'},
+  'windrush':     {bg:'#DC241F',fg:'#fff'},
+  'weaver':       {bg:'#9B0069',fg:'#fff'},
+  'suffragette':  {bg:'#5BB379',fg:'#000'},
+  'liberty':      {bg:'#61686B',fg:'#fff'},
+  'thameslink':   {bg:'#E9438A',fg:'#fff'},
+  'southern':     {bg:'#8CC63E',fg:'#000'},
+  'southeastern': {bg:'#389CFF',fg:'#000'},
+  'great-northern':{bg:'#8B3A9A',fg:'#fff'},
+  'c2c':          {bg:'#B7007C',fg:'#fff'},
+  'chiltern':     {bg:'#00A0E2',fg:'#000'},
+  'greater-anglia':{bg:'#D70428',fg:'#fff'},
+  'gatwick-express':{bg:'#EE2737',fg:'#fff'},
+  'heathrow-express':{bg:'#532E63',fg:'#fff'},
+  'south-western-railway':{bg:'#24398C',fg:'#fff'},
+  'london-northwestern-railway':{bg:'#00BF6F',fg:'#000'}
 };
+// when a line isn't listed, colour it by the kind of service it is
+var MODE_COLOURS={
+  'national-rail':{bg:'#9FB3C8',fg:'#04130b'},
+  'tube':{bg:'#9FB3C8',fg:'#04130b'},
+  'overground':{bg:'#EE7C0E',fg:'#fff'},
+  'dlr':{bg:'#00A4A7',fg:'#fff'},
+  'tram':{bg:'#84B817',fg:'#000'},
+  'elizabeth-line':{bg:'#6950A1',fg:'#fff'}
+};
+var modeOfLine={}; // line id -> the mode TfL says it runs as, filled in from the journey legs
 
 function lineColour(id){
-  var c=LINE_COLOURS[id]||{bg:'#00ff8830',fg:'#00ff88'};
-  return c;
+  return LINE_COLOURS[id]||MODE_COLOURS[modeOfLine[id]]||{bg:'#5ee3a1',fg:'#04130b'};
 }
 
 function lineName(id){
@@ -447,9 +378,35 @@ function lineName(id){
     'district':'District','hammersmith-city':'Hammersmith & City',
     'jubilee':'Jubilee','metropolitan':'Metropolitan','northern':'Northern',
     'piccadilly':'Piccadilly','victoria':'Victoria','waterloo-city':'Waterloo & City',
-    'elizabeth':'Elizabeth','dlr':'DLR','overground':'Overground'
+    'elizabeth':'Elizabeth line','dlr':'DLR','overground':'Overground','tram':'London Trams',
+    'thameslink':'Thameslink','southern':'Southern','southeastern':'Southeastern','great-northern':'Great Northern',
+    'c2c':'c2c','chiltern':'Chiltern Railways','greater-anglia':'Greater Anglia','gatwick-express':'Gatwick Express',
+    'heathrow-express':'Heathrow Express','south-western-railway':'South Western Railway',
+    'london-northwestern-railway':'London Northwestern Railway'
   };
-  return names[id]||(id.charAt(0).toUpperCase()+id.slice(1));
+  return names[id]||id.split('-').map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(' ');
+}
+
+// ─── TfL fetch: 12s timeout, retries on network errors, rate limits (429) and server errors (5xx) ───
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function tflFetch(url,tries){
+  tries=tries||3;
+  var attempt=0;
+  function go(){
+    attempt++;
+    var ctrl=new AbortController();
+    var timer=setTimeout(function(){ctrl.abort();},12000);
+    return fetch(url,{signal:ctrl.signal}).then(function(r){
+      clearTimeout(timer);
+      if((r.status===429||r.status>=500)&&attempt<tries)return sleep(800*attempt).then(go);
+      return r;
+    }).catch(function(err){
+      clearTimeout(timer);
+      if(attempt<tries)return sleep(800*attempt).then(go);
+      throw err;
+    });
+  }
+  return go();
 }
 
 // ─── Autocomplete ─────────────────────────────────────────────────────────────
@@ -461,6 +418,7 @@ function setupAC(inputId,acId){
   var selIdx=-1;
 
   inp.addEventListener('input',function(){
+    delete inp.dataset.naptan; delete inp.dataset.ids; // typing again invalidates the station picked earlier
     clearTimeout(acTimers[inputId]);
     var q=inp.value.trim();
     if(q.length<2){ac.innerHTML='';ac.classList.remove('open');return;}
@@ -485,9 +443,10 @@ function highlight(items,idx){
 }
 
 function fetchAC(q,ac,inp){
-  fetch('https://api.tfl.gov.uk/StopPoint/Search/'+encodeURIComponent(q)+'?modes=tube,elizabeth-line,overground,dlr&maxResults=6')
-    .then(function(r){return r.json();})
+  tflFetch('https://api.tfl.gov.uk/StopPoint/Search/'+encodeURIComponent(q)+'?modes=tube,elizabeth-line&maxResults=8',2)
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(data){
+      if(inp.value.trim()!==q)return; // a newer search has replaced this one
       var matches=(data.matches||[]);
       if(!matches.length){ac.classList.remove('open');return;}
       ac.innerHTML='';
@@ -495,10 +454,14 @@ function fetchAC(q,ac,inp){
         var div=document.createElement('div');
         div.className='ac-item';
         var zone=m.zone?'Z'+m.zone:'';
-        div.innerHTML='<span>'+escH(m.name)+'</span><span class="ac-zone">'+escH(zone)+'</span>';
+        var MODE_LBL={'tube':'Tube','national-rail':'National Rail','elizabeth-line':'Elizabeth line','overground':'Overground','dlr':'DLR','tram':'Tram'};
+        var kinds=(m.modes||[]).map(function(x){return MODE_LBL[x];}).filter(Boolean).join(', ');
+        div.innerHTML='<span>'+escH(m.name)+'</span><span class="ac-zone">'+escH(zone)+'</span>'+(kinds?'<div class="ac-line">'+escH(kinds)+'</div>':'');
         div.addEventListener('click',function(){
           inp.value=m.name;
+          // Keep every id TfL gave for this station. The journey request tries the station-wide hub id first (it covers Tube and rail platforms) and falls back to the others if TfL rejects it.
           inp.dataset.naptan=m.id;
+          inp.dataset.ids=JSON.stringify(idList(m));
           ac.innerHTML='';ac.classList.remove('open');
         });
         ac.appendChild(div);
@@ -506,6 +469,15 @@ function fetchAC(q,ac,inp){
       ac.classList.add('open');
     })
     .catch(function(){ac.classList.remove('open');});
+}
+
+function idList(m){
+  var out=[];
+  // The station's full name goes first: TfL resolves an exact station name reliably, whereas the stop id on its own has been refused.
+  if(m.name)out.push(String(m.name));
+  if(m.id)out.push(String(m.id));
+  if(m.icsCode&&/^\d+$/.test(String(m.icsCode)))out.push(String(m.icsCode));
+  return out;
 }
 
 function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -519,8 +491,8 @@ var selectedDate = new Date();
 var calViewYear = selectedDate.getFullYear();
 var calViewMonth = selectedDate.getMonth(); // 0-indexed
 
-var MONTH_NAMES=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
-var DOW_NAMES=['MO','TU','WE','TH','FR','SA','SU'];
+var MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DOW_NAMES=['Mo','Tu','We','Th','Fr','Sa','Su'];
 
 function pad2(n){return String(n).padStart(2,'0');}
 
@@ -600,12 +572,15 @@ function makeDayCell(dayNum,cellDate,dim){
   var today=new Date();
   if(isSameDay(cellDate,today))el.classList.add('cal-day-today');
   if(isSameDay(cellDate,selectedDate))el.classList.add('cal-day-selected');
+  var startToday=new Date();startToday.setHours(0,0,0,0);
+  if(cellDate<startToday){el.classList.add('cal-day-past');return el;} // earlier days can't be picked
 
   el.addEventListener('click',function(){
     selectedDate=cellDate;
     calViewYear=cellDate.getFullYear();
     calViewMonth=cellDate.getMonth();
     updateDateInput();
+    ensureNotPast(true);
     renderCalendar();
     closeCalendar();
   });
@@ -695,20 +670,83 @@ document.addEventListener('click',function(e){
   });
 })();
 
+// ─── Keep the departure out of the past ───────────────────────────────────────
+// A departure counts as past once it is more than a minute behind the clock. If the time was never edited it
+// quietly follows "now"; if the person typed it, they are told when it is moved.
+var PAST_GRACE=60000;
+var timeTouched=false;
+(function(){
+  var timeInp=document.getElementById('time-input');
+  timeInp.addEventListener('input',function(){timeTouched=true;});
+  timeInp.addEventListener('blur',function(){ensureNotPast(true);});
+})();
+function pickedDateTime(){
+  var v=document.getElementById('time-input').value.replace(/\D/g,'');
+  if(v.length<4)return null;
+  return new Date(selectedDate.getFullYear(),selectedDate.getMonth(),selectedDate.getDate(),+v.slice(0,2),+v.slice(2,4));
+}
+function setDepartureNow(){
+  var n=new Date();
+  selectedDate=new Date(n);
+  calViewYear=n.getFullYear();calViewMonth=n.getMonth();
+  updateDateInput();
+  var t=pad2(n.getHours())+':'+pad2(n.getMinutes());
+  var ti=document.getElementById('time-input');
+  ti.value=t;ti.placeholder=t;
+  timeTouched=false;
+  if(document.getElementById('cal-pop').classList.contains('open'))renderCalendar();
+}
+function ensureNotPast(announce){
+  var now=new Date(),d=pickedDateTime(),past=false;
+  if(d){past=now.getTime()-d.getTime()>PAST_GRACE;}
+  else{
+    var sd=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),selectedDate.getDate());
+    var t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    past=sd<t0;
+  }
+  if(!past)return false;
+  setDepartureNow();
+  if(announce)toast('That departure time had passed, so it is set to now.');
+  return true;
+}
+function checkDepartureClock(){
+  if(document.activeElement===document.getElementById('time-input'))return; // don't change it while someone is typing
+  ensureNotPast(timeTouched);
+}
+setInterval(checkDepartureClock,15000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)checkDepartureClock();});
+
 // ─── Plan Journey ─────────────────────────────────────────────────────────────
 var currentJourneys=[];
 var activeTab=0;
 var linesUsed=[];
+
+function resolvePlace(inputId,text){
+  var inp=document.getElementById(inputId);
+  if(inp.dataset.ids)return Promise.resolve(JSON.parse(inp.dataset.ids));
+  return tflFetch('https://api.tfl.gov.uk/StopPoint/Search/'+encodeURIComponent(text)+'?modes=tube,elizabeth-line&maxResults=8',2)
+    .then(function(r){if(!r.ok){var e=new Error('HTTP '+r.status);e.status=r.status;throw e;}return r.json();})
+    .then(function(d){
+      var ms=d.matches||[];
+      if(!ms.length){var e=new Error('not found');e.status=404;throw e;}
+      var norm=function(s){return s.toLowerCase().replace(/\b(underground|rail|dlr|tram|station|stop)\b/g,'').replace(/[^a-z0-9]+/g,' ').trim();};
+      var want=norm(text);
+      var exact=ms.filter(function(m){return norm(m.name)===want;});
+      var pick=(exact.length?exact:ms)[0];
+      return idList(pick);
+    });
+}
 
 function planJourney(){
   var fromVal=document.getElementById('from-input').value.trim();
   var toVal=document.getElementById('to-input').value.trim();
   if(!fromVal||!toVal){toast('⚠ Please enter both origin and destination.');return;}
 
+  ensureNotPast(true);
   var dateRaw=formatApiDate(selectedDate);
   var timeRaw=document.getElementById('time-input').value.replace(/\D/g,'')||getNowStr();
 
-  showLoading('QUERYING TFL API...');
+  showLoading('Querying the TfL API…');
   hideError();hideResults();
 
   // Build TfL journey planner URL
@@ -716,35 +754,156 @@ function planJourney(){
   var fromEnc=document.getElementById('from-input').dataset.naptan||encodeURIComponent(fromVal);
   var toEnc=document.getElementById('to-input').dataset.naptan||encodeURIComponent(toVal);
 
-  var url='https://api.tfl.gov.uk/Journey/JourneyResults/'+fromEnc+'/to/'+toEnc
-    +'?date='+dateRaw+'&time='+timeRaw
-    +'&timeIs=Departing'
-    +'&mode=tube,elizabeth-line,walking'
-    +'&walkingSpeed=Average'
-    +'&journeyPreference=LeastTime'
-    +'&alternatives=true';
-
-  fetch(url)
-    .then(function(r){
-      if(!r.ok)throw new Error('HTTP '+r.status);
+  // TfL answers "No journey found" when it dislikes some part of the request, so we step down through simpler versions:
+  // 0 full search, 1 fewer options, 2 no date or time (leave now). Always Tube, Elizabeth line and walking only.
+  var variantUsed=0;
+  function journeyURL(f,t,v){
+    var base='https://api.tfl.gov.uk/Journey/JourneyResults/'+f+'/to/'+t;
+    if(v===2)return base+'?mode=tube,elizabeth-line,walking';
+    if(v===1)return base+'?date='+dateRaw+'&time='+timeRaw+'&timeIs=Departing&mode=tube,elizabeth-line,walking';
+    return base+'?date='+dateRaw+'&time='+timeRaw
+      +'&timeIs=Departing'
+      +'&mode=tube,elizabeth-line,walking'
+      +'&walkingSpeed=Average'
+      +'&journeyPreference=LeastTime'
+      +'&alternatives=true';
+  }
+  // When a place name is ambiguous TfL answers 300 with a list: take its best match and ask again once.
+  function bestOption(dis,current){
+    if(!dis||dis.matchStatus!=='list'||!dis.disambiguationOptions||!dis.disambiguationOptions.length)return current;
+    var opts=dis.disambiguationOptions.filter(function(o){return o.place&&/StopPoint/i.test(o.place.placeType||'');})
+      .sort(function(a,b){return (b.matchQuality||0)-(a.matchQuality||0);});
+    if(!opts.length)return current; // no station among the options: don't guess an address
+    return encodeURIComponent(opts[0].parameterValue);
+  }
+  function request(f,t,canRetry,v){
+    return tflFetch(journeyURL(f,t,v)).then(function(r){
+      if(r.status===300){
+        return r.json().then(function(d){
+          if(!canRetry){var amb=new Error('ambiguous');amb.status=404;throw amb;}
+          return request(bestOption(d.fromLocationDisambiguation,f),bestOption(d.toLocationDisambiguation,t),false,v);
+        });
+      }
+      if(!r.ok){
+        return r.json().catch(function(){return {};}).then(function(b){
+          var err=new Error('HTTP '+r.status);err.status=r.status;err.apiMessage=b&&b.message;throw err;
+        });
+      }
       return r.json();
-    })
+    });
+  }
+
+  // A journey only counts if every leg is Tube / Elizabeth line / walking and it really starts and ends at the stations picked.
+  var OK_MODES=['tube','elizabeth-line','walking'];
+  function norm(s){return String(s||'').toLowerCase().replace(/\b(underground|station|dlr|rail)\b/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+  function sameStop(point,typed,ids){
+    if(!point)return false;
+    if(point.naptanId&&ids.indexOf(String(point.naptanId))>-1)return true;
+    if(point.icsCode&&ids.indexOf(String(point.icsCode))>-1)return true;
+    // the full station name we resolved (first id in the list) counts as a match too
+    if(ids[0]&&norm(point.commonName)===norm(ids[0]))return true;
+    // names must match exactly once "Underground Station" is ignored, so "Blackfriars Pier" is not "Blackfriars"
+    var a=norm(point.commonName),b=norm(typed);
+    if(!!a&&a===b)return true;
+    // a real Tube / Elizabeth line stop (ids starting 940G) whose name starts the same way; piers (930G), bus stops and street addresses don't qualify
+    return /^940G/.test(String(point.naptanId||''))&&!!a&&!!b&&(a.indexOf(b)===0||b.indexOf(a)===0);
+  }
+  // TfL sometimes resolves a station name to something next door (e.g. Blackfriars Pier) and adds a walk to it.
+  // If the Tube part already reaches the station that was picked, drop the extra walk at either end.
+  function trimJourney(j,a,b){
+    var legs=(j.legs||[]).slice();
+    if(legs.length<2)return j;
+    var out=Object.assign({},j),removed=0;
+    while(legs.length>1&&legs[legs.length-1].mode&&legs[legs.length-1].mode.id==='walking'
+          &&!sameStop(legs[legs.length-1].arrivalPoint,toVal,b)&&sameStop(legs[legs.length-2].arrivalPoint,toVal,b)){
+      removed+=legs.pop().duration||0;
+      out.arrivalDateTime=legs[legs.length-1].arrivalTime||out.arrivalDateTime;
+    }
+    while(legs.length>1&&legs[0].mode&&legs[0].mode.id==='walking'
+          &&!sameStop(legs[0].departurePoint,fromVal,a)&&sameStop(legs[1].departurePoint,fromVal,a)){
+      removed+=legs.shift().duration||0;
+      out.startDateTime=legs[0].departureTime||out.startDateTime;
+    }
+    out.legs=legs;
+    if(removed&&out.duration)out.duration=Math.max(1,out.duration-removed);
+    return out;
+  }
+  var rejectedInfo='';
+  function describeJourney(j){
+    if(!j||!j.legs||!j.legs.length)return '';
+    var legs=j.legs,modes=[];
+    legs.forEach(function(l){var m=l.mode&&l.mode.id;if(m&&modes.indexOf(m)===-1)modes.push(m);});
+    var f=legs[0].departurePoint&&legs[0].departurePoint.commonName,t=legs[legs.length-1].arrivalPoint&&legs[legs.length-1].arrivalPoint.commonName;
+    return (f||'?')+' to '+(t||'?')+' ('+modes.join(', ')+')';
+  }
+  function validJourney(j,a,b){
+    var legs=j.legs||[];
+    if(!legs.length)return false;
+    for(var k=0;k<legs.length;k++){
+      var m=legs[k].mode&&legs[k].mode.id;
+      if(OK_MODES.indexOf(m)===-1)return false;
+    }
+    return sameStop(legs[0].departurePoint,fromVal,a)&&sameStop(legs[legs.length-1].arrivalPoint,toVal,b);
+  }
+
+  // Try the id sets in order; move on when TfL says it can't find the place or has no route for it.
+  function tryRequests(a,b){
+    var n=Math.max(a.length,b.length),i=0,v=0,lastData=null,lastErr=null;
+    function next(){
+      if(i>=n){
+        if(lastData)return lastData;
+        throw lastErr||Object.assign(new Error('not found'),{status:404});
+      }
+      var f=encodeURIComponent(a[Math.min(i,a.length-1)]),t=encodeURIComponent(b[Math.min(i,b.length-1)]);
+      var thisV=v;
+      v++;if(v>2){v=0;i++;}
+      return request(f,t,true,thisV).then(function(d){
+        var ok=(d.journeys||[]).map(function(j){return trimJourney(j,a,b);}).filter(function(j){return validJourney(j,a,b);});
+        if(ok.length){d.journeys=ok;variantUsed=thisV;return d;}
+        if(!rejectedInfo)rejectedInfo=describeJourney((d.journeys||[])[0]);
+        lastData={journeys:[]};return next();
+      },function(e){
+        if(e.status===404||e.status===400){lastErr=e;return next();}
+        throw e;
+      });
+    }
+    return next();
+  }
+
+  Promise.all([resolvePlace('from-input',fromVal),resolvePlace('to-input',toVal)])
+    .then(function(c){return tryRequests(c[0],c[1]);})
     .then(function(data){
       hideLoading();
       if(!data.journeys||!data.journeys.length){
-        showError('No tube routes found between these locations. Try station names, or check spelling.');
+        showError('TfL did not return a Tube route between those two stations.'+(rejectedInfo?' It offered: '+rejectedInfo+', which does not fit.':'')+' Try different stations or another time.');
         return;
       }
+      // shortest journey first, then the next fastest
+      data.journeys.sort(function(x,y){return ((x.duration||0)-(y.duration||0))||String(x.arrivalDateTime).localeCompare(String(y.arrivalDateTime));});
       currentJourneys=data.journeys.slice(0,3);
       activeTab=0;
       renderResults(fromVal,toVal);
+      document.getElementById('results-kicker').textContent=[
+        'Route found',
+        'Route found, using simpler search settings',
+        'Route found for right now, because TfL had nothing for the date and time you chose'
+      ][variantUsed];
     })
     .catch(function(e){
       hideLoading();
-      if(e.message&&e.message.includes('404')){
-        showError('Could not find one or both locations. Please try typing a station name from the autocomplete list.');
+      var s=e.status;
+      if(s===404){
+        showError('TfL could not plan this journey between those two stations.'+(e.apiMessage?' TfL says: '+e.apiMessage:'')+' Pick Tube stations from the suggestion list.');
+      } else if(s===400){
+        showError('TfL could not plan that journey. Check the stations, date and time, then try again.');
+      } else if(s===429){
+        showError('TfL is getting a lot of requests right now. Wait a few seconds and try again.');
+      } else if(s>=500){
+        showError('The TfL journey service is having problems. Try again in a minute.');
+      } else if(e.name==='AbortError'){
+        showError('TfL took too long to answer. Try again.');
       } else {
-        showError('TfL API error. Check your connection or try again in a moment. ('+(e.message||'network error')+')');
+        showError('Could not reach TfL. Check your connection and try again.');
       }
     });
 }
@@ -769,7 +928,7 @@ function renderTabs(){
     var arr=fmtTime(j.arrivalDateTime);
     var d=document.createElement('div');
     d.className='jtab'+(i===activeTab?' active':'');
-    d.innerHTML='<span class="jtab-time">'+dur+' min</span>'
+    d.innerHTML=(i===0&&currentJourneys.length>1?'<span class="jtab-tag">Fastest</span>':'')+'<span class="jtab-time">'+dur+' min</span>'
       +'<span style="font-size:10px;letter-spacing:1px;">'+dep+' → '+arr+'</span>';
     (function(idx){d.addEventListener('click',function(){activeTab=idx;renderTabs();renderActiveJourney();});})(i);
     tabs.appendChild(d);
@@ -790,6 +949,7 @@ function renderActiveJourney(){
         if(ro.lineIdentifier&&ro.lineIdentifier.id){
           var lid=ro.lineIdentifier.id.toLowerCase();
           if(linesUsed.indexOf(lid)===-1)linesUsed.push(lid);
+          modeOfLine[lid]=(leg.mode&&leg.mode.id)||'';
         }
       });
     }
@@ -807,10 +967,10 @@ function renderActiveJourney(){
   if(changes>0)changes--;
 
   var html='<div class="journey-summary">'
-    +'<div class="js-stat"><div class="js-val">'+j.duration+'</div><div class="js-label">TOTAL MINS</div></div>'
-    +'<div class="js-stat"><div class="js-val yellow">'+stops+'</div><div class="js-label">STOPS</div></div>'
-    +'<div class="js-stat"><div class="js-val">'+Math.max(0,changes)+'</div><div class="js-label">CHANGES</div></div>'
-    +'<div class="js-stat"><div class="js-val">'+walkMins+'</div><div class="js-label">WALK MINS</div></div>'
+    +'<div class="js-stat"><div class="js-val">'+j.duration+'</div><div class="js-label">Total minutes</div></div>'
+    +'<div class="js-stat"><div class="js-val yellow">'+stops+'</div><div class="js-label">Stops</div></div>'
+    +'<div class="js-stat"><div class="js-val">'+Math.max(0,changes)+'</div><div class="js-label">Changes</div></div>'
+    +'<div class="js-stat"><div class="js-val">'+walkMins+'</div><div class="js-label">Walking minutes</div></div>'
     +'</div>';
 
   html+='<div class="steps-wrap">';
@@ -834,7 +994,7 @@ function renderActiveJourney(){
     var c=lineColour(lineId);
     var pillStyle=mode!=='walking'
       ?'background:'+c.bg+';color:'+c.fg+';border:1px solid '+c.bg+';'
-      :'background:rgba(0,255,136,.05);color:var(--text-mid);border:1px solid var(--border2);';
+      :'background:rgba(94,227,161,.08);color:var(--text-mid);border:1px solid var(--border2);';
 
     var stopPoints=leg.path&&leg.path.stopPoints?leg.path.stopPoints:[];
     var intermediateCount=Math.max(0,stopPoints.length-1);
@@ -854,16 +1014,16 @@ function renderActiveJourney(){
       +'<div class="step-name" style="color:'+(mode==='walking'?'var(--text-mid)':'var(--green)')+';">'+escH(depName)+'</div>'
       +'<div class="step-sub">'+dep
         +(mode==='walking'
-          ? ' &mdash; Walk '+leg.duration+' min ('+fmtDist(leg.path)+')'
+          ? ' &mdash; Walk '+leg.duration+' min'
           : ' &mdash; '+escH(lineLbl)+stopsNote+' &mdash; '+leg.duration+' min')
         +'</div>';
 
     if(mode!=='walking'){
       var dir=leg.instruction&&leg.instruction.detailed?leg.instruction.detailed:'';
       if(dir)html+='<div class="step-sub" style="color:var(--text-dim);font-size:10px;margin-top:2px;">'+escH(dir)+'</div>';
-      html+='<span class="step-pill" style="'+pillStyle+'">&#x25CF; '+escH((lineLbl||'TUBE').toUpperCase())+'</span>';
+      html+='<span class="step-pill" style="'+pillStyle+'">&#x25CF; '+escH((lineLbl||'Tube'))+'</span>';
     } else {
-      html+='<span class="step-pill" style="background:rgba(0,255,136,.05);color:var(--text-mid);border:1px solid var(--border2);">&#x1F6B6; WALK '+leg.duration+' MIN</span>';
+      html+='<span class="step-pill" style="background:rgba(94,227,161,.08);color:var(--text-mid);border:1px solid var(--border2);">&#x1F6B6; Walk '+leg.duration+' min</span>';
     }
 
     html+='</div></div>';
@@ -883,17 +1043,11 @@ function renderActiveJourney(){
 
   html+='</div>';
 
-  html+='<div class="disclaimer">'
-    +'* '+fmtTime(j.startDateTime)+' dep &nbsp;|&nbsp; '+fmtTime(j.arrivalDateTime)+' arr'
-    +' &nbsp;|&nbsp; data via TfL Unified API &nbsp;|&nbsp; always verify with Citymapper'
-    +'</div>';
-
   document.getElementById('journey-detail').innerHTML=html;
 }
 
 function colorHex(lineId){
-  var c=LINE_COLOURS[lineId];
-  return c?c.bg.replace('#',''):'00ff8830';
+  return lineColour(lineId).bg.replace('#','');
 }
 
 function fmtTime(iso){
@@ -909,40 +1063,52 @@ function fmtDist(path){
 }
 
 // ─── Line status for lines used ───────────────────────────────────────────────
+function getStatus(path){
+  return tflFetch('https://api.tfl.gov.uk'+path)
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(d){if(!Array.isArray(d))throw new Error('bad data');return d;});
+}
+function statusRowHtml(id,msg,lbl,cls){
+  var c=lineColour(id);
+  return '<div class="lss-row">'
+    +'<div class="lss-dot" style="background:'+c.bg+';"></div>'
+    +'<span class="lss-name">'+escH(lineName(id))+'</span>'
+    +'<span class="lss-msg">'+escH(msg)+'</span>'
+    +'<span class="lss-badge '+cls+'">'+escH(lbl)+'</span>'
+    +'</div>';
+}
+function lineStatusRow(line){
+  var p=(line.lineStatuses||[])[0]||{};
+  var sn=p.statusSeverityDescription||'Unknown';
+  var reason=p.reason||'';
+  var msg=reason?reason.replace(/^.*?:/,'').trim().split('.')[0]:sn;
+  var ok=sn.toLowerCase().includes('good')||sn.toLowerCase().includes('normal');
+  var warn=!ok&&sn.toLowerCase().includes('minor');
+  return statusRowHtml(line.id.toLowerCase(),msg,ok?'Good service':sn,ok?'status-ok':warn?'status-warn':'status-err');
+}
 function fetchLineStatus(){
-  if(!linesUsed.length){document.getElementById('lss-rows').innerHTML='<div style="font-size:11px;color:var(--text-dim);padding:8px 0;">No tube lines detected.</div>';return;}
-  var ids=linesUsed.join(',');
-  fetch('https://api.tfl.gov.uk/Line/'+encodeURIComponent(ids)+'/Status')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var html='';
-      data.forEach(function(line){
-        var p=(line.lineStatuses||[])[0]||{};
-        var sn=p.statusSeverityDescription||'Unknown';
-        var reason=p.reason||'';
-        var msg=reason?reason.replace(/^.*?:/,'').trim().split('.')[0]:sn;
-        var ok=sn.toLowerCase().includes('good')||sn.toLowerCase().includes('normal');
-        var warn=!ok&&sn.toLowerCase().includes('minor');
-        var cls=ok?'status-ok':warn?'status-warn':'status-err';
-        var lbl=ok?'GOOD SERVICE':sn.toUpperCase();
-        var c=lineColour(line.id.toLowerCase());
-        html+='<div class="lss-row">'
-          +'<div class="lss-dot" style="background:'+c.bg+';"></div>'
-          +'<span class="lss-name">'+escH(lineName(line.id.toLowerCase()))+'</span>'
-          +'<span class="lss-msg">'+escH(msg)+'</span>'
-          +'<span class="lss-badge '+cls+'">'+escH(lbl)+'</span>'
-          +'</div>';
-      });
-      document.getElementById('lss-rows').innerHTML=html||'<div style="font-size:11px;color:var(--text-dim);">No status data.</div>';
-    })
-    .catch(function(){
-      document.getElementById('lss-rows').innerHTML='<div style="font-size:11px;color:var(--red);">Could not fetch line status.</div>';
+  var box=document.getElementById('lss-rows');
+  if(!linesUsed.length){box.innerHTML='<div style="font-size:14px;color:var(--text-dim);padding:8px 0;">No rail lines detected.</div>';return;}
+  // TfL lines have a status by id. National Rail operators only appear in TfL's national-rail list, and not all of them do.
+  var tflIds=[],nrIds=[];
+  linesUsed.forEach(function(id){(modeOfLine[id]==='national-rail'?nrIds:tflIds).push(id);});
+  var a=tflIds.length?getStatus('/Line/'+encodeURIComponent(tflIds.join(','))+'/Status').catch(function(){return null;}):Promise.resolve([]);
+  var b=nrIds.length?getStatus('/Line/Mode/national-rail/Status').catch(function(){return null;}):Promise.resolve([]);
+  Promise.all([a,b]).then(function(res){
+    var html='';
+    if(res[0]===null){tflIds.forEach(function(id){html+=statusRowHtml(id,'Could not fetch live status','Unavailable','status-na');});}
+    else{res[0].forEach(function(l){html+=lineStatusRow(l);});}
+    nrIds.forEach(function(id){
+      var found=res[1]&&res[1].filter(function(l){return l.id.toLowerCase()===id;})[0];
+      html+=found?lineStatusRow(found):statusRowHtml(id,res[1]===null?'Could not fetch live status':'TfL has no live status for this operator','Not available','status-na');
     });
+    box.innerHTML=html||'<div style="font-size:14px;color:var(--text-dim);">No status data.</div>';
+  });
 }
 
 // ─── UI helpers ───────────────────────────────────────────────────────────────
 function showLoading(msg){
-  document.getElementById('loading-txt').textContent=msg||'LOADING...';
+  document.getElementById('loading-txt').textContent=msg||'Loading…';
   document.getElementById('loading-state').style.display='block';
   document.getElementById('plan-btn').disabled=true;
 }
@@ -961,8 +1127,8 @@ function resetForm(){
   hideResults();hideError();
   document.getElementById('from-input').value='';
   document.getElementById('to-input').value='';
-  delete document.getElementById('from-input').dataset.naptan;
-  delete document.getElementById('to-input').dataset.naptan;
+  delete document.getElementById('from-input').dataset.naptan; delete document.getElementById('from-input').dataset.ids;
+  delete document.getElementById('to-input').dataset.naptan; delete document.getElementById('to-input').dataset.ids;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -973,5 +1139,6 @@ document.addEventListener('keydown',function(e){
   }
 });
 </script>
+
 </body>
 </html>

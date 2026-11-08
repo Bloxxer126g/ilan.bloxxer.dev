@@ -1,57 +1,137 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Suburani · Vocabulary</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
-:root{--ink:#0b1220;--t:#1463ff;--td:#0b3fb8;--dim:#5b6b82;--line:#c5d0df;--panel:#f8fafc}
-*{box-sizing:border-box}
-body{margin:0;color:var(--ink);background:#e6ebf2;background-image:linear-gradient(#d6dee9 1px,transparent 1px),linear-gradient(90deg,#d6dee9 1px,transparent 1px);background-size:26px 26px;font:15px/1.55 ui-monospace,"JetBrains Mono","Cascadia Code",Consolas,Menlo,monospace}
-#win{max-width:660px;margin:26px auto;border:1px solid var(--ink);background:var(--panel);box-shadow:8px 8px 0 rgba(11,18,32,.14)}
-.tb{display:flex;justify-content:space-between;background:var(--ink);color:#e6ebf2;padding:6px 12px;font-size:12px;letter-spacing:.08em}
-#app{padding:22px 24px 30px}
-@media(max-width:700px){#win{margin:0;box-shadow:none;border-width:0 0 1px}#app{padding:18px 14px 26px}}
-h1{margin:0;font-size:34px;letter-spacing:.14em;font-weight:700}
-.cur{color:var(--t);animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
-.lead{margin:2px 0 8px;color:var(--t)}
-h2{font-size:13px;font-weight:400;color:var(--dim);margin:26px 0 10px;padding-bottom:5px;border-bottom:1px dashed var(--line);letter-spacing:.1em}
-h2 i{font-style:normal;color:var(--t);margin-right:10px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06110c;--card:#0d1e16;--card2:#12281d;--ink:#e7f4ea;--ink2:#c9e3d3;--mut:#8aa596;--line:#1c3528;
+  --blue:#5ee3a1;--blue-soft:#123425;--amber:#f5b94a;--coral:#ff7075;--onacc:#04130b;--accHi:#8ff0c0;
+  --disp:'Sora','Public Sans',system-ui,sans-serif;--body:'Public Sans',system-ui,sans-serif;--r:28px;
+}
+html{background:var(--bg)}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){*{cursor:none!important}}
+
+/* cursor */
+#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:8px;height:8px;border-radius:50%;background:var(--blue);transform:translate(-50%,-50%);transition:width .2s,height .2s,border-radius .2s,background .15s}
+body.cg #cursor-outer{background:var(--onacc)}
+body.ct #cursor-outer{width:3px;height:26px;border-radius:2px}
+body.cd #cursor-outer{width:5px;height:5px}
+.ripple{position:fixed;pointer-events:none;z-index:99998;width:14px;height:14px;border:1.5px solid var(--blue);border-radius:50%;margin:-7px 0 0 -7px;animation:rip .75s ease-out forwards}
+@keyframes rip{from{transform:scale(1);opacity:.9}to{transform:scale(6);opacity:0}}
+@media(hover:none){#cursor-outer{display:none}input{font-size:16px!important}}
+
+/* nav */
+nav{position:sticky;top:14px;z-index:100;max-width:1120px;margin:14px auto 0;padding:8px 8px 8px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(13,30,22,.82);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;width:calc(100% - 32px)}
+.logo{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.3px}
+.logo span{color:var(--blue)}
+.nav-right a{font-size:14px;font-weight:500;background:var(--blue);color:var(--onacc);display:flex;align-items:center;gap:10px;padding:10px 10px 10px 20px;border-radius:999px;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s}
+.nav-right a:hover{background:var(--accHi);transform:translateY(-4px);box-shadow:0 12px 30px rgba(94,227,161,.4)}
+.nav-right a:active{transform:translateY(0) scale(.97);box-shadow:none}
+.arr{width:26px;height:26px;border-radius:50%;background:var(--onacc);color:var(--blue);display:grid;place-items:center;font-size:13px;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.nav-right a:hover .arr{transform:translateX(5px) rotate(-45deg) scale(1.12)}
+
+#win{max-width:1120px;margin:0 auto;padding:0 24px}
+#app{padding:56px 0 24px}
+@media(max-width:560px){#win{padding:0 16px}#app{padding-top:40px}}
+
+/* hero */
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 10px;font-size:13px;font-weight:500;color:var(--mut);margin-bottom:24px}
+.badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(94,227,161,.2)}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(44px,8vw,96px);line-height:1;letter-spacing:-.045em;text-wrap:balance}
+h1 span{color:var(--blue)}
+.lead{margin:20px 0 36px;max-width:56ch;color:var(--mut);font-size:17px;line-height:1.6}
+
+/* setup panels */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:32px}
+.setup{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start}
+.setup .panel:nth-child(3){grid-column:1/-1}
+.setup .panel:nth-child(3) .q2{grid-template-columns:110px 1fr}
+@media(max-width:860px){.setup{grid-template-columns:1fr}}
+/* while quizzing or viewing results, keep the card a comfortable reading width */
+#app:has(.card),#app:has(.res-wrap){max-width:760px;margin:0 auto}
+h2{font-family:var(--disp);font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+h2 i{font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-size:14px;flex-shrink:0}
 .row{display:flex;flex-wrap:wrap;gap:8px}
-.seg,.sq,.opt1{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--ink);cursor:pointer}
-.seg{padding:6px 12px}
-.seg:hover,.sq:hover,.opt1:hover:not(:disabled){border-color:var(--t);color:var(--td);background:#e8f0ff}
-.on,.seg.on:hover,.sq.on:hover{background:var(--t);border-color:var(--t);color:#fff}
-.sq{width:58px;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25}
-.sq b{font-size:19px}.sq span{font-size:11px;opacity:.7}
-.small{font-size:13px;color:var(--dim);margin:10px 0 0}
-.link{background:none;border:0;padding:0;font:inherit;color:var(--td);text-decoration:underline;cursor:pointer}
-.c{text-align:center}.mono{letter-spacing:.02em}
-.q2{display:grid;grid-template-columns:78px 1fr;gap:6px 10px;align-items:center;margin-bottom:10px}
-.q2 label{color:var(--dim);font-size:13px}
-input[type=number]{width:62px;font:inherit;padding:4px;border:1px solid var(--ink);background:#fff;color:var(--ink)}
-input[type=checkbox]{accent-color:var(--t)}
-.pl{max-height:240px;overflow:auto;margin-top:10px;border:1px solid var(--line);padding:6px 12px;background:#fff}
-.pl label{display:flex;gap:8px;padding:3px 0;cursor:pointer}
-.pl .ch{font-size:12px;color:var(--t);margin-top:8px}
-.go{display:block;width:100%;margin-top:24px;background:var(--ink);color:#e6ebf2;border:1px solid var(--ink);padding:13px;font:inherit;font-weight:700;letter-spacing:.14em;cursor:pointer}
-.go:hover:not(:disabled){background:var(--t);border-color:var(--t);color:#fff}
-.go:disabled{opacity:.35;cursor:not-allowed}
-.go.alt{background:transparent;color:var(--ink)}.go.alt:hover:not(:disabled){background:#e8f0ff;color:var(--td);border-color:var(--t)}
-.top{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:14px}
-.card{border:1px solid var(--ink);background:#fff;text-align:center;padding-bottom:18px;position:relative}
-.card:before,.card:after{content:"";position:absolute;width:10px;height:10px;border:2px solid var(--t)}
-.card:before{left:-2px;bottom:-2px;border-width:0 0 2px 2px}.card:after{right:-2px;bottom:-2px;border-width:0 2px 2px 0}
-.band{text-align:left;padding:6px 12px;font-size:12px;letter-spacing:.12em;color:var(--t);border-bottom:1px dashed var(--line)}
-.word{font-size:36px;font-weight:700;line-height:1.25;margin:26px 14px 20px;word-break:break-word}
-.mean{font-size:20px;color:var(--td);margin:0 16px 8px;padding-top:16px;border-top:1px dashed var(--line)}
-.opts{display:grid;gap:8px;padding:0 18px}
-.opt1{padding:10px 14px;text-align:left}
-.opt1.ok{background:#dff5e8;border-color:#0f9d58;color:var(--ink)}.opt1.bad{background:#fde4e4;border-color:#d93025;color:var(--ink)}
-.ans{width:calc(100% - 36px);border:0;border-bottom:2px solid var(--ink);background:transparent;text-align:center;font:inherit;font-size:22px;padding:6px;color:var(--ink);caret-color:var(--t)}
-.ans:focus{outline:0;border-color:var(--t)}
-.fb{min-height:28px;margin:14px 18px 0;font-size:17px;font-weight:700}.fb.ok{color:#0f9d58}.fb.bad{color:#d93025}
-.big{font-size:64px;font-weight:700;text-align:center;color:var(--t);margin:14px 0 0;line-height:1}
-.miss{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line)}
-.btns{display:grid;gap:10px;margin-top:20px}.btns .go{margin:0}
-</style></head><body><div id="win"><div id="app"></div></div>
+.seg,.sq,.opt1{font:inherit;color:var(--ink2);background:var(--bg);border:1px solid var(--line);cursor:pointer;transition:transform .3s cubic-bezier(.2,.8,.2,1),background .2s,color .2s,border-color .2s,box-shadow .3s}
+.seg{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:500}
+.seg:hover,.sq:hover,.opt1:hover:not(:disabled){border-color:var(--blue);color:var(--blue);transform:translateY(-3px);box-shadow:0 10px 24px rgba(94,227,161,.15)}
+.on,.seg.on:hover,.sq.on:hover{background:var(--blue);border-color:var(--blue);color:var(--onacc)}
+.sq{width:68px;height:68px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.sq b{font-family:var(--disp);font-size:19px;font-weight:700}
+.sq span{font-size:11px;opacity:.7}
+.small{font-size:14px;color:var(--mut);margin:14px 0 0}
+.small:first-child{margin-top:0}
+.link{background:none;border:0;padding:0;font:inherit;color:var(--blue);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.link:hover{color:var(--accHi)}
+.c{text-align:center}
+.q2{display:grid;grid-template-columns:90px 1fr;gap:8px 14px;align-items:center;margin-bottom:14px}
+.q2 label{color:var(--mut);font-size:14px;font-weight:500}
+@media(max-width:560px){.q2{grid-template-columns:1fr}}
+input[type=number]{width:72px;font:500 15px var(--body);padding:8px 10px;border:1.5px solid transparent;border-radius:12px;background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s}
+input[type=number]:focus{border-color:var(--blue)}
+input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px}
+.small label{display:inline-flex;align-items:center;gap:8px;color:var(--ink2)}
+.pl{max-height:260px;overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:18px;padding:8px 16px;background:var(--bg);scrollbar-color:var(--line) transparent}
+.pl label{display:flex;gap:10px;padding:5px 0;cursor:pointer;color:var(--ink2)}
+.pl .ch{font-size:13px;font-weight:600;color:var(--blue);margin:12px 0 4px;font-family:var(--disp)}
+
+/* main button */
+.go{display:flex;align-items:center;justify-content:center;width:100%;margin-top:8px;background:var(--blue);color:var(--onacc);border:1px solid var(--blue);padding:16px;border-radius:999px;font:600 16px var(--disp);transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s,color .2s,border-color .2s}
+.go:hover:not(:disabled){background:var(--accHi);border-color:var(--accHi);transform:translateY(-4px);box-shadow:0 12px 30px rgba(94,227,161,.4)}
+.go:active:not(:disabled){transform:translateY(0) scale(.98);box-shadow:none}
+.go:disabled{background:var(--line);border-color:var(--line);color:var(--mut);cursor:not-allowed}
+.go.alt{background:transparent;color:var(--ink2);border-color:var(--line)}
+.go.alt:hover:not(:disabled){background:transparent;color:var(--blue);border-color:var(--blue);box-shadow:0 10px 24px rgba(94,227,161,.2)}
+
+/* quiz */
+.top{display:flex;align-items:center;gap:16px;font-size:14px;color:var(--mut);margin-bottom:18px}
+.prog{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:var(--blue);transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:32px;text-align:center;padding:0 0 26px;overflow:hidden}
+.band{display:inline-block;margin:24px 0 0;padding:6px 14px;font-size:13px;font-weight:600;color:var(--blue);background:var(--blue-soft);border-radius:999px}
+.word{font-family:var(--disp);font-size:clamp(34px,7vw,56px);font-weight:700;letter-spacing:-.03em;line-height:1.15;margin:26px 20px 24px;word-break:break-word}
+.mean{font-size:20px;color:var(--accHi);margin:0 24px;padding-top:20px;border-top:1px solid var(--line)}
+.opts{display:grid;gap:10px;padding:0 24px}
+.opt1{padding:14px 18px;text-align:left;border-radius:18px;font-size:16px;display:flex;align-items:center;gap:14px}
+.opt1 .k{width:26px;height:26px;border-radius:8px;background:var(--card2);color:var(--mut);display:grid;place-items:center;font:600 13px var(--disp);flex-shrink:0}
+.opt1.ok{background:var(--blue-soft);border-color:var(--blue);color:var(--ink)}
+.opt1.ok .k{background:var(--blue);color:var(--onacc)}
+.opt1.bad{background:#2a1215;border-color:#7a2a30;color:var(--ink)}
+.opt1.bad .k{background:var(--coral);color:var(--onacc)}
+.opt1:disabled{cursor:default}
+.ans{width:calc(100% - 48px);margin:0 24px;border:1.5px solid transparent;border-radius:18px;background:var(--bg);text-align:center;font:500 22px var(--body);padding:14px;color:var(--ink);caret-color:var(--blue);outline:none;transition:border-color .15s}
+.ans:focus{border-color:var(--blue)}
+.ans::placeholder{color:#6f8a7b}
+.fb{min-height:28px;margin:18px 24px 0;font-family:var(--disp);font-size:17px;font-weight:600}
+.fb.ok{color:var(--blue)}.fb.bad{color:#ff8a8e}
+.card+.go{margin-top:18px}
+
+/* results */
+.big{font-family:var(--disp);font-size:clamp(88px,22vw,150px);font-weight:700;letter-spacing:-.06em;text-align:center;color:var(--blue);margin:20px 0 4px;line-height:1}
+.miss{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--ink2)}
+.miss b{color:var(--ink);font-family:var(--disp)}
+.miss:last-of-type{border-bottom:none}
+.btns{display:grid;gap:10px;margin-top:22px}.btns .go{margin:0}
+.res-wrap h2{margin-top:30px}
+
+footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
+.blink{animation:blink 1.2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style></head><body>
+<div id="cursor-outer"></div>
+<nav>
+  <a class="logo" href="https://ilan.bloxxer.dev">SUBURANI<span>-VOCAB</span></a>
+  <div class="nav-right"><a href="https://ilan.bloxxer.dev">All projects <span class="arr">&rarr;</span></a></div>
+</nav>
+<main id="win"><div id="app"></div></main>
+<footer>ilan.bloxxer.dev &nbsp;|&nbsp; Created with the use of AI &nbsp;|&nbsp; <span class="blink">_</span></footer>
 <script>
 const BUILTIN={"1":[{"latin":"dormiō","english":"I sleep"},{"latin":"ego","english":"I"},{"latin":"frāter","english":"brother"},{"latin":"hōra","english":"hour"},{"latin":"in","english":["in","on"]},{"latin":"īnsula","english":"block of flats"},{"latin":"labōrō","english":"I work"},{"latin":"legō","english":"I read"},{"latin":"meus","english":"my"},{"latin":"nōn","english":"not"},{"latin":"pater","english":"father"},{"latin":"rīdeō","english":["I laugh","I smile"]},{"latin":"servus","english":["slave","enslaved person (male)"]},{"latin":"tū","english":"you (singular)"},{"latin":"turba","english":"crowd"},{"latin":"ubi?","english":"where?"},{"latin":"via","english":["street","road","way"]},{"latin":"sum","english":"I am"},{"latin":"es","english":"you (singular) are"},{"latin":"est","english":["he is","she is","it is"]}],"2":[{"latin":"cadō","english":"I fall"},{"latin":"cibus, cibum, m.","english":"food"},{"latin":"dūcō","english":["I lead","I take"]},{"latin":"et","english":"and"},{"latin":"fīlia, fīliam, f.","english":"daughter"},{"latin":"fīlius, fīlium, m.","english":"son"},{"latin":"forum, forum, n.","english":["forum","marketplace"]},{"latin":"habeō","english":["I have","I hold"]},{"latin":"habitō","english":"I live"},{"latin":"intrō","english":"I enter"},{"latin":"magnus","english":["big","large","great"]},{"latin":"pecūnia, pecūniam, f.","english":["money","sum of money"]},{"latin":"quaerō","english":["I search for","I look for","I ask"]},{"latin":"quoque","english":["also","too"]},{"latin":"salūtō","english":"I greet"},{"latin":"sed","english":"but"},{"latin":"spectō","english":["I look at","I watch"]},{"latin":"videō","english":"I see"},{"latin":"vīnum, vīnum, n.","english":"wine"},{"latin":"vocō","english":"I call"}],"3":[{"latin":"ambulō","english":"I walk"},{"latin":"amīcus, amīcum, m.","english":"friend"},{"latin":"ancilla, ancillam, f.","english":["slave","enslaved person (female)"]},{"latin":"clāmō","english":"I shout"},{"latin":"clāmor, clāmōrem, m.","english":["shout","shouting","noise"]},{"latin":"cum","english":"with"},{"latin":"currō","english":"I run"},{"latin":"dīcō","english":["I say","I speak","I tell"]},{"latin":"equus, equum, m.","english":"horse"},{"latin":"festīnō","english":"I hurry"},{"latin":"gladius, gladium, m.","english":"sword"},{"latin":"īnfēlīx","english":["unlucky","unhappy"]},{"latin":"laetus","english":"happy"},{"latin":"multus","english":["much","many"]},{"latin":"omnis","english":["all","every"]},{"latin":"per","english":["through","along"]},{"latin":"prīmus","english":"first"},{"latin":"senātor, senātōrem, m.","english":"senator"},{"latin":"urbs, urbem, f.","english":"city"},{"latin":"vincō","english":["I conquer","I win","I am victorious"]}],"4":[{"latin":"ad","english":["to","towards","at"]},{"latin":"adsum","english":["I am here","I am present"]},{"latin":"deus, deum, m.","english":"god"},{"latin":"dominus, dominum, m.","english":"master"},{"latin":"dōnum, dōnum, n.","english":["gift","present"]},{"latin":"laudō","english":"I praise"},{"latin":"nōs","english":["we","us"]},{"latin":"parvus","english":"small"},{"latin":"perīculum, perīculum, n.","english":"danger"},{"latin":"perterritus","english":"terrified"},{"latin":"puella, puellam, f.","english":"girl"},{"latin":"quod","english":"because"},{"latin":"rēx, rēgem, m.","english":"king"},{"latin":"Rōmānus","english":"Roman"},{"latin":"subitō","english":"suddenly"},{"latin":"templum, templum, n.","english":"temple"},{"latin":"teneō","english":["I hold","I keep","I possess"]},{"latin":"tollō","english":["I raise","I lift up","I hold up"]},{"latin":"veniō","english":"I come"},{"latin":"vōs","english":"you (plural)"}],"5":[{"latin":"aqua, aquam, f.","english":"water"},{"latin":"audiō, audīre","english":["hear","listen to"]},{"latin":"cupiō, cupere","english":["want","desire"]},{"latin":"custōs, custōdem, m.f.","english":"guard"},{"latin":"dēbeō, dēbēre","english":"owe"},{"latin":"dō, dare","english":"give"},{"latin":"effugiō, effugere","english":"escape"},{"latin":"iuvenis, iuvenem, m.f.","english":"young person"},{"latin":"maneō, manēre","english":["remain","stay"]},{"latin":"nēmō, nēminem","english":["no one","nobody"]},{"latin":"nōlō, nōlle","english":["don't want","refuse"]},{"latin":"nox, noctem, f.","english":"night"},{"latin":"portō, portāre","english":["carry","bear","take"]},{"latin":"possum, posse","english":["can","am able"]},{"latin":"pulcher","english":["beautiful","handsome"]},{"latin":"respondeō, respondēre","english":"reply"},{"latin":"taceō, tacēre","english":["am silent","am quiet"]},{"latin":"timeō, timēre","english":["fear","am afraid"]},{"latin":"vēndō, vēndere","english":"sell"},{"latin":"volō, velle","english":["want","wish","am willing"]}],"6":[{"latin":"ā, ab + abl.","english":["from","away from"]},{"latin":"capiō, capere","english":["take","catch","capture","adopt (a plan)"]},{"latin":"diēs, diem, m.","english":"day"},{"latin":"discēdō, discēdere","english":["depart","leave"]},{"latin":"ē, ex + abl.","english":["from","out of"]},{"latin":"exspectō, exspectāre","english":["wait for","expect"]},{"latin":"faciō, facere","english":["make","do"]},{"latin":"iam","english":["now","already"]},{"latin":"in + acc.","english":["into","onto"]},{"latin":"inquit","english":"says"},{"latin":"marītus, marītum, m.","english":"husband"},{"latin":"māter, mātrem, f.","english":"mother"},{"latin":"prope + acc.","english":"near"},{"latin":"rogō, rogāre","english":["ask","ask for"]},{"latin":"sedeō, sedēre","english":"sit"},{"latin":"stō, stāre","english":"stand"},{"latin":"tōtus","english":"whole"},{"latin":"trīstis","english":"sad"},{"latin":"tuus","english":["your (singular)","yours"]},{"latin":"uxor, uxōrem, f.","english":"wife"}]};
 const $=s=>document.querySelector(s),app=$('#app'),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -68,26 +148,27 @@ Promise.all(Array.from({length:30},(_,i)=>i+1).map(async n=>{try{const r=await f
 /* setup */
 function render(){
   Q=null;const chs=avail(),b=(on,t,f)=>`<button class="seg${on?' on':''}" onclick="${f}">${t}</button>`;
-  let h=`<h1>SUBURANI<span class="cur">_</span></h1><p class="lead">&gt; book_1 vocabulary trainer</p>
-  <h2><i>01</i>chapters</h2><div class="row">${chs.map(c=>`<button class="sq${S.chs.has(c)?' on':''}" onclick="togCh(${c})"><b>${String(c).padStart(2,"0")}</b><span>${data[c].length}w</span></button>`).join('')}</div>
-  <p class="small"><button class="link" onclick="allCh(1)">all</button> · <button class="link" onclick="allCh(0)">none</button></p>
-  <h2><i>02</i>words</h2><div class="row">${b(S.sel=='all','All',"setSel('all')")}${b(S.sel=='first','First …',"setSel('first')")}${b(S.sel=='last','Last …',"setSel('last')")}${b(S.sel=='pick','Pick words',"setSel('pick')")}</div>`;
+  let h=`<div class="badge">Suburani Book 1</div><h1>Learn your <span>Latin.</span></h1><p class="lead">Pick your chapters, choose how you want to be quizzed and build up your vocabulary.</p>
+  <div class="setup"><section class="panel"><h2><i>1</i>Chapters</h2><div class="row">${chs.map(c=>`<button class="sq${S.chs.has(c)?' on':''}" onclick="togCh(${c})"><b>${String(c).padStart(2,"0")}</b><span>${data[c].length} words</span></button>`).join('')}</div>
+  <p class="small"><button class="link" onclick="allCh(1)">Select all</button> · <button class="link" onclick="allCh(0)">Clear</button></p></section>
+  <section class="panel"><h2><i>2</i>Words</h2><div class="row">${b(S.sel=='all','All',"setSel('all')")}${b(S.sel=='first','First …',"setSel('first')")}${b(S.sel=='last','Last …',"setSel('last')")}${b(S.sel=='pick','Pick words',"setSel('pick')")}</div>`;
   if(S.sel=='first'||S.sel=='last')h+=`<p class="small">${S.sel=='first'?'First':'Last'} <input type="number" min="1" value="${S.n}" oninput="S.n=Math.max(1,+this.value||1);upd()"> words of the chosen chapters</p>`;
   if(S.sel=='pick'){
-    h+=`<p class="small"><button class="link" onclick="pickAll(1)">tick all</button> · <button class="link" onclick="pickAll(0)">untick all</button></p><div class="pl">`;
-    avail().filter(c=>S.chs.has(c)).forEach(c=>{h+=`<div class="ch">chapter ${String(c).padStart(2,'0')}</div>`+data[c].map(w=>`<label><input type="checkbox" ${S.picked.has(w.id)?'checked':''} onchange="tog('${w.id}',this.checked)"><span><b>${esc(w.latin)}</b> — ${esc(w.en.join(' / '))}</span></label>`).join('')});
+    h+=`<p class="small"><button class="link" onclick="pickAll(1)">Tick all</button> · <button class="link" onclick="pickAll(0)">Untick all</button></p><div class="pl">`;
+    avail().filter(c=>S.chs.has(c)).forEach(c=>{h+=`<div class="ch">Chapter ${String(c).padStart(2,'0')}</div>`+data[c].map(w=>`<label><input type="checkbox" ${S.picked.has(w.id)?'checked':''} onchange="tog('${w.id}',this.checked)"><span><b>${esc(w.latin)}</b> — ${esc(w.en.join(' / '))}</span></label>`).join('')});
     h+=`</div>`;
   }
-  h+=`<h2><i>03</i>quiz</h2>
+  h+=`</section>
+  <section class="panel"><h2><i>3</i>Quiz</h2>
   <div class="q2"><label>Translate</label><div class="row">${b(S.dir=='l2e','Latin → English',"S.dir='l2e';render()")}${b(S.dir=='e2l','English → Latin',"S.dir='e2l';render()")}${b(S.dir=='mix','Mixed',"S.dir='mix';render()")}</div></div>
   <div class="q2"><label>Answer</label><div class="row">${b(S.mode=='mc','Multiple choice',"S.mode='mc';render()")}${b(S.mode=='type','Type it',"S.mode='type';render()")}</div></div>
   <div class="q2"><label>Method</label><div class="row">${b(S.learn,'Learn gradually',"S.learn=true;render()")}${b(!S.learn,'Test each once',"S.learn=false;render()")}</div></div>
   <p class="small">${S.learn?'New words are shown to you first, a few at a time, and keep coming back until you get each one right twice in a row.':'Every chosen word is asked once.'}</p>
-  <p class="small"><label><input type="checkbox" ${S.shuf?'checked':''} onchange="S.shuf=this.checked"> Shuffle the order</label></p>
-  <button class="go" id="go" onclick="start()"></button>`;
+  <p class="small"><label><input type="checkbox" ${S.shuf?'checked':''} onchange="S.shuf=this.checked"> Shuffle the order</label></p></section>
+  </div><button class="go" id="go" onclick="start()"></button>`;
   app.innerHTML=h;upd();
 }
-function upd(){const n=selWords().length,g=$('#go');if(!g)return;g.disabled=!n;g.textContent=n?`▶ BEGIN · ${n} WORD${n==1?'':'S'}`:'SELECT WORDS FIRST'}
+function upd(){const n=selWords().length,g=$('#go');if(!g)return;g.disabled=!n;g.textContent=n?`Begin with ${n} word${n==1?'':'s'}`:'Select some words first'}
 const togCh=c=>{S.chs.has(c)?S.chs.delete(c):S.chs.add(c);render()},allCh=on=>{S.chs=new Set(on?avail():[]);render()},setSel=s=>{S.sel=s;render()};
 const tog=(id,on)=>{on?S.picked.add(id):S.picked.delete(id);upd()},pickAll=on=>{S.picked=new Set(on?chosen().map(w=>w.id):[]);render()};
 
@@ -105,23 +186,23 @@ function step(){
   ask(p[Math.random()*p.length|0].w);
 }
 function hdr(){
-  const done=Q.learn?Q.act.filter(a=>a.s>=2).length:Q.i,k=Math.round(done/Q.total*20);
-  return `<div class="top"><span class="mono">[${'█'.repeat(k)}${'░'.repeat(20-k)}] ${done}/${Q.total} ${Q.learn?'learned':'done'}</span><button class="link" onclick="render()">exit</button></div>`;
+  const done=Q.learn?Q.act.filter(a=>a.s>=2).length:Q.i,pc=Math.round(done/Q.total*100);
+  return `<div class="top"><div class="prog"><i style="width:${pc}%"></i></div><span>${done} of ${Q.total} ${Q.learn?'learned':'done'}</span><button class="link" onclick="render()">Exit</button></div>`;
 }
 function intro(w){
   Q.mode='intro';
-  app.innerHTML=hdr()+`<div class="card"><div class="band">[ NEW_WORD ]</div><div class="word">${esc(w.latin)}</div><div class="mean">→ ${esc(w.en.join(' · '))}</div></div><button class="go" onclick="step()">▶ GOT IT</button><p class="small c">// quiz incoming</p>`;
+  app.innerHTML=hdr()+`<div class="card"><div class="band">New word</div><div class="word">${esc(w.latin)}</div><div class="mean">${esc(w.en.join(' · '))}</div></div><button class="go" onclick="step()">Got it</button><p class="small c">A quiz question comes next</p>`;
 }
 const shown=(w,d)=>d=='l2e'?w.en.join(' / '):w.latin;
 function ask(w){
   const d=S.dir=='mix'?(Math.random()<.5?'l2e':'e2l'):S.dir;Q.cur={w,d};Q.mode='q';Q.ans=false;Q.last=w;
-  let h=hdr()+`<div class="card"><div class="band">[ ${d=='l2e'?'LATIN → ENGLISH':'ENGLISH → LATIN'} ]</div><div class="word">${esc(d=='l2e'?w.latin:w.en.join(' / '))}</div>`;
+  let h=hdr()+`<div class="card"><div class="band">${d=='l2e'?'Latin to English':'English to Latin'}</div><div class="word">${esc(d=='l2e'?w.latin:w.en.join(' / '))}</div>`;
   if(S.mode=='mc'){
     const right=shown(w,d),wr=shuf(Object.values(data).flat().filter(x=>x.id!=w.id).map(x=>shown(x,d)).filter((v,i,a)=>v!=right&&a.indexOf(v)==i)).slice(0,3);
     Q.opts=shuf([right,...wr]);
-    h+=`<div class="opts">${Q.opts.map((o,i)=>`<button class="opt1" onclick="pickOpt(${i})">${i+1}. ${esc(o)}</button>`).join('')}</div>`;
-  }else h+=`<input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type answer">`;
-  h+=`<div class="fb" id="fb"></div></div><button class="go" id="nx" ${S.mode=='mc'?'hidden':''} onclick="${S.mode=='type'?'checkType()':'step()'}">${S.mode=='type'?'▶ CHECK':'▶ NEXT'}</button>`;
+    h+=`<div class="opts">${Q.opts.map((o,i)=>`<button class="opt1" onclick="pickOpt(${i})"><span class="k">${i+1}</span>${esc(o)}</button>`).join('')}</div>`;
+  }else h+=`<input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer">`;
+  h+=`<div class="fb" id="fb"></div></div><button class="go" id="nx" ${S.mode=='mc'?'hidden':''} onclick="${S.mode=='type'?'checkType()':'step()'}">${S.mode=='type'?'Check':'Next'}</button>`;
   app.innerHTML=h;if(S.mode=='type')$('#ans').focus();
 }
 function norm(s,en){s=s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(.*?\)/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();return en?s.replace(/^(to|a|an|the)\s+/,''):s}
@@ -132,8 +213,8 @@ function accepted(w,d){
 function finish(ok,right){
   const {w}=Q.cur;Q.ans=true;Q.asked++;if(ok)Q.right++;else Q.miss[w.id]=(Q.miss[w.id]||0)+1;
   if(Q.learn){const a=Q.act.find(a=>a.w===w);a.s=ok?a.s+1:0}else Q.i++;
-  const f=$('#fb');f.className='fb '+(ok?'ok':'bad');f.textContent=ok?'✓ OK':'✗ ERR → '+right;
-  const n=$('#nx');n.hidden=false;n.textContent='▶ NEXT';n.setAttribute('onclick','step()');
+  const f=$('#fb');f.className='fb '+(ok?'ok':'bad');f.textContent=ok?'Correct':'Not quite: '+right;
+  const n=$('#nx');n.hidden=false;n.textContent='Next';n.setAttribute('onclick','step()');
 }
 function pickOpt(i){
   if(Q.ans)return;const {w,d}=Q.cur,right=shown(w,d);
@@ -146,10 +227,10 @@ function checkType(){
 }
 function results(){
   Q.mode='res';const tr=Q.words.filter(w=>Q.miss[w.id]),pct=Q.asked?Math.round(Q.right/Q.asked*100):0;
-  app.innerHTML=`<h1>COMPLETE<span class="cur">_</span></h1>
-  <div class="big">${pct}%</div><p class="small c">correct: ${Q.right}/${Q.asked} · words: ${Q.total}</p>
-  ${tr.length?`<h2>needs work</h2>${tr.map(w=>`<div class="miss"><b>${esc(w.latin)}</b><span>${esc(w.en.join(' / '))}</span></div>`).join('')}`:''}
-  <div class="btns">${tr.length?`<button class="go" onclick="start(Q.words.filter(w=>Q.miss[w.id]))">▶ PRACTISE THESE (${tr.length})</button>`:''}<button class="go alt" onclick="start(Q.words)">↻ GO AGAIN</button><button class="go alt" onclick="render()">← BACK TO SETUP</button></div>`;
+  app.innerHTML=`<div class="res-wrap"><div class="badge">Session complete</div><h1>All <span>done.</span></h1>
+  <div class="big">${pct}%</div><p class="small c">${Q.right} of ${Q.asked} correct · ${Q.total} words</p>
+  ${tr.length?`<h2>Needs work</h2>${tr.map(w=>`<div class="miss"><b>${esc(w.latin)}</b><span>${esc(w.en.join(' / '))}</span></div>`).join('')}`:''}
+  <div class="btns">${tr.length?`<button class="go" onclick="start(Q.words.filter(w=>Q.miss[w.id]))">Practise these (${tr.length})</button>`:''}<button class="go alt" onclick="start(Q.words)">Go again</button><button class="go alt" onclick="render()">Back to setup</button></div></div>`;
 }
 document.addEventListener('keydown',e=>{
   if(!Q)return;
@@ -160,4 +241,26 @@ document.addEventListener('keydown',e=>{
   }
 });
 render();
-</script></body></html>
+
+/* cursor */
+(function(){
+  const o=document.getElementById('cursor-outer');if(!o)return;
+  const GREEN='.go:not(.alt):not(:disabled), .seg.on, .sq.on, .opt1.ok, .nav-right a';
+  document.addEventListener('mousemove',e=>{
+    o.style.left=e.clientX+'px';o.style.top=e.clientY+'px';
+    const t=e.target.closest?e.target:document.body;
+    document.body.classList.toggle('cg',!!t.closest(GREEN));
+    document.body.classList.toggle('ct',!!t.closest('input[type=number], .ans'));
+  });
+  document.addEventListener('mouseleave',()=>document.body.classList.remove('cg'));
+  document.addEventListener('mouseup',()=>document.body.classList.remove('cd'));
+  document.addEventListener('mousedown',e=>{
+    document.body.classList.add('cd');
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    const r=document.createElement('span');r.className='ripple';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';
+    if(e.target.closest&&e.target.closest(GREEN))r.style.borderColor='#04130b';
+    document.body.appendChild(r);setTimeout(()=>r.remove(),800);
+  });
+})();
+</script>
+</body></html>
