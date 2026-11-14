@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B11HJYVGYN"></script>
+  <script src="gtag.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="gito: git, but gito push does add, commit and push in one go.">
+<title>gito — git add, commit and push in one command</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0c08;--card:#181510;--card2:#221e15;--ink:#f6f1e3;--ink2:#e0d9c3;--mut:#a89f86;--line:#35301f;
+  --blue:#f5c542;--blue-soft:#3a300e;--onacc:#1a1200;--accHi:#ffd966;
+  --disp:'Sora','Public Sans',system-ui,sans-serif;--body:'Public Sans',system-ui,sans-serif;
+  --mono:ui-monospace,'Cascadia Code','Cascadia Mono',Consolas,'SF Mono',Menlo,monospace;--r:28px;
+}
+html{background:var(--bg)}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){*{cursor:none!important}}
+
+/* cursor */
+#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:8px;height:8px;border-radius:50%;background:var(--blue);transform:translate(-50%,-50%);transition:width .2s,height .2s,background .15s}
+body.cg #cursor-outer{background:var(--onacc)}
+body.ct #cursor-outer{width:3px;height:26px;border-radius:2px}
+body.cd #cursor-outer{width:5px;height:5px}
+.ripple{position:fixed;pointer-events:none;z-index:99998;width:14px;height:14px;border:1.5px solid var(--blue);border-radius:50%;margin:-7px 0 0 -7px;animation:rip .75s ease-out forwards}
+@keyframes rip{from{transform:scale(1);opacity:.9}to{transform:scale(6);opacity:0}}
+@media(hover:none){#cursor-outer{display:none}}
+
+/* nav */
+nav{position:sticky;top:14px;z-index:100;max-width:1120px;margin:14px auto 0;padding:8px 8px 8px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(24,21,16,.82);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;width:calc(100% - 32px)}
+.logo{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.3px}
+.logo span{color:var(--blue)}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--blue);color:var(--onacc);font:600 14px var(--disp);padding:10px 10px 10px 20px;border-radius:999px;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s,color .2s,border-color .2s}
+.btn:hover{background:var(--accHi);transform:translateY(-4px);box-shadow:0 12px 30px rgba(245,197,66,.4)}
+.btn:active{transform:translateY(0) scale(.97);box-shadow:none}
+.btn.alt{background:transparent;color:var(--ink2);border:1px solid var(--line);padding:9px 9px 9px 20px}
+.btn.alt:hover{color:var(--blue);border-color:var(--blue);background:transparent;box-shadow:0 10px 24px rgba(245,197,66,.2)}
+.arr{width:26px;height:26px;border-radius:50%;background:var(--onacc);color:var(--blue);display:grid;place-items:center;font-size:13px;flex-shrink:0;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.btn.alt .arr{background:var(--card2)}
+.btn:hover .arr{transform:translateX(5px) rotate(-45deg) scale(1.12)}
+
+/* hero */
+.hero{max-width:1120px;margin:0 auto;padding:56px 24px 32px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 10px;font-size:13px;font-weight:500;color:var(--mut);margin-bottom:20px}
+.badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(245,197,66,.22)}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(72px,14vw,150px);line-height:.95;letter-spacing:-.06em}
+.hero h1 span{color:var(--blue)}
+.hero p{margin-top:20px;max-width:54ch;color:var(--mut);font-size:18px;line-height:1.55}
+.hero p code{font-family:var(--mono);font-size:.9em;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px}
+.hero-btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.meta{margin-top:14px;font-size:13px;color:var(--mut)}
+
+main{max-width:860px;margin:0 auto;padding:0 24px 24px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:32px;margin-bottom:16px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.panel:nth-of-type(2){animation-delay:.08s}.panel:nth-of-type(3){animation-delay:.16s}.panel:nth-of-type(4){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+h2{font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:-.03em;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+h2 i{font-style:normal;width:32px;height:32px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.lead{color:var(--mut);margin-bottom:22px}
+h3{font-family:var(--disp);font-size:16px;font-weight:600;letter-spacing:-.02em;margin:24px 0 8px}
+p{color:var(--ink2)}
+p+p,p+.code,.code+p,.code+.code{margin-top:12px}
+ol.steps{list-style:none;counter-reset:s;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+ol.steps>li{counter-increment:s;position:relative;padding-left:46px;min-width:0}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:32px;height:32px;border-radius:50%;background:var(--card2);color:var(--blue);display:grid;place-items:center;font:600 14px var(--disp)}
+ol.steps b{font-family:var(--disp);font-weight:600;color:var(--ink)}
+code{font-family:var(--mono);font-size:.9em;color:var(--blue)}
+kbd{font-family:var(--mono);font-size:.85em;background:var(--card2);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 7px;color:var(--ink)}
+
+/* code blocks */
+.code{position:relative;max-width:100%;background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:16px 84px 16px 18px;font-family:var(--mono);font-size:14px;line-height:1.7;color:var(--ink);overflow-x:auto;white-space:pre}
+.code .c{color:var(--mut)}
+.copy{position:absolute;top:10px;right:10px;font:600 12px var(--disp);padding:6px 12px;border-radius:999px;background:var(--card2);color:var(--ink2);border:1px solid var(--line);transition:transform .3s cubic-bezier(.2,.8,.2,1),background .2s,color .2s,border-color .2s}
+.copy:hover{background:var(--blue);color:var(--onacc);border-color:var(--blue);transform:translateY(-2px)}
+.copy.done{background:var(--blue);color:var(--onacc);border-color:var(--blue)}
+
+/* use cases */
+.cmds{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:18px}
+.cmd{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:16px 18px;transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .25s,box-shadow .3s}
+.cmd:hover{transform:translateY(-3px);border-color:var(--blue);box-shadow:0 12px 28px rgba(245,197,66,.12)}
+.cmd code{display:block;font-size:15px;color:var(--blue);margin-bottom:6px;overflow-x:auto;white-space:pre}
+.cmd span{color:var(--mut);font-size:14px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 4px}
+.flow code{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--ink)}
+.flow .then{color:var(--mut);font-size:13px}
+.note{display:flex;gap:14px;background:var(--blue-soft);border:1px solid #5a4a16;border-radius:20px;padding:16px 18px;margin-top:16px;color:var(--ink2)}
+.note b{font-family:var(--disp);color:var(--blue);font-weight:600}
+ul.tips{list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+ul.tips li{position:relative;padding-left:22px;color:var(--ink2)}
+ul.tips li::before{content:'';position:absolute;left:0;top:.65em;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+
+footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
+.blink{animation:blink 1.2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@media(max-width:620px){.hero{padding-top:36px}.panel{padding:22px}h2{font-size:21px}.nav-btn{display:none}}
+</style>
+</head>
+<body>
+<div id="cursor-outer"></div>
+
+<nav>
+  <a class="logo" href="https://ilan.bloxxer.dev">ILAN<span>.BLOXXER.DEV</span></a>
+  <a class="btn nav-btn" href="https://github.com/II-Dragon14/gito/releases/latest" target="_blank" rel="noopener">Latest release <span class="arr">&rarr;</span></a>
+</nav>
+
+<header class="hero">
+  <div class="badge">Command-line tool for Windows</div>
+  <h1>gito<span>.</span></h1>
+  <p>It's just git, except <code>gito push "message"</code> does add, commit and push in one go. Everything else is passed straight through to git.</p>
+  <div class="hero-btns">
+    <a class="btn" href="https://github.com/II-Dragon14/gito/releases/latest" target="_blank" rel="noopener">Get the latest release <span class="arr">&rarr;</span></a>
+    <a class="btn alt" href="https://github.com/II-Dragon14/gito" target="_blank" rel="noopener">View on GitHub <span class="arr">&rarr;</span></a>
+  </div>
+  <p class="meta">Needs Git installed. You don't need Python to run the .exe.</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2><i>1</i>What it does</h2>
+    <p class="lead">Normally, saving your work to GitHub takes three commands. With gito it's one.</p>
+    <div class="flow"><code>git add .</code><span class="then">then</span><code>git commit -m "message"</code><span class="then">then</span><code>git push</code></div>
+    <p style="margin-top:14px">becomes</p>
+    <div class="code"><button class="copy" type="button">Copy</button>gito push "message"</div>
+    <p>Any other command, such as <code>gito status</code> or <code>gito pull</code>, goes to git exactly as you typed it.</p>
+  </section>
+
+  <section class="panel">
+    <h2><i>2</i>Install and add it to your PATH</h2>
+    <p class="lead">Adding gito to your PATH lets you type <code>gito</code> in any folder, in any terminal.</p>
+    <ol class="steps">
+      <li><b>Install Git first.</b> If <code>git --version</code> already works in a terminal, skip this. Otherwise install Git for Windows from git-scm.com.</li>
+      <li><b>Download gito.exe and put it in a folder of its own.</b> Get it from the latest release on GitHub (use the button at the top of this page), then save it somewhere like <code>C:\Tools\gito</code>. Windows may warn about the download because the file isn't code-signed. If you trust it, choose More info, then Run anyway.</li>
+      <li><b>Add that folder to your PATH.</b> Pick one of these:
+        <h3>Option A: in Windows settings</h3>
+        <p>Press <kbd>Win</kbd> and type <code>environment variables</code>, then open <i style="font-style:normal;color:var(--ink)">Edit environment variables for your account</i>. Under <i style="font-style:normal;color:var(--ink)">User variables</i> select <code>Path</code>, click Edit, then New, and paste <code>C:\Tools\gito</code>. Click OK on every window.</p>
+        <h3>Option B: one line in PowerShell</h3>
+        <div class="code"><button class="copy" type="button">Copy</button>[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path","User") + ";C:\Tools\gito", "User")</div>
+        <p>This changes only your own account and doesn't need administrator rights. If your folder is somewhere else, change the path in the line above.</p>
+      </li>
+      <li><b>Open a new terminal and check it works.</b> A terminal that was already open won't see the change.
+        <div class="code"><button class="copy" type="button">Copy</button>gito --version</div>
+        <p>You should see your Git version, for example <code>git version 2.x</code>. That's gito passing the command through to git. If Windows says gito isn't recognised, the folder isn't on your PATH yet, so check the path you added and reopen the terminal.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <h2><i>3</i>How to use it</h2>
+    <p class="lead">Open a terminal in your project folder, the one that's already a git repository, and run:</p>
+    <div class="code"><button class="copy" type="button">Copy</button>gito push "fix the login button"</div>
+    <p>Put your message in quotes. gito then stages everything, commits it with that message and pushes it.</p>
+    <div class="cmds">
+      <div class="cmd"><code>gito push "your message"</code><span>Runs git add ., git commit -m "your message", then git push.</span></div>
+      <div class="cmd"><code>gito push "your message" origin main</code><span>Anything after the message is handed to git push. Here it pushes to origin main.</span></div>
+      <div class="cmd"><code>gito push "first commit" -u origin main</code><span>Useful for the first push of a new branch, because -u remembers where it goes next time.</span></div>
+      <div class="cmd"><code>gito status</code><span>Any command that isn't push goes straight to git. The same goes for gito pull, gito log --oneline, gito checkout -b new-branch and the rest.</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><i>4</i>Good to know</h2>
+    <p class="lead">A few things that behave in ways you might not expect.</p>
+    <ul class="tips">
+      <li><b>It stages everything.</b> <code>gito push</code> runs <code>git add .</code>, which includes new files. Check <code>gito status</code> first if you're unsure, and keep a <code>.gitignore</code> for files that must stay private, such as keys and passwords.</li>
+      <li><b>Nothing new to commit?</b> It tells you, then pushes anyway. That's handy for pushing a commit you made earlier.</li>
+      <li><b>If staging fails, it stops</b> and nothing is committed or pushed.</li>
+      <li><b>You must give a message.</b> <code>gito push</code> on its own just shows the usage line.</li>
+      <li><b>Only the word push is special.</b> Every other command behaves exactly as it does in git.</li>
+      <li><b>"git not found"</b> means Git isn't installed or isn't on your PATH.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  ilan.bloxxer.dev &nbsp;|&nbsp; Created with the use of AI &nbsp;|&nbsp; <span class="blink">_</span>
+</footer>
+
+<script>
+// copy buttons
+document.querySelectorAll('.code').forEach(function(box){
+  var btn=box.querySelector('.copy'); if(!btn) return;
+  btn.addEventListener('click',function(){
+    var text=box.textContent.replace(btn.textContent,'').trim();
+    var done=function(){ btn.textContent='Copied'; btn.classList.add('done'); setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('done'); },1500); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,function(){}); }
+    else{ var t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); try{document.execCommand('copy');done();}catch(e){} t.remove(); }
+  });
+});
+
+/* cursor */
+(function(){
+  var o=document.getElementById('cursor-outer'); if(!o) return;
+  var GREEN='.btn:not(.alt), .copy:hover, .copy.done';
+  document.addEventListener('mousemove',function(e){
+    o.style.left=e.clientX+'px'; o.style.top=e.clientY+'px';
+    var t=e.target.closest?e.target:document.body;
+    document.body.classList.toggle('cg',!!t.closest(GREEN));
+  });
+  document.addEventListener('mouseleave',function(){document.body.classList.remove('cg');});
+  document.addEventListener('mouseup',function(){document.body.classList.remove('cd');});
+  document.addEventListener('mousedown',function(e){
+    document.body.classList.add('cd');
+    var r=document.createElement('span'); r.className='ripple'; r.style.left=e.clientX+'px'; r.style.top=e.clientY+'px';
+    if(e.target.closest&&e.target.closest(GREEN)) r.style.borderColor='#1a1200';
+    document.body.appendChild(r); setTimeout(function(){r.remove();},800);
+  });
+})();
+</script>
+</body>
+</html>
