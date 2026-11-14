@@ -190,7 +190,7 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
   .now-icon{font-size:56px}
   .days-grid{grid-template-columns:repeat(2,1fr)}
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
 @media print{body{background:#fff}#cursor-outer,#cursor-inner,nav,.planner,.discord-fab{display:none!important}}
 </style>
 </head>
@@ -303,7 +303,7 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
   var GREEN='a.cta,.btn-plan,.discord-fab,.hour.now,.scroll-btn:not(:disabled):hover';
   document.addEventListener('mouseover',function(e){document.body.classList.toggle('cg',!!e.target.closest(GREEN));});
   document.addEventListener('mouseleave',function(){document.body.classList.remove('cg');});
-  document.addEventListener('mousedown',function(e){document.body.classList.add('cd');if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;var r=document.createElement('span');r.className='ripple';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';if(e.target.closest(GREEN))r.style.borderColor='#04121c';document.body.appendChild(r);setTimeout(function(){r.remove();},800);});
+  document.addEventListener('mousedown',function(e){document.body.classList.add('cd');var r=document.createElement('span');r.className='ripple';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';if(e.target.closest(GREEN))r.style.borderColor='#04121c';document.body.appendChild(r);setTimeout(function(){r.remove();},800);});
   document.addEventListener('mouseup',function(){document.body.classList.remove('cd');});
   document.addEventListener('mouseover',function(e){
     var t=e.target;

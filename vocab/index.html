@@ -123,7 +123,7 @@ input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px}
 footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
 .blink{animation:blink 1.2s infinite;display:inline-block}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
 </style></head><body>
 <div id="cursor-outer"></div>
 <nav>
@@ -256,7 +256,7 @@ render();
   document.addEventListener('mouseup',()=>document.body.classList.remove('cd'));
   document.addEventListener('mousedown',e=>{
     document.body.classList.add('cd');
-    if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    
     const r=document.createElement('span');r.className='ripple';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';
     if(e.target.closest&&e.target.closest(GREEN))r.style.borderColor='#1a0b05';
     document.body.appendChild(r);setTimeout(()=>r.remove(),800);
