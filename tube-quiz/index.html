@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B11HJYVGYN"></script>
+  <script src="gtag.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="TUBE-QUIZ: name the Tube lines you would take between two stations.">
+<title>TUBE-QUIZ — Which lines would you take?</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0912;--card:#151024;--card2:#1e1832;--ink:#f1eefb;--ink2:#d9d3ee;--mut:#9b93b5;--line:#2d2547;
+  --blue:#a78bfa;--blue-soft:#2a2050;--onacc:#140a2e;--accHi:#c4b5fd;--ok:#4ade80;--bad:#ff7075;--amber:#f5b94a;
+  --disp:'Sora','Public Sans',system-ui,sans-serif;--body:'Public Sans',system-ui,sans-serif;--r:28px;
+}
+html{background:var(--bg)}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){*{cursor:none!important}}
+
+/* cursor */
+#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:8px;height:8px;border-radius:50%;background:var(--blue);transform:translate(-50%,-50%);transition:width .2s,height .2s,background .15s}
+body.cg #cursor-outer{background:var(--onacc)}
+body.cd #cursor-outer{width:5px;height:5px}
+.ripple{position:fixed;pointer-events:none;z-index:99998;width:14px;height:14px;border:1.5px solid var(--blue);border-radius:50%;margin:-7px 0 0 -7px;animation:rip .75s ease-out forwards}
+@keyframes rip{from{transform:scale(1);opacity:.9}to{transform:scale(6);opacity:0}}
+@media(hover:none){#cursor-outer{display:none}}
+
+/* nav */
+nav{position:sticky;top:14px;z-index:100;max-width:1120px;margin:14px auto 0;padding:8px 8px 8px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(21,16,36,.82);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;width:calc(100% - 32px)}
+.logo{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.3px}
+.logo span{color:var(--blue)}
+.nav-right a{font-size:14px;font-weight:500;background:var(--blue);color:var(--onacc);display:flex;align-items:center;gap:10px;padding:10px 10px 10px 20px;border-radius:999px;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s}
+.nav-right a:hover{background:var(--accHi);transform:translateY(-4px);box-shadow:0 12px 30px rgba(167,139,250,.4)}
+.nav-right a:active{transform:translateY(0) scale(.97);box-shadow:none}
+.arr{width:26px;height:26px;border-radius:50%;background:var(--onacc);color:var(--blue);display:grid;place-items:center;font-size:13px;flex-shrink:0;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.nav-right a:hover .arr{transform:translateX(5px) rotate(-45deg) scale(1.12)}
+
+/* hero */
+.hero{max-width:1120px;margin:0 auto;padding:48px 24px 28px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 10px;font-size:13px;font-weight:500;color:var(--mut);margin-bottom:18px}
+.badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(167,139,250,.22)}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(46px,9vw,104px);line-height:1;letter-spacing:-.05em;text-wrap:balance;max-width:14ch}
+.hero h1 span{color:var(--blue)}
+.hero p{margin-top:18px;max-width:56ch;color:var(--mut);font-size:17px;line-height:1.6}
+
+main{max-width:860px;margin:0 auto;padding:0 24px 24px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px;margin-bottom:16px}
+
+/* settings + stats */
+.top-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.seg{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:500;color:var(--ink2);background:var(--card);border:1px solid var(--line);transition:transform .3s cubic-bezier(.2,.8,.2,1),background .2s,color .2s,border-color .2s,box-shadow .3s}
+.seg:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-3px);box-shadow:0 10px 24px rgba(167,139,250,.18)}
+.seg.on,.seg.on:hover{background:var(--blue);border-color:var(--blue);color:var(--onacc)}
+.level-note{color:var(--mut);font-size:14px;margin:-4px 4px 16px}
+.stats{display:flex;gap:18px;font-size:14px;color:var(--mut)}
+.stats b{font-family:var(--disp);color:var(--ink);font-size:17px;margin-left:4px}
+
+/* question */
+.q{animation:cardIn .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.stations{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin-bottom:26px}
+.st{background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:18px 20px}
+.st small{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+.st b{font-family:var(--disp);font-size:clamp(20px,3.4vw,28px);font-weight:700;letter-spacing:-.03em;line-height:1.15;word-break:break-word}
+.st-arr{width:44px;height:44px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-size:18px}
+.prompt{font-family:var(--disp);font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:12px}
+.route{min-height:64px;border:1.5px dashed var(--line);border-radius:22px;padding:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:18px;transition:border-color .2s}
+.route.has{border-style:solid;border-color:var(--blue-soft)}
+.route .hint{color:var(--mut);font-size:14px;padding:0 6px}
+.then{color:var(--mut);font-size:13px}
+
+/* line chips */
+.chip{display:inline-flex;align-items:center;font-family:var(--disp);font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;border:1.5px solid transparent;white-space:nowrap;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.chip.k{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.pal .chip{justify-content:center;padding:13px 10px;font-size:15px}
+.pal .chip:hover:not(:disabled){transform:translateY(-4px) scale(1.03);box-shadow:0 12px 26px rgba(0,0,0,.45)}
+.pal .chip:active:not(:disabled){transform:translateY(0) scale(.96)}
+.pal .chip:disabled{opacity:.35;cursor:not-allowed}
+
+/* buttons */
+.acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.go{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:var(--onacc);border:1px solid var(--blue);padding:14px 28px;border-radius:999px;font:600 15px var(--disp);transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s,color .2s,border-color .2s}
+.go:hover:not(:disabled){background:var(--accHi);border-color:var(--accHi);transform:translateY(-4px);box-shadow:0 12px 30px rgba(167,139,250,.42)}
+.go:active:not(:disabled){transform:translateY(0) scale(.97);box-shadow:none}
+.go:disabled{background:var(--line);border-color:var(--line);color:var(--mut);cursor:not-allowed}
+.go.alt{background:transparent;color:var(--ink2);border-color:var(--line)}
+.go.alt:hover:not(:disabled){background:transparent;color:var(--blue);border-color:var(--blue);box-shadow:0 10px 24px rgba(167,139,250,.2)}
+
+/* result */
+.result{margin-top:22px;padding-top:22px;border-top:1px solid var(--line);animation:cardIn .45s cubic-bezier(.2,.8,.2,1) both}
+.verdict{display:inline-block;font-family:var(--disp);font-weight:600;font-size:15px;padding:7px 16px;border-radius:999px;margin-bottom:10px}
+.verdict.ok{background:#12301f;color:var(--ok)}
+.verdict.mid{background:#3a2a0a;color:#f5c36b}
+.verdict.no{background:#3a1519;color:#ff8a8e}
+.why{color:var(--ink2);margin-bottom:18px}
+.best-h{font-family:var(--disp);font-size:16px;font-weight:600;margin-bottom:10px}
+.opt{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:18px;margin-bottom:8px}
+.opt .via{color:var(--mut);font-size:13px;flex-basis:100%}
+.opt .via b{color:var(--ink2);font-weight:500}
+.next{margin-top:18px}
+
+footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
+.blink{animation:blink 1.2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.discord-fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;display:grid;place-items:center;background:var(--blue);color:var(--onacc);border-radius:50%;z-index:500;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s}
+.discord-fab:hover{background:var(--accHi);transform:translateY(-6px) scale(1.12) rotate(-8deg);box-shadow:0 14px 30px rgba(167,139,250,.45)}
+.discord-fab:active{transform:scale(.95)}
+
+@media(max-width:620px){
+  .hero{padding-top:32px}
+  .nav-right a{padding:10px 10px 10px 16px}
+  .panel{padding:20px}
+  .stations{grid-template-columns:1fr}
+  .st-arr{margin:0 auto;transform:rotate(90deg)}
+  .pal{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="cursor-outer"></div>
+
+<nav>
+  <a class="logo" href="https://ilan.bloxxer.dev">TUBE<span>-QUIZ</span></a>
+  <div class="nav-right"><a href="https://ilan.bloxxer.dev">All projects <span class="arr">&rarr;</span></a></div>
+</nav>
+
+<header class="hero">
+  <div class="badge">London Underground quiz</div>
+  <h1>Know your <span>lines.</span></h1>
+  <p>You get two stations. Tap the Tube lines you would take to get from one to the other, in order. Any route that works counts, and we show you the quickest ones afterwards.</p>
+</header>
+
+<main>
+  <div class="top-row">
+    <div class="row" id="levels"></div>
+    <div class="stats"><span>Correct<b id="s-ok">0</b></span><span>Streak<b id="s-streak">0</b></span><span>Best<b id="s-best">0</b></span></div>
+  </div>
+  <p class="level-note" id="level-note"></p>
+
+  <section class="panel q" id="card">
+    <div class="stations">
+      <div class="st"><small>From</small><b id="from"></b></div>
+      <div class="st-arr">&rarr;</div>
+      <div class="st"><small>To</small><b id="to"></b></div>
+    </div>
+    <div class="prompt">Which lines would you take?</div>
+    <div class="route" id="route"></div>
+    <div class="pal" id="pal"></div>
+    <div class="acts">
+      <button class="go" id="check" type="button">Check route</button>
+      <button class="go alt" id="undo" type="button">Undo</button>
+      <button class="go alt" id="clear" type="button">Clear</button>
+    </div>
+    <div class="result" id="result" hidden></div>
+  </section>
+</main>
+
+<footer>
+  ilan.bloxxer.dev &nbsp;|&nbsp; Created with the use of AI &nbsp;|&nbsp; <span class="blink">_</span>
+</footer>
+
+<a href="https://discord.gg/vfW7kdccHK" target="_blank" rel="noopener" class="discord-fab" title="Join the Discord" aria-label="Join the Discord">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+    <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.07.07 0 0 0-.073.035c-.211.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.07.07 0 0 0-.073-.035A19.74 19.74 0 0 0 3.68 4.37a.064.064 0 0 0-.03.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.055 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.01c.12.099.246.197.373.291a.077.077 0 0 1-.006.128 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.106c.36.698.772 1.364 1.225 1.994a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.673-3.549-13.66a.061.061 0 0 0-.03-.028ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.955 2.419-2.157 2.419Zm7.974 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.946 2.419-2.157 2.419Z"/>
+  </svg>
+</a>
+
+<script>
+'use strict';
+/* ---------- Tube data: the 11 Underground lines only (no Overground, DLR, trams or Elizabeth line) ---------- */
+const DATA = {"Bakerloo":["Baker Street","Charing Cross","Edgware Road (Bakerloo)","Elephant & Castle","Embankment","Harlesden","Harrow & Wealdstone","Kensal Green","Kenton","Kilburn Park","Lambeth North","Maida Vale","Marylebone","North Wembley","Oxford Circus","Paddington","Piccadilly Circus","Queen's Park","Regent's Park","South Kenton","Stonebridge Park","Warwick Avenue","Waterloo","Wembley Central","Willesden Junction"],"Central":["Bank","Barkingside","Bethnal Green","Bond Street","Buckhurst Hill","Chancery Lane","Chigwell","Debden","Ealing Broadway","East Acton","Epping","Fairlop","Gants Hill","Grange Hill","Greenford","Hainault","Hanger Lane","Holborn","Holland Park","Lancaster Gate","Leyton","Leytonstone","Liverpool Street","Loughton","Marble Arch","Mile End","Newbury Park","North Acton","Northolt","Notting Hill Gate","Oxford Circus","Perivale","Queensway","Redbridge","Roding Valley","Ruislip Gardens","Shepherd's Bush (Central)","Snaresbrook","South Ruislip","South Woodford","St Paul's","Stratford","Theydon Bois","Tottenham Court Road","Wanstead","West Acton","West Ruislip","White City","Woodford"],"Circle":["Aldgate","Baker Street","Barbican","Bayswater","Blackfriars","Cannon Street","Edgware Road (Circle)","Embankment","Euston Square","Farringdon","Gloucester Road","Goldhawk Road","Great Portland Street","Hammersmith","High Street Kensington","King's Cross St Pancras","Ladbroke Grove","Latimer Road","Liverpool Street","Mansion House","Monument","Moorgate","Notting Hill Gate","Paddington","Royal Oak","Shepherd's Bush Market","Sloane Square","South Kensington","St James's Park","Temple","Tower Hill","Victoria","Westbourne Park","Westminster","Wood Lane"],"District":["Acton Town","Aldgate East","Barking","Barons Court","Bayswater","Becontree","Blackfriars","Bow Road","Bromley-by-Bow","Cannon Street","Chiswick Park","Dagenham East","Dagenham Heathway","Ealing Broadway","Ealing Common","Earl's Court","East Ham","East Putney","Edgware Road (Circle)","Elm Park","Embankment","Fulham Broadway","Gloucester Road","Gunnersbury","Hammersmith","High Street Kensington","Hornchurch","Kensington (Olympia)","Kew Gardens","Mansion House","Mile End","Monument","Notting Hill Gate","Paddington","Parsons Green","Plaistow","Putney Bridge","Ravenscourt Park","Richmond","Sloane Square","South Kensington","Southfields","St James's Park","Stamford Brook","Stepney Green","Temple","Tower Hill","Turnham Green","Upminster","Upminster Bridge","Upney","Upton Park","Victoria","West Brompton","West Ham","West Kensington","Westminster","Whitechapel","Wimbledon","Wimbledon Park"],"Hammersmith & City":["Aldgate East","Baker Street","Barbican","Barking","Bow Road","Bromley-by-Bow","East Ham","Edgware Road (Circle)","Euston Square","Farringdon","Goldhawk Road","Great Portland Street","Hammersmith","King's Cross St Pancras","Ladbroke Grove","Latimer Road","Liverpool Street","Mile End","Moorgate","Paddington","Plaistow","Royal Oak","Shepherd's Bush Market","Stepney Green","Upton Park","West Ham","Westbourne Park","Whitechapel","Wood Lane"],"Jubilee":["Baker Street","Bermondsey","Bond Street","Canada Water","Canary Wharf","Canning Town","Canons Park","Dollis Hill","Finchley Road","Green Park","Kilburn","Kingsbury","London Bridge","Neasden","North Greenwich","Queensbury","Southwark","St John's Wood","Stanmore","Stratford","Swiss Cottage","Waterloo","Wembley Park","West Ham","West Hampstead","Westminster","Willesden Green"],"Metropolitan":["Aldgate","Amersham","Baker Street","Barbican","Chalfont & Latimer","Chesham","Chorleywood","Croxley","Eastcote","Euston Square","Farringdon","Finchley Road","Great Portland Street","Harrow-on-the-Hill","Hillingdon","Ickenham","King's Cross St Pancras","Liverpool Street","Moor Park","Moorgate","North Harrow","Northwick Park","Northwood","Northwood Hills","Pinner","Preston Road","Rayners Lane","Rickmansworth","Ruislip","Ruislip Manor","Uxbridge","Watford","Wembley Park","West Harrow"],"Northern":["Angel","Archway","Balham","Bank","Battersea Power Station","Belsize Park","Borough","Brent Cross","Burnt Oak","Camden Town","Chalk Farm","Charing Cross","Clapham Common","Clapham North","Clapham South","Colindale","Colliers Wood","East Finchley","Edgware","Elephant & Castle","Embankment","Euston","Finchley Central","Golders Green","Goodge Street","Hampstead","Hendon Central","High Barnet","Highgate","Kennington","Kentish Town","King's Cross St Pancras","Leicester Square","London Bridge","Mill Hill East","Moorgate","Morden","Mornington Crescent","Nine Elms","Old Street","Oval","South Wimbledon","Stockwell","Tooting Bec","Tooting Broadway","Tottenham Court Road","Totteridge & Whetstone","Tufnell Park","Warren Street","Waterloo","West Finchley","Woodside Park"],"Piccadilly":["Acton Town","Alperton","Arnos Grove","Arsenal","Barons Court","Boston Manor","Bounds Green","Caledonian Road","Cockfosters","Covent Garden","Ealing Common","Earl's Court","Eastcote","Finsbury Park","Gloucester Road","Green Park","Hammersmith","Hatton Cross","Heathrow Terminal 4","Heathrow Terminal 5","Heathrow Terminals 2 & 3","Hillingdon","Holborn","Holloway Road","Hounslow Central","Hounslow East","Hounslow West","Hyde Park Corner","Ickenham","King's Cross St Pancras","Knightsbridge","Leicester Square","Manor House","North Ealing","Northfields","Oakwood","Osterley","Park Royal","Piccadilly Circus","Rayners Lane","Ruislip","Ruislip Manor","Russell Square","South Ealing","South Harrow","South Kensington","Southgate","Sudbury Hill","Sudbury Town","Turnham Green","Turnpike Lane","Uxbridge","Wood Green"],"Victoria":["Blackhorse Road","Brixton","Euston","Finsbury Park","Green Park","Highbury & Islington","King's Cross St Pancras","Oxford Circus","Pimlico","Seven Sisters","Stockwell","Tottenham Hale","Vauxhall","Victoria","Walthamstow Central","Warren Street"],"Waterloo & City":["Bank","Waterloo"]};
+// stations that are separate on the map but are one interchange in real life
+const LINKS = [['Bank','Monument']];
+const COLOURS = {
+  'Bakerloo':['#B36305','#fff'],'Central':['#E32017','#fff'],'Circle':['#FFD300','#111'],'District':['#00782A','#fff'],
+  'Hammersmith & City':['#F3A9BB','#111'],'Jubilee':['#A0A5A9','#111'],'Metropolitan':['#9B0056','#fff'],
+  'Northern':['#000000','#fff'],'Piccadilly':['#003688','#fff'],'Victoria':['#0098D4','#fff'],'Waterloo & City':['#95CDBA','#111']
+};
+const LINE_NAMES = Object.keys(DATA);
+
+/* ---------- network ---------- */
+const stationLines = new Map();               // station -> Set of lines
+LINE_NAMES.forEach(l => DATA[l].forEach(s => { if(!stationLines.has(s)) stationLines.set(s,new Set()); stationLines.get(s).add(l); }));
+const STATIONS = [...stationLines.keys()].sort();
+const linked = new Map();                     // station -> station it connects to
+LINKS.forEach(([a,b]) => { linked.set(a,b); linked.set(b,a); });
+
+// where can you change from one line to another?
+const changes = {};
+LINE_NAMES.forEach(a => { changes[a] = {}; LINE_NAMES.forEach(b => { if(a!==b) changes[a][b] = []; }); });
+LINE_NAMES.forEach(a => LINE_NAMES.forEach(b => {
+  if(a===b) return;
+  const set = new Set(DATA[a]);
+  DATA[b].forEach(s => { if(set.has(s)) changes[a][b].push(s); });
+  LINKS.forEach(([x,y]) => {
+    if(set.has(x) && DATA[b].includes(y)) changes[a][b].push(x+' / '+y);
+    if(set.has(y) && DATA[b].includes(x)) changes[a][b].push(y+' / '+x);
+  });
+  changes[a][b] = [...new Set(changes[a][b])];
+}));
+const hasChange = (a,b) => a!==b && changes[a][b].length>0;
+const linesAt = s => [...stationLines.get(s)];
+
+// every shortest sequence of lines from A to B
+function shortest(A,B){
+  const from = linesAt(A), to = new Set(linesAt(B));
+  const dist = {}; let frontier = [];
+  from.forEach(l => { dist[l]=1; frontier.push(l); });
+  while(frontier.length){
+    const nxt=[];
+    frontier.forEach(l => LINE_NAMES.forEach(m => { if(dist[m]===undefined && hasChange(l,m)){ dist[m]=dist[l]+1; nxt.push(m);} }));
+    frontier = nxt;
+  }
+  let best = Infinity; to.forEach(t => { if(dist[t]!==undefined) best = Math.min(best,dist[t]); });
+  if(best===Infinity) return {best:Infinity,routes:[]};
+  const routes = [];
+  const back = (l, tail) => {
+    if(routes.length>=40) return;
+    if(dist[l]===1){ if(from.includes(l)) routes.push([l,...tail]); return; }
+    LINE_NAMES.forEach(p => { if(dist[p]===dist[l]-1 && hasChange(p,l)) back(p,[l,...tail]); });
+  };
+  to.forEach(t => { if(dist[t]===best) back(t,[]); });
+  return {best, routes};
+}
+
+/* ---------- check an answer ---------- */
+function judge(A,B,seq){
+  if(!seq.length) return {ok:false, why:'Pick at least one line first.'};
+  if(!stationLines.get(A).has(seq[0])) return {ok:false, why:A+' is not on the '+seq[0]+' line, so you cannot start there.'};
+  for(let i=0;i<seq.length-1;i++){
+    if(!hasChange(seq[i],seq[i+1])) return {ok:false, why:'You cannot change from the '+seq[i]+' line to the '+seq[i+1]+' line: they do not share a station.'};
+  }
+  if(!stationLines.get(B).has(seq[seq.length-1])) return {ok:false, why:'The '+seq[seq.length-1]+' line does not stop at '+B+'.'};
+  return {ok:true};
+}
+
+/* ---------- question picker ---------- */
+// Almost every pair of stations is one or two lines apart, so difficulty is about how many ways there are to do it
+const LEVELS = [
+  {id:'easy',  label:'Easy',   note:'Direct journeys: a single line is enough.',                          test:r => r.best===1},
+  {id:'medium',label:'Medium', note:'One change, with a couple of different ways to do it.',              test:r => r.best===2 && r.routes.length>=2},
+  {id:'hard',  label:'Hard',   note:'Only one route works, or you need three lines to get there.',        test:r => r.best>=3 || (r.best===2 && r.routes.length===1)},
+  {id:'mixed', label:'Mixed',  note:'A bit of everything.',                                               test:r => true}
+];
+// the answer only depends on which lines serve each station, so remember it
+const memo = new Map();
+const keyOf = s => linesAt(s).sort().join('|');
+function route(A,B){
+  const k = keyOf(A)+'>'+keyOf(B);
+  if(!memo.has(k)) memo.set(k, shortest(A,B));
+  return memo.get(k);
+}
+let level = 'easy', cur = null, seq = [], answered = false, last = '';
+const st = {ok:0, streak:0, best:0};
+try{ st.best = +localStorage.getItem('tubequiz-best')||0; }catch(e){}
+
+function pick(){
+  const L = LEVELS.find(x=>x.id===level);
+  for(let tries=0; tries<6000; tries++){
+    const A = STATIONS[Math.floor(Math.random()*STATIONS.length)];
+    const B = STATIONS[Math.floor(Math.random()*STATIONS.length)];
+    if(A===B || linked.get(A)===B || (A+'|'+B)===last) continue;
+    const r = route(A,B);
+    if(r.best!==Infinity && L.test(r)){ last=A+'|'+B; return {A,B,r}; }
+  }
+  const A='Highgate',B='Blackfriars'; return {A,B,r:route(A,B)};
+}
+
+/* ---------- UI ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const chip = (l,extra) => { const c=COLOURS[l]; return '<span class="chip'+(l==='Northern'?' k':'')+(extra||'')+'" style="background:'+c[0]+';color:'+c[1]+'">'+esc(l)+'</span>'; };
+
+function drawLevels(){
+  $('level-note').textContent = LEVELS.find(x=>x.id===level).note;
+  $('levels').innerHTML = LEVELS.map(l => '<button class="seg'+(l.id===level?' on':'')+'" data-l="'+l.id+'" type="button">'+l.label+'</button>').join('');
+  $('levels').querySelectorAll('.seg').forEach(b => b.addEventListener('click',()=>{ level=b.dataset.l; drawLevels(); next(); }));
+}
+function drawStats(){ $('s-ok').textContent=st.ok; $('s-streak').textContent=st.streak; $('s-best').textContent=st.best; }
+function drawRoute(){
+  const r = $('route');
+  r.classList.toggle('has', seq.length>0);
+  r.innerHTML = seq.length
+    ? seq.map((l,i)=>(i?'<span class="then">then</span>':'')+chip(l)).join('')
+    : '<span class="hint">Tap the lines you would take, in order.</span>';
+  $('check').disabled = answered || !seq.length;
+  $('undo').disabled = answered || !seq.length;
+  $('clear').disabled = answered || !seq.length;
+  $('pal').querySelectorAll('.chip').forEach(b => b.disabled = answered);
+}
+function drawPal(){
+  $('pal').innerHTML = LINE_NAMES.map(l => {
+    const c=COLOURS[l];
+    return '<button class="chip'+(l==='Northern'?' k':'')+'" data-line="'+esc(l)+'" type="button" style="background:'+c[0]+';color:'+c[1]+'">'+esc(l)+'</button>';
+  }).join('');
+  $('pal').querySelectorAll('.chip').forEach(b => b.addEventListener('click',()=>{
+    if(answered) return;
+    const l=b.dataset.line;
+    if(seq[seq.length-1]===l) return;
+    if(seq.length>=6) return;
+    seq.push(l); drawRoute();
+  }));
+}
+function routeRows(routes){
+  return routes.slice(0,6).map(rt => {
+    const via = rt.slice(0,-1).map((l,i)=>{ const c=changes[l][rt[i+1]]; return 'Change from '+l+' to '+rt[i+1]+' at <b>'+esc(c.slice(0,3).join(', '))+(c.length>3?' and more':'')+'</b>'; }).join('. ');
+    return '<div class="opt">'+rt.map((l,i)=>(i?'<span class="then">then</span>':'')+chip(l)).join('')+(via?'<span class="via">'+via+'</span>':'<span class="via">A direct journey, no change needed.</span>')+'</div>';
+  }).join('');
+}
+
+function check(){
+  if(answered || !seq.length) return;
+  const {A,B,r} = cur, j = judge(A,B,seq);
+  answered = true;
+  let verdict, cls, why;
+  if(j.ok){
+    st.ok++; st.streak++; if(st.streak>st.best){ st.best=st.streak; try{localStorage.setItem('tubequiz-best',st.best);}catch(e){} }
+    if(seq.length===r.best){ cls='ok'; verdict='Correct: and it is a quickest route'; why='Nice. '+(r.best===1?'One line does it.':'That takes '+r.best+' lines, which is the fewest possible.'); }
+    else { cls='mid'; verdict='Correct, but not the quickest'; why='That route works, but you can do it with '+r.best+' line'+(r.best===1?'':'s')+' instead of '+seq.length+'.'; }
+  } else { st.streak=0; cls='no'; verdict='Not quite'; why=j.why; }
+  const others = r.routes.length;
+  $('result').hidden = false;
+  $('result').innerHTML =
+    '<span class="verdict '+cls+'">'+verdict+'</span><p class="why">'+esc(why)+'</p>'+
+    '<div class="best-h">Quickest '+(others>1?'routes':'route')+' ('+r.best+' line'+(r.best===1?'':'s')+')</div>'+
+    routeRows(r.routes)+(others>6?'<p class="why">And '+(others-6)+' more.</p>':'')+
+    '<div class="next"><button class="go" id="nextbtn" type="button">Next question</button></div>';
+  $('nextbtn').addEventListener('click', next);
+  drawStats(); drawRoute();
+}
+
+function next(){
+  cur = pick(); seq = []; answered = false;
+  $('from').textContent = cur.A; $('to').textContent = cur.B;
+  $('result').hidden = true; $('result').innerHTML='';
+  const card=$('card'); card.classList.remove('q'); void card.offsetWidth; card.classList.add('q');
+  drawRoute(); drawStats();
+}
+
+$('check').addEventListener('click', check);
+$('undo').addEventListener('click', ()=>{ if(!answered){ seq.pop(); drawRoute(); } });
+$('clear').addEventListener('click', ()=>{ if(!answered){ seq=[]; drawRoute(); } });
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  if(answered){ next(); } else { check(); }
+});
+
+drawLevels(); drawPal(); next();
+
+/* ---------- cursor ---------- */
+(function(){
+  const o=document.getElementById('cursor-outer'); if(!o) return;
+  const GREEN='.nav-right a, .go:not(.alt):not(:disabled), .seg.on, .discord-fab';
+  document.addEventListener('mousemove',e=>{
+    o.style.left=e.clientX+'px'; o.style.top=e.clientY+'px';
+    document.body.classList.toggle('cg',!!(e.target.closest&&e.target.closest(GREEN)));
+  });
+  document.addEventListener('mouseleave',()=>document.body.classList.remove('cg'));
+  document.addEventListener('mouseup',()=>document.body.classList.remove('cd'));
+  document.addEventListener('mousedown',e=>{
+    document.body.classList.add('cd');
+    const r=document.createElement('span'); r.className='ripple'; r.style.left=e.clientX+'px'; r.style.top=e.clientY+'px';
+    if(e.target.closest&&e.target.closest(GREEN)) r.style.borderColor='#140a2e';
+    document.body.appendChild(r); setTimeout(()=>r.remove(),800);
+  });
+})();
+</script>
+</body>
+</html>

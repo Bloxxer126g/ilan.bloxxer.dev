@@ -61,16 +61,17 @@ nav{position:sticky;top:14px;z-index:100;max-width:1120px;margin:14px auto 0;pad
 /* projects: every card is the same square; rows wrap and centre however many there are */
 .projects{max-width:1120px;margin:0 auto;padding:0 24px 24px;display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
 .project{flex:0 0 250px;width:250px;aspect-ratio:1/1;position:relative;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;animation:projectIn .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*110ms + 300ms);transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .25s,background .25s,box-shadow .35s}
-.project::before{content:'';position:absolute;width:300px;height:300px;right:-120px;top:-160px;border-radius:50%;background:radial-gradient(circle,rgba(94,227,161,.22),transparent 65%);opacity:0;transition:opacity .35s;pointer-events:none}
-.project:hover{transform:translateY(-6px);border-color:var(--blue);background:var(--card2);box-shadow:0 18px 40px rgba(94,227,161,.12)}
+.project::before{content:'';position:absolute;width:300px;height:300px;right:-120px;top:-160px;border-radius:50%;background:radial-gradient(circle,rgba(var(--c-rgb,94,227,161),.34),transparent 65%);opacity:0;transition:opacity .35s;pointer-events:none}
+.project:hover{transform:translateY(-6px);border-color:var(--c,var(--blue));background:var(--card2);box-shadow:0 22px 54px rgba(var(--c-rgb,94,227,161),.3),0 0 0 1px rgba(var(--c-rgb,94,227,161),.55)}
 .project:hover::before{opacity:1}
-.project-icon{width:54px;height:54px;border-radius:18px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-size:27px;line-height:1;position:relative}
-.project-badge{position:absolute;top:22px;right:22px;font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;color:var(--blue);background:var(--blue-soft)}
+.project-icon{width:54px;height:54px;border-radius:18px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-size:27px;line-height:1;position:relative;transition:border-color .3s,background .3s,box-shadow .3s}
+.project:hover .project-icon{border-color:var(--c,var(--blue));background:rgba(var(--c-rgb,94,227,161),.16);box-shadow:0 0 26px rgba(var(--c-rgb,94,227,161),.4)}
+.project-badge{position:absolute;top:22px;right:22px;font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;color:var(--c,var(--blue));background:rgba(var(--c-rgb,94,227,161),.16)}
 .project-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;position:relative}
 .project-name{font-family:var(--disp);font-size:21px;font-weight:700;letter-spacing:-.03em;line-height:1.15}
 .project-desc{margin-top:4px;font-size:13px;color:var(--mut);line-height:1.45}
-.project .arr{width:38px;height:38px;font-size:16px;background:var(--card2);color:var(--blue);transition:transform .35s cubic-bezier(.2,.8,.2,1),background .2s,color .2s}
-.project:hover .arr{background:var(--blue);color:var(--onacc);transform:translateX(4px) rotate(-45deg) scale(1.12)}
+.project .arr{width:38px;height:38px;font-size:16px;background:var(--card2);color:var(--c,var(--blue));transition:transform .35s cubic-bezier(.2,.8,.2,1),background .2s,color .2s}
+.project:hover .arr{background:var(--c,var(--blue));color:var(--c-on,var(--onacc));transform:translateX(4px) rotate(-45deg) scale(1.12)}
 .project:active{transform:translateY(-2px) scale(.99)}
 
 footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
@@ -89,7 +90,6 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
   .nav-right a:not(.cta){display:none}
   .project{flex-basis:min(100%,320px);width:min(100%,320px)}
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -116,7 +116,7 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
   </header>
 
   <section class="projects" aria-label="Projects">
-    <a class="project" href="/sky-watch/index.html" title="Live weather and sky conditions">
+    <a class="project" style="--c:#7cc8ff;--c-rgb:124,200,255;--c-on:#04121c" href="/sky-watch/index.html" title="Live weather and sky conditions">
       <span class="project-badge">New</span>
       <div class="project-icon">🌤️</div>
       <div class="project-foot">
@@ -125,7 +125,7 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
       </div>
     </a>
 
-    <a class="project" href="/tube-route/index.html" title="Plan any London tube journey live">
+    <a class="project" style="--c:#f0443f;--c-rgb:240,68,63;--c-on:#ffffff" href="/tube-route/index.html" title="Plan any London tube journey live">
       <div class="project-icon">🚇</div>
       <div class="project-foot">
         <div><div class="project-name">Tube-Route</div><div class="project-desc">Live tube journey planner</div></div>
@@ -133,7 +133,16 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
       </div>
     </a>
 
-    <a class="project" href="/cipher/index.html" title="Encode and decode messages with classic ciphers">
+    <a class="project" style="--c:#a78bfa;--c-rgb:167,139,250;--c-on:#140a2e" href="/tube-quiz" title="Name the Tube lines you would take between two stations">
+      <span class="project-badge">New</span>
+      <div class="project-icon">🧭</div>
+      <div class="project-foot">
+        <div><div class="project-name">Tube-Quiz</div><div class="project-desc">Which lines would you take?</div></div>
+        <span class="arr">&rarr;</span>
+      </div>
+    </a>
+
+    <a class="project" style="--c:#5ee3a1;--c-rgb:94,227,161;--c-on:#04130b" href="/cipher/index.html" title="Encode and decode messages with classic ciphers">
       <div class="project-icon">🔐</div>
       <div class="project-foot">
         <div><div class="project-name">Cipher</div><div class="project-desc">Encode and decode ciphers</div></div>
@@ -141,7 +150,7 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
       </div>
     </a>
 
-    <a class="project" href="/vocab" title="Latin vocabulary quizzes for Suburani Book 1">
+    <a class="project" style="--c:#e8845a;--c-rgb:232,132,90;--c-on:#1a0b05" href="/vocab" title="Latin vocabulary quizzes for Suburani Book 1">
       <span class="project-badge">New</span>
       <div class="project-icon">🏛️</div>
       <div class="project-foot">
@@ -171,13 +180,14 @@ document.querySelectorAll('.project').forEach(function(c,i){c.style.setProperty(
   var GREEN='.nav-right a.cta,.discord-fab';
   document.addEventListener('mousemove',function(e){
     o.style.left=e.clientX+'px';o.style.top=e.clientY+'px';
+    var card=e.target.closest&&e.target.closest('.project');
+    o.style.background=card?card.style.getPropertyValue('--c'):'';
     document.body.classList.toggle('cg',!!(e.target.closest&&e.target.closest(GREEN)));
   });
   document.addEventListener('mouseleave',function(){document.body.classList.remove('cg');});
   document.addEventListener('mouseup',function(){document.body.classList.remove('cd');});
   document.addEventListener('mousedown',function(e){
     document.body.classList.add('cd');
-    if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
     var r=document.createElement('span');r.className='ripple';
     r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';
     if(e.target.closest&&e.target.closest(GREEN))r.style.borderColor='#04130b';
