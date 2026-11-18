@@ -7,7 +7,94 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06110c;--card:#0d1e16;--card2:#12281d;--ink:#e7f4ea;--ink2:#c9e3d3;--mut:#8aa596;--line:#1c3528;
+  --blue:#5ee3a1;--blue-soft:#123425;--amber:#f5b94a;--coral:#ff7075;--onacc:#04130b;--accHi:#8ff0c0;
+  --disp:'Sora','Public Sans',system-ui,sans-serif;--body:'Public Sans',system-ui,sans-serif;
+  --r:28px;
+}
+html{background:var(--bg)}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){*{cursor:none!important}}
+
+#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:8px;height:8px;border-radius:50%;background:var(--blue);transform:translate(-50%,-50%);transition:width .2s,height .2s,border-radius .2s,background .15s}
+body.cg #cursor-outer{background:var(--onacc)}
+body.ct #cursor-outer{width:3px;height:26px;border-radius:2px}
+body.cd #cursor-outer{width:5px;height:5px}
+.ripple{position:fixed;pointer-events:none;z-index:99998;width:14px;height:14px;border:1.5px solid var(--blue);border-radius:50%;margin:-7px 0 0 -7px;animation:rip .75s ease-out forwards}
+@keyframes rip{from{transform:scale(1);opacity:.9}to{transform:scale(6);opacity:0}}
+@media(hover:none){#cursor-outer{display:none}input[type=text]{font-size:16px}}
+
+nav{position:sticky;top:14px;z-index:100;max-width:1120px;margin:14px auto 0;padding:8px 8px 8px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(13,30,22,.82);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;width:calc(100% - 32px)}
+.logo{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.3px}
+.logo span{color:var(--blue)}
+.nav-right{display:flex;align-items:center;gap:6px}
+.nav-right a{font-size:14px;font-weight:500;color:var(--mut);padding:10px 18px;border-radius:999px}
+.nav-right a.here{color:var(--ink);background:var(--card2)}
+.nav-right a.cta{background:var(--blue);color:var(--onacc);display:flex;align-items:center;gap:10px;padding:10px 10px 10px 20px}
+.arr{width:26px;height:26px;border-radius:50%;background:var(--onacc);color:var(--blue);display:grid;place-items:center;font-size:13px}
+
+.hero{max-width:1120px;margin:0 auto;padding:72px 24px 40px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 10px;font-size:13px;font-weight:500;color:var(--mut);margin-bottom:26px}
+.badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(94,227,161,.2)}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(44px,8vw,96px);line-height:1;letter-spacing:-.045em;max-width:12ch;text-wrap:balance}
+.hero h1 span{color:var(--blue)}
+.hero p{margin-top:24px;max-width:54ch;color:var(--mut);font-size:17px;line-height:1.6}
+
+.planner{max-width:1120px;margin:0 auto;padding:0 24px}
+.planner-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:32px;display:grid;grid-template-columns:1fr 1.4fr;gap:28px 40px}
+.card-title{grid-column:1/-1;font-family:var(--disp);font-weight:600;font-size:20px;letter-spacing:-.02em}
+.form-row label{font-size:13px;font-weight:500;color:var(--mut);display:block;margin-bottom:8px}
+input[type=text]{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:16px;color:var(--ink);font:500 16px var(--body);padding:15px 18px;outline:none;transition:border-color .15s,background .15s}
+input[type=text]:focus{border-color:var(--blue);background:#0a1a12}
+input[type=text]::placeholder{color:#5f7a6b}
+.btn-plan{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;background:var(--blue);color:var(--onacc);font:600 16px var(--disp);border-radius:999px;padding:10px 10px 10px 30px}
+.btn-plan .arr{width:44px;height:44px;font-size:18px}
+.btn-plan:disabled{opacity:.6}
+.nav-right a.cta,.btn-plan,.nav-right a{transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s,color .2s}
+.arr{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.nav-right a.cta:hover,.btn-plan:not(:disabled):hover{background:var(--accHi);transform:translateY(-4px);box-shadow:0 12px 30px rgba(94,227,161,.4)}
+.nav-right a.cta:active,.btn-plan:active{transform:translateY(0) scale(.97);box-shadow:none}
+.nav-right a.cta:hover .arr,.btn-plan:not(:disabled):hover .arr{transform:translateX(5px) rotate(-45deg) scale(1.12)}
+.nav-right a:not(.cta):hover{color:var(--ink);background:var(--card2);transform:translateY(-2px)}
+
+.result{max-width:1120px;margin:0 auto;padding:32px 24px 0}
+.msg{display:none;border-radius:20px;padding:16px 22px;font-size:14px;overflow-wrap:anywhere}
+.msg.visible{display:block}
+.msg.err{background:#2a1215;border:1px solid #5a2327;color:#ff8a8e}
+.msg.ok{background:var(--blue-soft);border:1px solid #1f5a3d;color:var(--blue)}
+.msg.warn{background:#2a2410;border:1px solid #4a3d14;color:#f5c36b}
+
+.found{display:none;background:#0c3b28;border-radius:36px;padding:40px;position:relative;overflow:hidden}
+.found.visible{display:block;animation:rise .5s both}
+.found::before{content:'';position:absolute;width:520px;height:520px;right:-160px;top:-220px;border-radius:50%;background:radial-gradient(circle,rgba(94,227,161,.38),transparent 65%);pointer-events:none}
+.found .lab{position:relative;font-size:13px;font-weight:600;color:#8ff0c0}
+.found .big{position:relative;font-family:var(--disp);font-weight:700;font-size:clamp(40px,7vw,84px);letter-spacing:-.045em;line-height:1.05;margin-top:10px;overflow-wrap:anywhere}
+.found .sub{position:relative;font-size:14px;color:#a9cdb9;margin-top:14px}
+@keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+.recent{max-width:1120px;margin:0 auto;padding:48px 24px 0}
+.section-title{font-family:var(--disp);font-size:24px;font-weight:600;letter-spacing:-.03em;margin-bottom:16px}
+.rows{display:grid;gap:10px}
+.row{display:flex;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px 22px;transition:transform .25s,border-color .25s}
+.row:hover{transform:translateY(-3px);border-color:var(--blue)}
+.row b{font-family:var(--disp);font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.row span{color:var(--ink2);overflow-wrap:anywhere;text-align:right}
+
+footer{max-width:1120px;margin:48px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
+.blink{animation:blink 1.2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+@media(max-width:860px){.planner-card{grid-template-columns:1fr}}
+@media(max-width:520px){.hero{padding-top:48px}.nav-right a:not(.cta):not(.here){display:none}.planner-card{padding:22px}.found{padding:28px 24px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+</style>
 </head>
 <body>
 <div id="cursor-outer"></div>
@@ -51,8 +138,68 @@
 
 <footer>Raffle desk<span class="blink">_</span></footer>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script>
+// ---- PASTE YOUR SUPABASE VALUES HERE ----
+window.RAFFLE_CONFIG = {
+  SUPABASE_URL: "https://wvnmjlvriegitqwvhgdx.supabase.co",
+  SUPABASE_KEY: "sb_publishable_ELwIqfnxttoGKSn8pePw7Q_506NioZI"
+};
+</script>
+<script>
+/* ---- cursor ---- */
+(function(){
+  var o=document.getElementById('cursor-outer');
+  if(!o)return;
+  var GREEN='a.cta,.btn-plan:not(:disabled)';
+  document.addEventListener('mousemove',function(e){o.style.left=e.clientX+'px';o.style.top=e.clientY+'px';});
+  document.addEventListener('mouseover',function(e){
+    document.body.classList.toggle('cg',!!e.target.closest(GREEN));
+    document.body.classList.toggle('ct',!!e.target.closest('input'));
+  });
+  document.addEventListener('mouseleave',function(){document.body.classList.remove('cg');});
+  document.addEventListener('mousedown',function(e){
+    document.body.classList.add('cd');
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    var r=document.createElement('span');r.className='ripple';
+    r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';
+    if(e.target.closest(GREEN))r.style.borderColor='#04130b';
+    document.body.appendChild(r);setTimeout(function(){r.remove();},800);
+  });
+  document.addEventListener('mouseup',function(){document.body.classList.remove('cd');});
+})();
+
+/* ---- supabase (plain REST, no library needed) ---- */
+const SB = (function(){
+  const c = window.RAFFLE_CONFIG || {};
+  const configured = c.SUPABASE_URL && c.SUPABASE_KEY && !/YOUR-/.test(c.SUPABASE_URL + c.SUPABASE_KEY);
+  const base = (c.SUPABASE_URL||'').replace(/\/$/,'') + '/rest/v1/tickets';
+  const headers = {apikey:c.SUPABASE_KEY, Authorization:'Bearer '+c.SUPABASE_KEY, 'Content-Type':'application/json'};
+  return {
+    configured,
+    async add(ticket, name){
+      const r = await fetch(base,{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({ticket,name})});
+      if(r.ok) return {ok:true};
+      let body={}; try{body=await r.json();}catch(e){}
+      if(r.status===409||body.code==='23505') return {ok:false,duplicate:true};
+      return {ok:false,message:body.message||('Something went wrong ('+r.status+')')};
+    },
+    async find(ticket){
+      const r = await fetch(base+'?ticket=eq.'+encodeURIComponent(ticket)+'&select=ticket,name,created_at',{headers});
+      if(!r.ok){let b={};try{b=await r.json();}catch(e){}throw new Error(b.message||('Something went wrong ('+r.status+')'));}
+      const rows = await r.json();
+      return rows[0]||null;
+    },
+    async recent(n){
+      const r = await fetch(base+'?select=ticket,name&order=created_at.desc&limit='+n,{headers});
+      if(!r.ok) return [];
+      return r.json();
+    }
+  };
+})();
+function show(el,cls,text){el.className='msg visible '+cls;el.textContent=text;}
+function hide(el){el.className=el.className.replace(' visible','');}
+
+</script>
 <script>
 const $=s=>document.querySelector(s);
 const msg=$('#msg'),t=$('#ticket'),n=$('#name'),btn=$('#save');
@@ -73,7 +220,7 @@ async function loadRecent(){
 
 async function save(){
   hide(msg);
-  if(!SB.configured){show(msg,'warn','Supabase is not connected yet. Open config.js and paste in your project URL and key.');return;}
+  if(!SB.configured){show(msg,'warn','Supabase is not connected yet. Open this file and paste in your project URL and key.');return;}
   const ticket=t.value.trim(), name=n.value.trim();
   if(!ticket||!name){show(msg,'err','Please fill in both the ticket number and the name.');return;}
   btn.disabled=true;
@@ -87,7 +234,7 @@ async function save(){
     }else{
       show(msg,'err',r.message);
     }
-  }catch(e){show(msg,'err','Could not reach Supabase. Check your internet and the values in config.js.');}
+  }catch(e){show(msg,'err','Could not reach Supabase. Check your internet and the values at the top of the script in this file.');}
   btn.disabled=false;
 }
 btn.addEventListener('click',save);
