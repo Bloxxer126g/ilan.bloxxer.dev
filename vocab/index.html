@@ -120,6 +120,16 @@ input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px}
 .btns{display:grid;gap:10px;margin-top:22px}.btns .go{margin:0}
 .res-wrap h2{margin-top:30px}
 
+/* grammar */
+.word.sent{font-size:clamp(24px,4.8vw,36px);letter-spacing:-.02em}
+.blank{display:inline-block;min-width:2.6em;height:1em;vertical-align:-.12em;border-bottom:3px solid var(--blue)}
+.blank.e{min-width:.9em}
+.filled{color:var(--blue)}
+#act{margin-top:18px}#act .btns{margin-top:0}
+/* discord */
+.discord-fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;display:grid;place-items:center;background:var(--blue);color:var(--onacc);border-radius:50%;z-index:500;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s}
+.discord-fab:hover{background:var(--accHi);transform:translateY(-6px) scale(1.12) rotate(-8deg);box-shadow:0 14px 30px rgba(232,132,90,.45)}
+.discord-fab:active{transform:scale(.95)}
 footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
 .blink{animation:blink 1.2s infinite;display:inline-block}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
@@ -132,24 +142,157 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
 </nav>
 <main id="win"><div id="app"></div></main>
 <footer>ilan.bloxxer.dev &nbsp;|&nbsp; Created with the use of AI &nbsp;|&nbsp; <span class="blink">_</span></footer>
+<a href="https://discord.gg/vfW7kdccHK" target="_blank" rel="noopener" class="discord-fab" title="Join the Discord" aria-label="Join the Discord">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+    <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.07.07 0 0 0-.073.035c-.211.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.07.07 0 0 0-.073-.035A19.74 19.74 0 0 0 3.68 4.37a.064.064 0 0 0-.03.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.055 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.01c.12.099.246.197.373.291a.077.077 0 0 1-.006.128 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.106c.36.698.772 1.364 1.225 1.994a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.673-3.549-13.66a.061.061 0 0 0-.03-.028ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.955 2.419-2.157 2.419Zm7.974 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.946 2.419-2.157 2.419Z"/>
+  </svg>
+</a>
 <script>
 const BUILTIN={"1":[{"latin":"dormiō","english":"I sleep"},{"latin":"ego","english":"I"},{"latin":"frāter","english":"brother"},{"latin":"hōra","english":"hour"},{"latin":"in","english":["in","on"]},{"latin":"īnsula","english":"block of flats"},{"latin":"labōrō","english":"I work"},{"latin":"legō","english":"I read"},{"latin":"meus","english":"my"},{"latin":"nōn","english":"not"},{"latin":"pater","english":"father"},{"latin":"rīdeō","english":["I laugh","I smile"]},{"latin":"servus","english":["slave","enslaved person (male)"]},{"latin":"tū","english":"you (singular)"},{"latin":"turba","english":"crowd"},{"latin":"ubi?","english":"where?"},{"latin":"via","english":["street","road","way"]},{"latin":"sum","english":"I am"},{"latin":"es","english":"you (singular) are"},{"latin":"est","english":["he is","she is","it is"]}],"2":[{"latin":"cadō","english":"I fall"},{"latin":"cibus, cibum, m.","english":"food"},{"latin":"dūcō","english":["I lead","I take"]},{"latin":"et","english":"and"},{"latin":"fīlia, fīliam, f.","english":"daughter"},{"latin":"fīlius, fīlium, m.","english":"son"},{"latin":"forum, forum, n.","english":["forum","marketplace"]},{"latin":"habeō","english":["I have","I hold"]},{"latin":"habitō","english":"I live"},{"latin":"intrō","english":"I enter"},{"latin":"magnus","english":["big","large","great"]},{"latin":"pecūnia, pecūniam, f.","english":["money","sum of money"]},{"latin":"quaerō","english":["I search for","I look for","I ask"]},{"latin":"quoque","english":["also","too"]},{"latin":"salūtō","english":"I greet"},{"latin":"sed","english":"but"},{"latin":"spectō","english":["I look at","I watch"]},{"latin":"videō","english":"I see"},{"latin":"vīnum, vīnum, n.","english":"wine"},{"latin":"vocō","english":"I call"}],"3":[{"latin":"ambulō","english":"I walk"},{"latin":"amīcus, amīcum, m.","english":"friend"},{"latin":"ancilla, ancillam, f.","english":["slave","enslaved person (female)"]},{"latin":"clāmō","english":"I shout"},{"latin":"clāmor, clāmōrem, m.","english":["shout","shouting","noise"]},{"latin":"cum","english":"with"},{"latin":"currō","english":"I run"},{"latin":"dīcō","english":["I say","I speak","I tell"]},{"latin":"equus, equum, m.","english":"horse"},{"latin":"festīnō","english":"I hurry"},{"latin":"gladius, gladium, m.","english":"sword"},{"latin":"īnfēlīx","english":["unlucky","unhappy"]},{"latin":"laetus","english":"happy"},{"latin":"multus","english":["much","many"]},{"latin":"omnis","english":["all","every"]},{"latin":"per","english":["through","along"]},{"latin":"prīmus","english":"first"},{"latin":"senātor, senātōrem, m.","english":"senator"},{"latin":"urbs, urbem, f.","english":"city"},{"latin":"vincō","english":["I conquer","I win","I am victorious"]}],"4":[{"latin":"ad","english":["to","towards","at"]},{"latin":"adsum","english":["I am here","I am present"]},{"latin":"deus, deum, m.","english":"god"},{"latin":"dominus, dominum, m.","english":"master"},{"latin":"dōnum, dōnum, n.","english":["gift","present"]},{"latin":"laudō","english":"I praise"},{"latin":"nōs","english":["we","us"]},{"latin":"parvus","english":"small"},{"latin":"perīculum, perīculum, n.","english":"danger"},{"latin":"perterritus","english":"terrified"},{"latin":"puella, puellam, f.","english":"girl"},{"latin":"quod","english":"because"},{"latin":"rēx, rēgem, m.","english":"king"},{"latin":"Rōmānus","english":"Roman"},{"latin":"subitō","english":"suddenly"},{"latin":"templum, templum, n.","english":"temple"},{"latin":"teneō","english":["I hold","I keep","I possess"]},{"latin":"tollō","english":["I raise","I lift up","I hold up"]},{"latin":"veniō","english":"I come"},{"latin":"vōs","english":"you (plural)"}],"5":[{"latin":"aqua, aquam, f.","english":"water"},{"latin":"audiō, audīre","english":["hear","listen to"]},{"latin":"cupiō, cupere","english":["want","desire"]},{"latin":"custōs, custōdem, m.f.","english":"guard"},{"latin":"dēbeō, dēbēre","english":"owe"},{"latin":"dō, dare","english":"give"},{"latin":"effugiō, effugere","english":"escape"},{"latin":"iuvenis, iuvenem, m.f.","english":"young person"},{"latin":"maneō, manēre","english":["remain","stay"]},{"latin":"nēmō, nēminem","english":["no one","nobody"]},{"latin":"nōlō, nōlle","english":["don't want","refuse"]},{"latin":"nox, noctem, f.","english":"night"},{"latin":"portō, portāre","english":["carry","bear","take"]},{"latin":"possum, posse","english":["can","am able"]},{"latin":"pulcher","english":["beautiful","handsome"]},{"latin":"respondeō, respondēre","english":"reply"},{"latin":"taceō, tacēre","english":["am silent","am quiet"]},{"latin":"timeō, timēre","english":["fear","am afraid"]},{"latin":"vēndō, vēndere","english":"sell"},{"latin":"volō, velle","english":["want","wish","am willing"]}],"6":[{"latin":"ā, ab + abl.","english":["from","away from"]},{"latin":"capiō, capere","english":["take","catch","capture","adopt (a plan)"]},{"latin":"diēs, diem, m.","english":"day"},{"latin":"discēdō, discēdere","english":["depart","leave"]},{"latin":"ē, ex + abl.","english":["from","out of"]},{"latin":"exspectō, exspectāre","english":["wait for","expect"]},{"latin":"faciō, facere","english":["make","do"]},{"latin":"iam","english":["now","already"]},{"latin":"in + acc.","english":["into","onto"]},{"latin":"inquit","english":"says"},{"latin":"marītus, marītum, m.","english":"husband"},{"latin":"māter, mātrem, f.","english":"mother"},{"latin":"prope + acc.","english":"near"},{"latin":"rogō, rogāre","english":["ask","ask for"]},{"latin":"sedeō, sedēre","english":"sit"},{"latin":"stō, stāre","english":"stand"},{"latin":"tōtus","english":"whole"},{"latin":"trīstis","english":"sad"},{"latin":"tuus","english":["your (singular)","yours"]},{"latin":"uxor, uxōrem, f.","english":"wife"}]};
 const $=s=>document.querySelector(s),app=$('#app'),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ROM=' I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI XVII XVIII XIX XX'.split(' ');
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-let data={},S={chs:new Set([1]),sel:'all',n:10,picked:new Set(),dir:'l2e',mode:'mc',learn:true,shuf:true},Q=null;
+let data={},S={chs:new Set([1]),sel:'all',n:10,picked:new Set(),dir:'l2e',mode:'mc',learn:true,shuf:true,kind:'vocab',gch:new Set([1,2]),goff:new Set(),gshuf:false},Q=null,G=null;
 function addWords(ch,arr){data[ch]=(Array.isArray(arr)?arr:arr.words||[]).filter(x=>x&&x.latin&&x.english).map((x,i)=>({id:ch+'-'+i,ch,latin:String(x.latin).trim(),en:[].concat(x.english).map(s=>String(s).trim())}))}
 const avail=()=>Object.keys(data).map(Number).sort((a,b)=>a-b);
 const chosen=()=>avail().filter(c=>S.chs.has(c)).flatMap(c=>data[c]);
 function selWords(){const a=chosen();return S.sel=='first'?a.slice(0,S.n):S.sel=='last'?a.slice(-S.n):S.sel=='pick'?a.filter(w=>S.picked.has(w.id)):a}
 for(const c in BUILTIN)addWords(+c,BUILTIN[c]);
-Promise.all(Array.from({length:30},(_,i)=>i+1).map(async n=>{try{const r=await fetch(`Chap${n}.json`);if(r.ok)addWords(n,await r.json())}catch(e){}})).then(()=>{if(!Q)render()});
+Promise.all(Array.from({length:30},(_,i)=>i+1).map(async n=>{try{const r=await fetch(`Chap${n}.json`);if(r.ok)addWords(n,await r.json())}catch(e){}})).then(()=>{if(!Q&&!G)render()});
+
+/* grammar */
+const GRAM={
+1:[
+{id:'1a',title:'Translate these sentences (1)',kind:'translate',items:[
+['ego in īnsulā habitō.','I live in a block of flats.'],
+['tū in popīnā labōrās.','You work in the bar.'],
+['Sabīna intrat.','Sabina enters.'],
+['ego in cellā legō.','I read in the room.'],
+['tū nōn dormīs.','You do not sleep.'],
+['ego labōrō.','I work.']]},
+{id:'1b',title:'Translate these sentences (2)',kind:'translate',items:[
+['ego sum in īnsulā.','I am in the block of flats.'],
+['negōtiātor in Subūrā est.','The merchant is in the Subura.'],
+['tū es in popīnā.','You are in the bar.'],
+['Subūra nōn est quiēta.','The Subura is not quiet.']]},
+{id:'1c',title:'Complete the sentences, then translate',kind:'choose',bank:['ego','tū','ambulat','habitō','iuvenis','dormīs'],items:[
+['{} in lectīcā dormit.','iuvenis','The young person sleeps in the litter.'],
+['{} labōrās, soror?','tū','Are you working, sister?'],
+['ego in Subūrā {}.','habitō','I live in the Subura.'],
+['{} nōn sum in cellā.','ego','I am not in the room.'],
+['Sabīna in viā {}.','ambulat','Sabina walks in the street.'],
+['tū in īnsulā {}.','dormīs','You sleep in the block of flats.']]}
+],
+2:[
+{id:'2a',title:'Complete the noun endings, then translate',kind:'ending',items:[
+['Giscō can{} videt.','em','Gisco sees the dog.'],
+['Rūfīn{} amīcum vocat.','us','Rufinus calls the friend.'],
+['mercātor cib{} vēndit.','um','The merchant sells food.'],
+['amīc{} Faustum salūtat.','us','The friend greets Faustus.'],
+['ego īnsul{} spectō.','am','I look at the block of flats.'],
+['tū īnfan{} tenēs.','tem','You hold the baby.']]},
+{id:'2b',title:'Select the correct noun form, then translate',kind:'choose',items:[
+['ego {} videō.','equum','I see the horse.',['equus','equum']],
+['{} canem vocat.','servus','The slave calls the dog.',['servus','servum']],
+['tū {} habēs?','pecūniam','Do you have money?',['pecūnia','pecūniam']],
+['{} in popīnā sedet.','senex','The old man sits in the bar.',['senex','senem']],
+['{} Faustus audit.','clāmōrem','Faustus hears the shouting.',['clāmor','clāmōrem']]]},
+{id:'2c',title:'Select the correct verb form, then translate',kind:'choose',items:[
+['ego cibum {}.','habeō','I have food.',['habet','habeō','habēs']],
+['Mānius in viā {}.','sedet','Manius sits in the street.',['sedēs','sedeō','sedet']],
+['tū in popīnā {}.','labōrās','You work in the bar.',['labōrat','labōrās','labōrō']],
+['ego in Subūrā {}.','habitō','I live in the Subura.',['habitō','habitat','habitās']],
+['Faustus īnsulam {}.','intrat','Faustus enters the block of flats.',['intrō','intrās','intrat']]]}
+]};
+for(const c in GRAM)GRAM[c].forEach(s=>{s.items=s.items.map((x,i)=>s.kind=='translate'?{id:s.id+i,ch:+c,set:s,lat:x[0],en:x[1]}:{id:s.id+i,ch:+c,set:s,tpl:x[0],ans:x[1],en:x[2],opts:x[3]||s.bank})});
+const gAvail=()=>Object.keys(GRAM).map(Number).sort((a,b)=>a-b);
+const gSets=()=>gAvail().filter(c=>S.gch.has(c)).flatMap(c=>GRAM[c].filter(s=>!S.goff.has(s.id)));
+const gItems=()=>gSets().flatMap(s=>s.items);
+const full=it=>it.lat||it.tpl.replace('{}',it.ans);
+const normT=s=>s.toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\b(the|a|an)\b/g,' ').replace(/\s+/g,' ').trim();
+function head(){
+  const t=(k,l)=>`<button class="seg${S.kind==k?' on':''}" onclick="S.kind='${k}';render()">${l}</button>`;
+  return `<div class="badge">Suburani Book 1</div><h1>Learn your <span>Latin.</span></h1><p class="lead">${S.kind=='gram'?'Work through the grammar exercises from each chapter: fill the gaps, then translate.':'Pick your chapters, choose how you want to be quizzed and build up your vocabulary.'}</p><div class="row" style="margin:-12px 0 28px">${t('vocab','Vocabulary')}${t('gram','Grammar')}</div>`;
+}
+function gRender(){
+  const chs=gAvail(),pad=c=>String(c).padStart(2,'0'),cnt=c=>GRAM[c].reduce((n,s)=>n+s.items.length,0);
+  let h=head()+`<div class="setup"><section class="panel"><h2><i>1</i>Chapters</h2><div class="row">${chs.map(c=>`<button class="sq${S.gch.has(c)?' on':''}" onclick="gTogCh(${c})"><b>${pad(c)}</b><span>${cnt(c)} sentences</span></button>`).join('')}</div>
+  <p class="small"><button class="link" onclick="gAllCh(1)">Select all</button> · <button class="link" onclick="gAllCh(0)">Clear</button></p></section>
+  <section class="panel"><h2><i>2</i>Exercises</h2>`;
+  const on=chs.filter(c=>S.gch.has(c));
+  if(!on.length)h+=`<p class="small">Choose a chapter first.</p>`;
+  else h+=`<div class="pl" style="max-height:none;margin-top:0">${on.map(c=>`<div class="ch">Chapter ${pad(c)}</div>`+GRAM[c].map(s=>`<label><input type="checkbox" ${S.goff.has(s.id)?'':'checked'} onchange="gTogSet('${s.id}',this.checked)"><span><b>${esc(s.title)}</b> — ${s.items.length} sentences</span></label>`).join('')).join('')}</div>`;
+  h+=`<p class="small"><label><input type="checkbox" ${S.gshuf?'checked':''} onchange="S.gshuf=this.checked"> Shuffle the order</label></p></section></div><button class="go" id="go" onclick="gStart()"></button>`;
+  app.innerHTML=h;gUpd();
+}
+function gUpd(){const n=gItems().length,g=$('#go');if(!g)return;g.disabled=!n;g.textContent=n?`Begin with ${n} sentence${n==1?'':'s'}`:'Select some exercises first'}
+const gTogCh=c=>{S.gch.has(c)?S.gch.delete(c):S.gch.add(c);gRender()},gAllCh=on=>{S.gch=new Set(on?gAvail():[]);gRender()},gTogSet=(id,on)=>{on?S.goff.delete(id):S.goff.add(id);gUpd()};
+
+function gStart(items){
+  items=(items||gItems()).slice();if(S.gshuf)shuf(items);
+  Q=null;G={items,i:0,right:0,miss:[],ph:'',aOk:true,it:null,opts:[]};gAsk();
+}
+const gBand=it=>`Chapter ${String(it.ch).padStart(2,'0')} · ${it.set.title}`;
+const sent=(it,fill)=>{const [a,b]=it.tpl.split('{}');return esc(a)+(fill==null?`<span class="blank${it.set.kind=='ending'?' e':''}"></span>`:`<span class="filled">${esc(fill)}</span>`)+esc(b)};
+function gHdr(){const n=G.items.length;return `<div class="top"><div class="prog"><i style="width:${Math.round(G.i/n*100)}%"></i></div><span>${G.i+1} of ${n}</span><button class="link" onclick="render()">Exit</button></div>`}
+function gShow(it,sh,body,act,ph){G.ph=ph;app.innerHTML=gHdr()+`<div class="card"><div class="band">${esc(gBand(it))}</div><div class="word sent" id="sw">${sh}</div>${body}<div class="fb" id="fb"></div></div><div id="act">${act}</div>`}
+function gAsk(){
+  if(G.i>=G.items.length)return gResults();
+  const it=G.items[G.i],k=it.set.kind;G.it=it;G.aOk=true;
+  if(k=='translate')return gB();
+  if(k=='choose'){G.opts=shuf(it.opts.slice());return gShow(it,sent(it,null),`<div class="opts">${G.opts.map((o,i)=>`<button class="opt1" onclick="gPick(${i})"><span class="k">${i+1}</span>${esc(o)}</button>`).join('')}</div>`,'','a-pick')}
+  gShow(it,sent(it,null),`<input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type the missing ending">`,`<button class="go" onclick="gCheckEnd()">Check</button>`,'a-type');$('#ans').focus();
+}
+function gAfterA(ok){
+  G.aOk=ok;G.ph='a-done';$('#sw').innerHTML=sent(G.it,G.it.ans);
+  const f=$('#fb');f.className='fb '+(ok?'ok':'bad');f.textContent=ok?'Correct':'Not quite: '+G.it.ans;
+  $('#act').innerHTML=`<button class="go" onclick="gB()">Next: translate</button>`;
+}
+function gPick(i){
+  if(G.ph!='a-pick')return;const ans=G.it.ans;
+  document.querySelectorAll('.opt1').forEach((b,j)=>{b.disabled=true;if(G.opts[j]==ans)b.classList.add('ok');else if(j==i)b.classList.add('bad')});
+  gAfterA(G.opts[i]==ans);
+}
+function gCheckEnd(){
+  if(G.ph!='a-type')return;const v=$('#ans'),g=norm(v.value);if(!g){v.focus();return}v.disabled=true;
+  const it=G.it,stem=(it.tpl.match(/(\S*)\{\}/)||[,''])[1];
+  gAfterA([it.ans,stem+it.ans].map(x=>norm(x)).includes(g));
+}
+function gB(){
+  const it=G.it,lat=it.set.kind=='translate'?esc(it.lat):sent(it,it.ans);
+  gShow(it,lat,`<input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your English translation">`,`<button class="go" onclick="gCheckT()">Check</button>`,'b-type');$('#ans').focus();
+}
+function gCheckT(){
+  if(G.ph!='b-type')return;const v=$('#ans'),g=normT(v.value);if(!g){v.focus();return}v.disabled=true;
+  const it=G.it,f=$('#fb');
+  if(g==normT(it.en)){f.className='fb ok';f.textContent='Correct';G.ph='b-auto';$('#act').innerHTML=`<button class="go" onclick="gMark(1)">Next</button>`}
+  else{f.className='fb';f.innerHTML=`Model answer: <span style="color:var(--accHi)">${esc(it.en)}</span>`;G.ph='b-mark';
+    $('#act').innerHTML=`<p class="small c" style="margin:0 0 12px">Is your translation close enough in meaning?</p><div class="btns"><button class="go" onclick="gMark(1)">Yes, I had it</button><button class="go alt" onclick="gMark(0)">No, I got it wrong</button></div>`}
+}
+function gMark(ok){if(ok&&G.aOk)G.right++;else G.miss.push(G.it);G.i++;gAsk()}
+function gResults(){
+  G.ph='res';const n=G.items.length,pct=n?Math.round(G.right/n*100):0;
+  app.innerHTML=`<div class="res-wrap"><div class="badge">Session complete</div><h1>All <span>done.</span></h1>
+  <div class="big">${pct}%</div><p class="small c">${G.right} of ${n} sentences fully correct</p>
+  ${G.miss.length?`<h2>Needs work</h2>${G.miss.map(it=>`<div class="miss"><b>${esc(full(it))}</b><span>${esc(it.en)}</span></div>`).join('')}`:''}
+  <div class="btns">${G.miss.length?`<button class="go" onclick="gStart(G.miss)">Practise these (${G.miss.length})</button>`:''}<button class="go alt" onclick="gStart(G.items)">Go again</button><button class="go alt" onclick="render()">Back to setup</button></div></div>`;
+}
+document.addEventListener('keydown',e=>{
+  if(!G)return;const p=G.ph;
+  if(e.key=='Enter'){
+    if(p=='a-type'){e.preventDefault();gCheckEnd()}
+    else if(p=='a-done'){e.preventDefault();gB()}
+    else if(p=='b-type'){e.preventDefault();gCheckT()}
+    else if(p=='b-auto'){e.preventDefault();gMark(1)}
+  }else if(p=='a-pick'&&/^[1-9]$/.test(e.key)&&G.opts[+e.key-1]!==undefined)gPick(+e.key-1);
+  else if(p=='b-mark'){if(e.key=='1')gMark(1);else if(e.key=='2')gMark(0)}
+});
 
 /* setup */
-function render(){
-  Q=null;const chs=avail(),b=(on,t,f)=>`<button class="seg${on?' on':''}" onclick="${f}">${t}</button>`;
-  let h=`<div class="badge">Suburani Book 1</div><h1>Learn your <span>Latin.</span></h1><p class="lead">Pick your chapters, choose how you want to be quizzed and build up your vocabulary.</p>
-  <div class="setup"><section class="panel"><h2><i>1</i>Chapters</h2><div class="row">${chs.map(c=>`<button class="sq${S.chs.has(c)?' on':''}" onclick="togCh(${c})"><b>${String(c).padStart(2,"0")}</b><span>${data[c].length} words</span></button>`).join('')}</div>
+function render(){Q=null;G=null;return S.kind=='gram'?gRender():vRender()}
+function vRender(){
+  const chs=avail(),b=(on,t,f)=>`<button class="seg${on?' on':''}" onclick="${f}">${t}</button>`;
+  let h=head()+`<div class="setup"><section class="panel"><h2><i>1</i>Chapters</h2><div class="row">${chs.map(c=>`<button class="sq${S.chs.has(c)?' on':''}" onclick="togCh(${c})"><b>${String(c).padStart(2,"0")}</b><span>${data[c].length} words</span></button>`).join('')}</div>
   <p class="small"><button class="link" onclick="allCh(1)">Select all</button> · <button class="link" onclick="allCh(0)">Clear</button></p></section>
   <section class="panel"><h2><i>2</i>Words</h2><div class="row">${b(S.sel=='all','All',"setSel('all')")}${b(S.sel=='first','First …',"setSel('first')")}${b(S.sel=='last','Last …',"setSel('last')")}${b(S.sel=='pick','Pick words',"setSel('pick')")}</div>`;
   if(S.sel=='first'||S.sel=='last')h+=`<p class="small">${S.sel=='first'?'First':'Last'} <input type="number" min="1" value="${S.n}" oninput="S.n=Math.max(1,+this.value||1);upd()"> words of the chosen chapters</p>`;
@@ -245,7 +388,7 @@ render();
 /* cursor */
 (function(){
   const o=document.getElementById('cursor-outer');if(!o)return;
-  const GREEN='.go:not(.alt):not(:disabled), .seg.on, .sq.on, .nav-right a';
+  const GREEN='.go:not(.alt):not(:disabled), .seg.on, .sq.on, .nav-right a, .discord-fab';
   document.addEventListener('mousemove',e=>{
     o.style.left=e.clientX+'px';o.style.top=e.clientY+'px';
     const t=e.target.closest?e.target:document.body;

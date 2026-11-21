@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Countdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c1104;--card:#161d09;--card2:#1e2810;--ink:#f0f7e2;--ink2:#dbe9c0;--mut:#9aa882;--line:#2c3a18;
+  --blue:#a3e635;--blue-soft:#26340d;--teal:#a3e635;--amber:#f5b94a;--coral:#ff7075;--onacc:#0f1a02;--accHi:#c2f26b;
+  --disp:'Sora','Public Sans',system-ui,sans-serif;--body:'Public Sans',system-ui,sans-serif;
+  --r:28px;
+}
+html{background:var(--bg);color-scheme:dark}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){*{cursor:none!important}}
+
+/* cursor */
+#cursor-outer{position:fixed;pointer-events:none;z-index:99999;width:8px;height:8px;border-radius:50%;background:var(--blue);transform:translate(-50%,-50%);transition:width .2s,height .2s,border-radius .2s,background .15s}
+body.cg #cursor-outer{background:var(--onacc)}
+body.ct #cursor-outer{width:3px;height:26px;border-radius:2px}
+body.cd #cursor-outer{width:5px;height:5px}
+.ripple{position:fixed;pointer-events:none;z-index:99998;width:14px;height:14px;border:1.5px solid var(--blue);border-radius:50%;margin:-7px 0 0 -7px;animation:rip .75s ease-out forwards}
+@keyframes rip{from{transform:scale(1);opacity:.9}to{transform:scale(6);opacity:0}}
+@media(hover:none){#cursor-outer{display:none}input{font-size:16px!important}}
+
+/* nav */
+nav{position:sticky;top:14px;z-index:100;max-width:1120px;margin:14px auto 0;padding:8px 8px 8px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(22,29,9,.82);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px;width:calc(100% - 32px)}
+.logo{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.3px}
+.logo span{color:var(--blue)}
+.nav-right{display:flex;align-items:center;gap:6px}
+.nav-right a{font-size:14px;font-weight:500;color:var(--mut);padding:10px 18px;border-radius:999px}
+.nav-right a.cta{background:var(--blue);color:var(--onacc);display:flex;align-items:center;gap:10px;padding:10px 10px 10px 20px}
+.nav-right a.cta:hover{background:var(--accHi);color:var(--onacc)}
+.arr{width:26px;height:26px;border-radius:50%;background:var(--onacc);color:var(--blue);display:grid;place-items:center;font-size:13px}
+
+/* hero */
+.hero{max-width:1120px;margin:0 auto;padding:72px 24px 40px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 10px;font-size:13px;font-weight:500;color:var(--mut);margin-bottom:26px}
+.badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(163,230,53,.2);animation:blink 1.2s infinite}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(44px,8vw,96px);line-height:1;letter-spacing:-.045em;max-width:12ch;text-wrap:balance}
+.hero h1 span{color:var(--blue)}
+.hero p{margin-top:24px;max-width:54ch;color:var(--mut);font-size:17px;line-height:1.6}
+
+/* form panel */
+.planner{max-width:1120px;margin:0 auto;padding:0 24px}
+.planner-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:32px;display:grid;grid-template-columns:1.4fr 1fr;gap:28px 40px}
+.planner-card.one{grid-template-columns:1fr}
+.card-title{grid-column:1/-1;font-family:var(--disp);font-weight:600;font-size:20px;letter-spacing:-.02em}
+.form-row{position:relative}
+.form-row label{font-size:13px;font-weight:500;color:var(--mut);display:block;margin-bottom:8px}
+.form-row .hint{font-size:12px;color:var(--mut);margin-top:8px}
+input[type=text],input[type=datetime-local]{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:16px;color:var(--ink);font:500 16px var(--body);padding:15px 18px;outline:none;transition:border-color .15s,background .15s}
+input[type=text]:focus,input[type=datetime-local]:focus{border-color:var(--blue);background:#11170a}
+input::placeholder{color:#9aa6b6}
+.btn-plan{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;background:var(--blue);color:var(--onacc);font:600 16px var(--disp);border-radius:999px;padding:10px 10px 10px 30px}
+.btn-plan .arr{width:44px;height:44px;font-size:18px}
+.btn-plan:hover{background:var(--accHi)}
+.btn-plan:disabled{opacity:.6;pointer-events:none}
+.copy-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.btn-copy{display:flex;align-items:center;gap:10px;background:var(--blue);color:var(--onacc);font:600 15px var(--disp);border-radius:999px;padding:8px 8px 8px 24px}
+.btn-copy .arr{width:34px;height:34px;font-size:15px}
+.btn-copy:hover{background:var(--accHi)}
+.error-state{background:#2a1215;border:1px solid #5a2327;border-radius:20px;padding:16px 22px;margin-top:20px}
+.error-state p{font-size:14px;color:#ff8a8e;overflow-wrap:anywhere}
+
+/* result */
+.results{max-width:1120px;margin:0 auto;padding:56px 24px 40px}
+.status-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.place-name{font-family:var(--disp);font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:-.04em;line-height:1.05;overflow-wrap:anywhere}
+.place-name small{display:block;font:400 15px var(--body);letter-spacing:0;color:var(--mut);margin-top:8px}
+.chip{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;color:var(--blue);background:#26340d;white-space:nowrap}
+.chip.snap{color:#f5c36b;background:#3a2a0a}
+
+.now-card{background:#2f4210;color:#fff;border-radius:36px;overflow:hidden;position:relative}
+.now-card::before{content:'';position:absolute;width:520px;height:520px;right:-160px;top:-220px;border-radius:50%;background:radial-gradient(circle,rgba(163,230,53,.38),transparent 65%);pointer-events:none}
+.units{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);position:relative}
+.stat{background:#263609;padding:44px 12px 38px;text-align:center}
+.unit-val{font-family:var(--disp);font-size:clamp(40px,8vw,96px);font-weight:700;line-height:1;letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.stat-label{font-size:13px;color:#a9bb86;margin-top:14px}
+.over{position:relative;padding:72px 32px;text-align:center}
+.over h2{font-family:var(--disp);font-size:clamp(40px,8vw,96px);font-weight:700;letter-spacing:-.05em;line-height:1}
+.share{margin-top:24px}
+
+.gone{max-width:1120px;margin:0 auto;padding:0 24px}
+
+footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.8}
+.blink{animation:blink 1.2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* hovers */
+.nav-right a.cta,.btn-plan,.btn-copy,.nav-right a{transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s,color .2s}
+.arr{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.nav-right a.cta:hover,.btn-plan:hover,.btn-copy:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(163,230,53,.4)}
+.nav-right a.cta:active,.btn-plan:active,.btn-copy:active{transform:translateY(0) scale(.97);box-shadow:none}
+.nav-right a.cta:hover .arr,.btn-plan:hover .arr,.btn-copy:hover .arr{transform:translateX(5px) rotate(-45deg) scale(1.12)}
+.nav-right a:not(.cta):hover{transform:translateY(-2px);color:var(--ink);background:var(--card2)}
+
+/* discord */
+.discord-fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;display:grid;place-items:center;background:var(--blue);color:var(--onacc);border-radius:50%;z-index:500;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .2s}
+.discord-fab:hover{background:var(--accHi);transform:translateY(-6px) scale(1.12) rotate(-8deg);box-shadow:0 14px 30px rgba(163,230,53,.45)}
+.discord-fab:active{transform:scale(.95)}
+
+@media(max-width:860px){.planner-card{grid-template-columns:1fr}}
+@media(max-width:520px){
+  .hero{padding-top:48px}
+  .nav-right a:not(.cta){display:none}
+  .planner-card{padding:22px}
+  .units{grid-template-columns:repeat(2,1fr)}
+  .stat{padding:30px 12px 26px}
+  .copy-row{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media print{body{background:#fff}#cursor-outer,nav,.discord-fab{display:none!important}}
+</style>
+</head>
+<body>
+<div id="cursor-outer"></div>
+
+<nav>
+  <a class="logo" href="./">count<span>down</span></a>
+  <div class="nav-right">
+    <a class="cta" href="./">New countdown <span class="arr">↗</span></a>
+  </div>
+</nav>
+
+<!-- Create view -->
+<main id="home" hidden>
+  <section class="hero">
+    <div class="badge">Free to share</div>
+    <h1>Count it <span>down.</span></h1>
+    <p>Name your event, pick the moment, and get a link anyone can open.</p>
+  </section>
+  <section class="planner">
+    <div class="planner-card">
+      <div class="card-title">Make a countdown</div>
+      <div class="form-row">
+        <label for="name">Event name</label>
+        <input type="text" id="name" maxlength="80" placeholder="Summer holiday" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label for="when">Date and time</label>
+        <input type="datetime-local" id="when">
+        <div class="hint">In your own time zone. Everyone who opens the link sees it in theirs.</div>
+      </div>
+      <button class="btn-plan" id="create">Create countdown <span class="arr">→</span></button>
+    </div>
+    <div class="error-state" id="home-error" hidden><p></p></div>
+  </section>
+</main>
+
+<!-- Countdown view -->
+<main id="view" hidden>
+  <section class="results">
+    <div class="status-row">
+      <h1 class="place-name"><span id="ev-name"></span><small id="ev-date"></small></h1>
+      <span class="chip" id="chip">Counting down</span>
+    </div>
+
+    <div class="now-card">
+      <div class="units" id="units">
+        <div class="stat"><div class="unit-val" id="u-d">0</div><div class="stat-label">days</div></div>
+        <div class="stat"><div class="unit-val" id="u-h">00</div><div class="stat-label">hours</div></div>
+        <div class="stat"><div class="unit-val" id="u-m">00</div><div class="stat-label">minutes</div></div>
+        <div class="stat"><div class="unit-val" id="u-s">00</div><div class="stat-label">seconds</div></div>
+      </div>
+      <div class="over" id="over" hidden>
+        <h2>It’s time.</h2>
+      </div>
+    </div>
+
+    <div class="planner-card one share">
+      <div class="card-title">Share this countdown</div>
+      <div class="copy-row">
+        <input type="text" id="link" readonly>
+        <button class="btn-copy" id="copy">Copy link <span class="arr">↗</span></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Missing / expired view -->
+<main id="gone" hidden>
+  <section class="hero">
+    <div class="badge">Ended</div>
+    <h1>All <span>done.</span></h1>
+    <p>This countdown has ended, or the link isn’t right.</p>
+  </section>
+  <section class="gone">
+    <a class="btn-plan" href="./" style="max-width:420px">Make a new one <span class="arr">→</span></a>
+  </section>
+</main>
+
+<div class="planner" id="fatal" hidden><div class="error-state"><p></p></div></div>
+
+<footer>Make as many as you like<span class="blink">_</span></footer>
+
+<a href="https://discord.gg/vfW7kdccHK" target="_blank" rel="noopener" class="discord-fab" title="Join the Discord" aria-label="Join the Discord">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+    <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.07.07 0 0 0-.073.035c-.211.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.07.07 0 0 0-.073-.035A19.74 19.74 0 0 0 3.68 4.37a.064.064 0 0 0-.03.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.055 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.01c.12.099.246.197.373.291a.077.077 0 0 1-.006.128 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.106c.36.698.772 1.364 1.225 1.994a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.673-3.549-13.66a.061.061 0 0 0-.03-.028ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.955 2.419-2.157 2.419Zm7.974 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.946 2.419-2.157 2.419Z"/>
+  </svg>
+</a>
+
+<script>
+/* ---- Config: paste your own from Supabase > Project Settings > API ---- */
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_KEY = 'YOUR-ANON-OR-PUBLISHABLE-KEY';
+/* ----------------------------------------------------------------------- */
+
+const $ = s => document.querySelector(s);
+const HOUR = 3600000;
+
+async function rpc(fn, args) {
+  if (SUPABASE_URL.includes('YOUR-PROJECT')) throw new Error('Add your Supabase URL and key at the top of the script.');
+  const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args)
+  });
+  const j = await r.json().catch(() => null);
+  if (!r.ok) throw new Error((j && j.message) || 'Something went wrong. Try again.');
+  return j;
+}
+
+function show(id) {
+  ['home', 'view', 'gone'].forEach(k => $('#' + k).hidden = k !== id);
+}
+function fatal(msg) {
+  ['home', 'view', 'gone'].forEach(k => $('#' + k).hidden = true);
+  $('#fatal').hidden = false;
+  $('#fatal p').textContent = msg;
+}
+const pad = n => String(n).padStart(2, '0');
+
+/* ---------- Create ---------- */
+function initHome() {
+  show('home');
+  const when = $('#when');
+  const soon = new Date(Date.now() + 5 * 60000);
+  const local = new Date(soon.getTime() - soon.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  when.min = local;
+  const err = $('#home-error');
+  $('#create').addEventListener('click', async () => {
+    err.hidden = true;
+    const name = $('#name').value.trim();
+    if (!name) return showErr('Give your event a name.');
+    if (!when.value) return showErr('Pick a date and time.');
+    const d = new Date(when.value);
+    if (isNaN(d) || d.getTime() <= Date.now()) return showErr('Pick a time in the future.');
+    const btn = $('#create');
+    btn.disabled = true;
+    try {
+      const id = await rpc('create_countdown', { p_name: name, p_event_at: d.toISOString() });
+      location.href = location.pathname + '?c=' + encodeURIComponent(id);
+    } catch (e) {
+      btn.disabled = false;
+      showErr(e.message);
+    }
+  });
+  function showErr(m) { err.hidden = false; err.querySelector('p').textContent = m; }
+}
+
+/* ---------- View ---------- */
+async function initView(id) {
+  if (!/^[a-z0-9]{4,16}$/i.test(id)) return show('gone');
+  let row;
+  try {
+    const res = await rpc('get_countdown', { p_id: id });
+    row = res && res[0];
+  } catch (e) { return fatal(e.message); }
+  if (!row) return show('gone');
+
+  const ev = new Date(row.event_at).getTime();
+  const offset = new Date(row.server_now).getTime() - Date.now(); // corrects a wrong device clock
+  $('#ev-name').textContent = row.name;
+  $('#ev-date').textContent = new Date(ev).toLocaleString(undefined, {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+  });
+  $('#link').value = location.origin + location.pathname + '?c=' + encodeURIComponent(id);
+  show('view');
+
+  $('#copy').addEventListener('click', async () => {
+    const b = $('#copy');
+    try { await navigator.clipboard.writeText($('#link').value); }
+    catch { $('#link').select(); document.execCommand('copy'); }
+    b.firstChild.textContent = 'Copied ';
+    setTimeout(() => b.firstChild.textContent = 'Copy link ', 1600);
+  });
+
+  const timer = setInterval(tick, 250);
+  tick();
+
+  function tick() {
+    const now = Date.now() + offset;
+    const left = ev - now;
+    if (left > 0) {
+      const s = Math.floor(left / 1000);
+      $('#u-d').textContent = Math.floor(s / 86400);
+      $('#u-h').textContent = pad(Math.floor(s % 86400 / 3600));
+      $('#u-m').textContent = pad(Math.floor(s % 3600 / 60));
+      $('#u-s').textContent = pad(s % 60);
+      document.title = row.name + ' · ' + Math.floor(s / 86400) + 'd ' + pad(Math.floor(s % 86400 / 3600)) + ':' + pad(Math.floor(s % 3600 / 60)) + ':' + pad(s % 60);
+    } else if (now - ev < HOUR) {
+      $('#units').hidden = true;
+      $('#over').hidden = false;
+      const c = $('#chip');
+      c.textContent = 'Happening now';
+      c.classList.add('snap');
+      document.title = row.name + ' · It’s time';
+    } else {
+      clearInterval(timer);
+      document.title = 'Countdown';
+      show('gone');
+    }
+  }
+}
+
+/* ---------- Start ---------- */
+const id = new URLSearchParams(location.search).get('c');
+id ? initView(id) : initHome();
+
+/* ---------- Cursor ---------- */
+(function () {
+  const o = $('#cursor-outer');
+  document.addEventListener('mousemove', e => { o.style.left = e.clientX + 'px'; o.style.top = e.clientY + 'px'; });
+  const GREEN = 'a.cta,.btn-plan,.btn-copy,.discord-fab';
+  document.addEventListener('mouseover', e => {
+    document.body.classList.toggle('cg', !!e.target.closest(GREEN));
+    if (e.target.closest('input')) document.body.classList.add('ct');
+  });
+  document.addEventListener('mouseout', e => { if (e.target.closest('input')) document.body.classList.remove('ct'); });
+  document.addEventListener('mouseleave', () => document.body.classList.remove('cg'));
+  document.addEventListener('mousedown', e => {
+    document.body.classList.add('cd');
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    r.style.left = e.clientX + 'px';
+    r.style.top = e.clientY + 'px';
+    if (e.target.closest(GREEN)) r.style.borderColor = '#0f1a02';
+    document.body.appendChild(r);
+    setTimeout(() => r.remove(), 800);
+  });
+  document.addEventListener('mouseup', () => document.body.classList.remove('cd'));
+})();
+</script>
+</body>
+</html>
