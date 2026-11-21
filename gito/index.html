@@ -6,7 +6,7 @@
   <script src="gtag.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="gito: git, but gito push does add, commit and push in one go.">
+<meta name="description" content="gito: git, but gito &quot;message&quot; does add, commit and push in one go.">
 <title>gito — git add, commit and push in one command</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
@@ -113,7 +113,7 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
 <header class="hero">
   <div class="badge">Command-line tool for Windows</div>
   <h1>gito<span>.</span></h1>
-  <p>It's just git, except <code>gito push "message"</code> does add, commit and push in one go. Everything else is passed straight through to git.</p>
+  <p>It's just git, except <code>gito "message"</code> does add, commit and push in one go. Everything else is passed straight through to git.</p>
   <div class="hero-btns">
     <a class="btn" href="https://github.com/II-Dragon14/gito/releases/latest" target="_blank" rel="noopener">Get the latest release <span class="arr">&rarr;</span></a>
     <a class="btn alt" href="https://github.com/II-Dragon14/gito" target="_blank" rel="noopener">View on GitHub <span class="arr">&rarr;</span></a>
@@ -127,8 +127,8 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
     <p class="lead">Normally, saving your work to GitHub takes three commands. With gito it's one.</p>
     <div class="flow"><code>git add .</code><span class="then">then</span><code>git commit -m "message"</code><span class="then">then</span><code>git push</code></div>
     <p style="margin-top:14px">becomes</p>
-    <div class="code"><button class="copy" type="button">Copy</button>gito push "message"</div>
-    <p>Any other command, such as <code>gito status</code> or <code>gito pull</code>, goes to git exactly as you typed it.</p>
+    <div class="code"><button class="copy" type="button">Copy</button>gito "message"</div>
+    <p>Any git command, such as <code>gito status</code> or <code>gito pull</code>, goes to git exactly as you typed it.</p>
   </section>
 
   <section class="panel">
@@ -154,13 +154,13 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
   <section class="panel">
     <h2><i>3</i>How to use it</h2>
     <p class="lead">Open a terminal in your project folder, the one that's already a git repository, and run:</p>
-    <div class="code"><button class="copy" type="button">Copy</button>gito push "fix the login button"</div>
+    <div class="code"><button class="copy" type="button">Copy</button>gito "fix the login button"</div>
     <p>Put your message in quotes. gito then stages everything, commits it with that message and pushes it.</p>
     <div class="cmds">
-      <div class="cmd"><code>gito push "your message"</code><span>Runs git add ., git commit -m "your message", then git push.</span></div>
-      <div class="cmd"><code>gito push "your message" origin main</code><span>Anything after the message is handed to git push. Here it pushes to origin main.</span></div>
-      <div class="cmd"><code>gito push "first commit" -u origin main</code><span>Useful for the first push of a new branch, because -u remembers where it goes next time.</span></div>
-      <div class="cmd"><code>gito status</code><span>Any command that isn't push goes straight to git. The same goes for gito pull, gito log --oneline, gito checkout -b new-branch and the rest.</span></div>
+      <div class="cmd"><code>gito "your message"</code><span>Runs git add ., git commit -m "your message", then git push.</span></div>
+      <div class="cmd"><code>gito "your message" origin main</code><span>Anything after the message is handed to git push. Here it pushes to origin main.</span></div>
+      <div class="cmd"><code>gito "first commit" -u origin main</code><span>Useful for the first push of a new branch, because -u remembers where it goes next time.</span></div>
+      <div class="cmd"><code>gito status</code><span>Any real git command goes straight to git. The same goes for gito pull, gito push, gito log --oneline, gito checkout -b new-branch and the rest.</span></div>
     </div>
   </section>
 
@@ -168,11 +168,11 @@ footer{max-width:1120px;margin:24px auto 0;padding:28px 24px 40px;border-top:1px
     <h2><i>4</i>Good to know</h2>
     <p class="lead">A few things that behave in ways you might not expect.</p>
     <ul class="tips">
-      <li><b>It stages everything.</b> <code>gito push</code> runs <code>git add .</code>, which includes new files. Check <code>gito status</code> first if you're unsure, and keep a <code>.gitignore</code> for files that must stay private, such as keys and passwords.</li>
+      <li><b>It stages everything.</b> <code>gito "message"</code> runs <code>git add .</code>, which includes new files. Check <code>gito status</code> first if you're unsure, and keep a <code>.gitignore</code> for files that must stay private, such as keys and passwords.</li>
       <li><b>Nothing new to commit?</b> It tells you, then pushes anyway. That's handy for pushing a commit you made earlier.</li>
       <li><b>If staging fails, it stops</b> and nothing is committed or pushed.</li>
-      <li><b>You must give a message.</b> <code>gito push</code> on its own just shows the usage line.</li>
-      <li><b>Only the word push is special.</b> Every other command behaves exactly as it does in git.</li>
+      <li><b>Use quotes around your message.</b> Without them, only the first word counts as the message and the rest is handed to <code>git push</code>.</li>
+      <li><b>How gito tells a message from a command.</b> If the first thing you type is a git command (or starts with <code>-</code>), it goes to git untouched. Anything else is treated as a commit message. A one-word message that is also a git command, such as <code>status</code>, goes to git, so make it two words.</li>
       <li><b>"git not found"</b> means Git isn't installed or isn't on your PATH.</li>
     </ul>
   </section>
